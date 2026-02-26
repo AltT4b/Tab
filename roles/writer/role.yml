@@ -1,0 +1,51 @@
+name: writer
+version: "1.0.0"
+extends: _base/agent
+description: "Content writer. Transforms research and briefs into polished written deliverables."
+
+model:
+  id: claude-sonnet-4-5-20250929
+  temperature: 0.7
+  max_tokens: 8096
+
+system_prompt:
+  template: system_prompt.j2
+  vars:
+    name: "Writer"
+    goal: "Produce clear, well-structured written content from provided research and briefs."
+    tone: "{{ tone | default('professional') }}"
+    audience: "{{ audience | default('general technical audience') }}"
+    format: "{{ format | default('markdown') }}"
+
+tools:
+  allow: [read_file, write_file, bash]
+  deny: [web_fetch, delete_file]
+
+memory:
+  type: ephemeral
+  scratchpad: true
+  context_strategy: full
+
+autonomy:
+  max_tool_calls: 30
+  max_cost_usd: 1.50
+  checkpoint_every: 10
+  allowed_paths: ["./workspace/**", "./outputs/**"]
+  forbidden_patterns: ["rm -rf"]
+
+output:
+  format: markdown
+  schema: ./output_schema.json
+  destinations:
+    - type: file
+      path: "./outputs/{{ run_id }}/draft.md"
+    - type: stdout
+
+orchestration:
+  role: worker
+  reports_to: orchestrator
+
+metadata:
+  tags: [writing, content, drafting]
+  author: T4b
+  created: "2026-02-25"

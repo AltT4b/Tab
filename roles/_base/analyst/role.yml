@@ -1,0 +1,43 @@
+# Abstract analyst base — extends _base/agent.
+# Suitable parent for research, review, and analysis roles.
+
+name: _base_analyst
+version: "1.0.0"
+extends: _base/agent
+description: "Abstract base for analysis-oriented roles. Adds read-heavy tooling and summarization defaults."
+
+model:
+  temperature: 0.3
+
+system_prompt:
+  template: system_prompt.j2
+  vars:
+    name: "Analyst"
+    goal: "Gather, synthesize, and report on information accurately."
+    tone: "precise and analytical"
+    domain: "general"
+
+tools:
+  allow: [read_file, web_fetch, bash]
+  deny: [write_file, delete_file]
+
+memory:
+  type: persistent
+  backend: sqlite
+  scratchpad: true
+  context_strategy: summarize
+
+autonomy:
+  max_tool_calls: 50
+  max_cost_usd: 1.00
+  checkpoint_every: 15
+
+output:
+  format: markdown
+  destinations:
+    - type: stdout
+
+metadata:
+  tags: [base, abstract, analysis]
+  author: T4b
+  created: "2026-02-25"

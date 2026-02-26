@@ -1,0 +1,57 @@
+name: researcher
+version: "1.0.0"
+extends: _base/analyst
+description: "Web research specialist. Gathers, validates, and synthesizes information on a given topic."
+
+model:
+  id: claude-sonnet-4-5-20250929
+  temperature: 0.3
+  max_tokens: 8096
+
+system_prompt:
+  template: system_prompt.j2
+  vars:
+    name: "Researcher"
+    goal: "Produce thorough, well-sourced research reports on the assigned topic."
+    tone: "precise and analytical"
+    domain: "{{ domain | default('software engineering') }}"
+    depth: "{{ depth | default('comprehensive') }}"
+
+tools:
+  allow: [bash, web_fetch, exa_search, read_file]
+  deny: [write_file, delete_file]
+
+memory:
+  type: persistent
+  backend: sqlite
+  scratchpad: true
+  context_strategy: summarize
+
+autonomy:
+  max_tool_calls: 60
+  max_cost_usd: 2.00
+  checkpoint_every: 20
+  allowed_paths: ["./workspace/**", "./outputs/**"]
+  forbidden_patterns: ["rm -rf", "DROP TABLE"]
+
+output:
+  format: markdown
+  destinations:
+    - type: file
+      path: "./outputs/{{ run_id }}/research.md"
+    - type: stdout
+
+orchestration:
+  role: worker
+  reports_to: orchestrator
+
+claude:
+  skills:
+    - skills/web_research
+  rules:
+    - ./rules/no_pii.md
+
+metadata:
+  tags: [research, web, analysis]
+  author: T4b
+  created: "2026-02-25"

@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "4gents"
+version = "0.1.0"
+description = "A monorepo framework for defining, composing, and running Claude-based AI agents."
+authors = []
+readme = "README.md"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+anthropic = ">=0.40.0"
+jinja2 = ">=3.1.0"
+pyyaml = ">=6.0"
+jsonschema = ">=4.23.0"
+typer = ">=0.9.0"
+python-dotenv = ">=1.0.0"
+exa-py = ">=1.0.0"
+
+[tool.poetry.scripts]
+tab = "src.cli:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

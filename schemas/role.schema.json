@@ -1,0 +1,328 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://4gents/schemas/role.schema.json",
+  "title": "4gents Role",
+  "description": "Schema for a 4gents role.yml bundle manifest.",
+  "type": "object",
+  "required": ["name", "version"],
+  "additionalProperties": false,
+  "properties": {
+
+    "name": {
+      "type": "string",
+      "description": "Unique role identifier. Must be a valid directory name.",
+      "pattern": "^[a-z0-9_-]+$"
+    },
+
+    "version": {
+      "type": "string",
+      "description": "Semantic version string.",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+
+    "extends": {
+      "type": "string",
+      "description": "Parent role path relative to roles/. E.g. '_base/agent'. Max depth 3.",
+      "pattern": "^[a-z0-9_/-]+$"
+    },
+
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of what this role does."
+    },
+
+    "model": {
+      "type": "object",
+      "description": "Claude model configuration.",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Anthropic model string. E.g. 'claude-opus-4-5-20251101'.",
+          "enum": [
+            "claude-opus-4-5-20251101",
+            "claude-sonnet-4-5-20250929",
+            "claude-haiku-4-5-20251001"
+          ]
+        },
+        "temperature": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Sampling temperature. 0 = deterministic, 1 = most creative."
+        },
+        "max_tokens": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32768,
+          "description": "Maximum tokens per response."
+        }
+      }
+    },
+
+    "system_prompt": {
+      "description": "Persona definition. Either a Jinja2 template reference or an inline string.",
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "Template-driven persona (preferred).",
+          "required": ["template"],
+          "additionalProperties": false,
+          "properties": {
+            "template": {
+              "type": "string",
+              "description": "Path to Jinja2 template file relative to role directory.",
+              "pattern": "\\.j2$"
+            },
+            "vars": {
+              "type": "object",
+              "description": "Variables injected into the template at render time.",
+              "additionalProperties": { "type": "string" }
+            }
+          }
+        },
+        {
+          "type": "string",
+          "description": "Inline system prompt string (for simple roles)."
+        }
+      ]
+    },
+
+    "tools": {
+      "type": "object",
+      "description": "Tool access policy for this role.",
+      "additionalProperties": false,
+      "properties": {
+        "allow": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tool names this role is permitted to use.",
+          "examples": [["bash", "web_fetch", "read_file"]]
+        },
+        "deny": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tool names explicitly blocked. Takes precedence over allow."
+        },
+        "mcp_servers": {
+          "type": "array",
+          "description": "MCP server configurations available to this role.",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "additionalProperties": true,
+            "properties": {
+              "name": { "type": "string" },
+              "api_key": {
+                "type": "string",
+                "description": "Must be an env var reference: ${VAR_NAME}.",
+                "pattern": "^\\$\\{[A-Z0-9_]+\\}$"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "memory": {
+      "type": "object",
+      "description": "Memory and context window strategy.",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["ephemeral", "persistent", "shared"],
+          "description": "ephemeral = no persistence; persistent = role-scoped storage; shared = shared across roles."
+        },
+        "backend": {
+          "type": "string",
+          "enum": ["file", "sqlite"],
+          "description": "Storage backend when type is persistent or shared."
+        },
+        "scratchpad": {
+          "type": "boolean",
+          "description": "Whether the agent gets a writable scratch area during its run."
+        },
+        "context_strategy": {
+          "type": "string",
+          "enum": ["summarize", "truncate", "full"],
+          "description": "How to handle context window overflow."
+        }
+      }
+    },
+
+    "autonomy": {
+      "type": "object",
+      "description": "Autonomy limits and safety boundaries.",
+      "additionalProperties": false,
+      "properties": {
+        "max_tool_calls": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Hard cap on total tool calls per run."
+        },
+        "max_cost_usd": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Maximum spend in USD before the run is halted."
+        },
+        "checkpoint_every": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Require human check-in every N tool calls."
+        },
+        "allowed_paths": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Glob patterns for filesystem paths this role may access."
+        },
+        "forbidden_patterns": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Substrings or patterns that must never appear in tool call arguments."
+        }
+      }
+    },
+
+    "output": {
+      "type": "object",
+      "description": "Output format and delivery contract.",
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": ["markdown", "json", "structured"],
+          "description": "Primary output format."
+        },
+        "schema": {
+          "type": "string",
+          "description": "Path to JSON Schema file for validating structured output, relative to role directory."
+        },
+        "destinations": {
+          "type": "array",
+          "description": "Where output is delivered after a successful run.",
+          "items": {
+            "type": "object",
+            "required": ["type"],
+            "additionalProperties": true,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["file", "stdout"],
+                "description": "Destination type."
+              },
+              "path": {
+                "type": "string",
+                "description": "File path template (Jinja2). Used when type is 'file'."
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "orchestration": {
+      "type": "object",
+      "description": "Multi-agent orchestration configuration.",
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": ["orchestrator", "worker", "peer"],
+          "description": "This agent's position in the agent graph."
+        },
+        "reports_to": {
+          "type": "string",
+          "description": "Role name this agent is accountable to. Used by workers."
+        },
+        "can_spawn": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Role names this agent is permitted to instantiate."
+        },
+        "can_delegate_to": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Role names this agent can hand tasks to."
+        },
+        "max_sub_agents": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum concurrent sub-agents this role may maintain."
+        },
+        "delegation_strategy": {
+          "type": "string",
+          "enum": ["parallel", "sequential", "conditional"],
+          "description": "How work is distributed to sub-agents."
+        }
+      }
+    },
+
+    "claude": {
+      "type": "object",
+      "description": "Bundled Claude Code artifacts for this role.",
+      "additionalProperties": false,
+      "properties": {
+        "skills": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Paths to SKILL.md directories relative to role directory."
+        },
+        "hooks": {
+          "type": "array",
+          "description": "Claude hook configurations.",
+          "items": {
+            "type": "object",
+            "required": ["event", "script"],
+            "additionalProperties": false,
+            "properties": {
+              "event": {
+                "type": "string",
+                "enum": [
+                  "pre_tool_call",
+                  "post_tool_call",
+                  "pre_prompt",
+                  "post_prompt",
+                  "on_error"
+                ]
+              },
+              "script": {
+                "type": "string",
+                "description": "Path to hook script relative to role directory."
+              }
+            }
+          }
+        },
+        "commands": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Paths to custom slash command scripts relative to role directory."
+        },
+        "rules": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Paths to rule/guardrail markdown files relative to role directory."
+        }
+      }
+    },
+
+    "metadata": {
+      "type": "object",
+      "description": "Non-functional metadata for cataloguing and tooling.",
+      "additionalProperties": false,
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "author": { "type": "string" },
+        "created": {
+          "type": "string",
+          "format": "date",
+          "description": "ISO 8601 date string."
+        }
+      }
+    }
+
+  }
+}
