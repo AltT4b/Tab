@@ -105,13 +105,11 @@ The runner enforces spawn/delegate permissions at runtime — unauthorized actio
 
 ## Secrets
 
-All sensitive values must use environment variable references. Never write raw secrets into role files.
+All sensitive values live in `.env`. The runtime reads them via `os.getenv()` — never put raw secrets into role files.
 
-```yaml
-tools:
-  mcp_servers:
-    - name: exa
-      api_key: ${EXA_API_KEY}   # ✓ safe to commit
+```
+EXA_API_KEY=your-key-here
+ANTHROPIC_API_KEY=your-key-here
 ```
 
 ---

@@ -30,7 +30,7 @@ autonomy:
   max_tool_calls: 30
   max_cost_usd: 1.50
   checkpoint_every: 10
-  allowed_paths: ["./workspace/**", "./outputs/**"]
+  allowed_paths: ["./workspace/**"]
   forbidden_patterns: ["rm -rf"]
 
 output:
@@ -38,7 +38,7 @@ output:
   schema: ./output_schema.json
   destinations:
     - type: file
-      path: "./outputs/{{ run_id }}/draft.md"
+      path: "./workspace/{{ run_id }}/draft.md"
     - type: stdout
 
 orchestration:

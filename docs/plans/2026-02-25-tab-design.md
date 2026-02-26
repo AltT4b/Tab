@@ -96,7 +96,6 @@ tools:
   deny: [write_file, delete_file]
   mcp_servers:
     - name: exa
-      api_key: ${EXA_API_KEY}   # always env var refs — never raw secrets
 
 # ── Memory & Context ────────────────────────────────────────────────────────
 memory:

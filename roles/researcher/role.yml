@@ -31,14 +31,14 @@ autonomy:
   max_tool_calls: 60
   max_cost_usd: 2.00
   checkpoint_every: 20
-  allowed_paths: ["./workspace/**", "./outputs/**"]
+  allowed_paths: ["./workspace/**"]
   forbidden_patterns: ["rm -rf", "DROP TABLE"]
 
 output:
   format: markdown
   destinations:
     - type: file
-      path: "./outputs/{{ run_id }}/research.md"
+      path: "./workspace/{{ run_id }}/research.md"
     - type: stdout
 
 orchestration:

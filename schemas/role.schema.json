@@ -112,12 +112,7 @@
             "required": ["name"],
             "additionalProperties": true,
             "properties": {
-              "name": { "type": "string" },
-              "api_key": {
-                "type": "string",
-                "description": "Must be an env var reference: ${VAR_NAME}.",
-                "pattern": "^\\$\\{[A-Z0-9_]+\\}$"
-              }
+              "name": { "type": "string" }
             }
           }
         }
