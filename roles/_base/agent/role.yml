@@ -3,7 +3,7 @@
 
 name: _base_agent
 version: "1.0.0"
-description: "Minimal abstract base for all 4gents roles. Sets safe defaults."
+description: "Minimal abstract base for all Tab roles. Sets safe defaults."
 
 model:
   id: claude-sonnet-4-5-20250929

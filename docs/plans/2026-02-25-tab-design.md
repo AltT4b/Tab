@@ -1,4 +1,4 @@
-# 4gents — System Design
+# Tab — System Design
 
 **Date:** 2026-02-25
 **Author:** T4b
@@ -8,7 +8,7 @@
 
 ## Overview
 
-4gents is a monorepo framework for defining, composing, and eventually executing Claude-based agents. The central concept is the **role** — a self-describing directory bundle that encapsulates everything needed to instantiate and run an agent: its identity, model configuration, tool permissions, memory strategy, autonomy limits, output contracts, orchestration position, and bundled Claude artifacts.
+Tab is a monorepo framework for defining, composing, and eventually executing Claude-based agents. The central concept is the **role** — a self-describing directory bundle that encapsulates everything needed to instantiate and run an agent: its identity, model configuration, tool permissions, memory strategy, autonomy limits, output contracts, orchestration position, and bundled Claude artifacts.
 
 The `roles/` directory is the core of the project. A custom agent runner (to be built in `src/`) reads these role definitions at runtime and uses them to spin up Claude-based agents.
 
@@ -17,7 +17,7 @@ The `roles/` directory is the core of the project. A custom agent runner (to be 
 ## Repository Structure
 
 ```
-4gents/
+Tab/
 ├── roles/
 │   ├── _base/                    # Abstract base roles (not directly runnable)
 │   │   ├── role.yml

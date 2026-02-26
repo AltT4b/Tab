@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://4gents/schemas/role.schema.json",
-  "title": "4gents Role",
-  "description": "Schema for a 4gents role.yml bundle manifest.",
+  "$id": "https://Tab/schemas/role.schema.json",
+  "title": "Tab Role",
+  "description": "Schema for a Tab role.yml bundle manifest.",
   "type": "object",
   "required": ["name", "version"],
   "additionalProperties": false,

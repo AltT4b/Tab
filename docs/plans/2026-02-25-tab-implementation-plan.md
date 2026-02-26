@@ -1,4 +1,4 @@
-# 4gents — Implementation Plan
+# Tab — Implementation Plan
 
 **Date:** 2026-02-25
 **Status:** Active
@@ -7,7 +7,7 @@
 
 ## Goal
 
-Scaffold the 4gents monorepo with a validated role schema, a set of abstract base roles, three concrete example roles, and a CLI validation utility. The runner (`src/`) is out of scope for this phase.
+Scaffold the Tab monorepo with a validated role schema, a set of abstract base roles, three concrete example roles, and a CLI validation utility. The runner (`src/`) is out of scope for this phase.
 
 ---
 
@@ -41,14 +41,14 @@ CLI script: `python scripts/validate_role.py roles/researcher`
 - Accepts `--all` flag to validate every role in `roles/`
 
 ### Phase 6 — README
-Top-level `README.md` covering: what 4gents is, repo structure, how to define a role, inheritance rules, orchestration model, how to run the validator.
+Top-level `README.md` covering: what Tab is, repo structure, how to define a role, inheritance rules, orchestration model, how to run the validator.
 
 ---
 
 ## Deliverables
 
 ```
-4gents/
+Tab/
 ├── .gitignore
 ├── README.md
 ├── roles/
@@ -79,6 +79,6 @@ Top-level `README.md` covering: what 4gents is, repo structure, how to define a 
 │   └── .gitkeep
 └── docs/
     └── plans/
-        ├── 2026-02-25-4gents-design.md
-        └── 2026-02-25-4gents-implementation-plan.md
+        ├── 2026-02-25-Tab-design.md
+        └── 2026-02-25-Tab-implementation-plan.md
 ```

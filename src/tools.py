@@ -1,5 +1,5 @@
 """
-Tool definitions and implementations for 4gents.
+Tool definitions and implementations for Tab.
 
 Maps tool names (as declared in role.yml tools.allow) to:
   - Anthropic tool definition dicts (for the API)
@@ -353,7 +353,7 @@ class ToolExecutor:
 
     def _execute_web_fetch(self, url: str, timeout: int = 15) -> str:
         limit = 200 * 1024  # 200 KB
-        headers = {"User-Agent": "4gents/0.1 (claude-agent-runner)"}
+        headers = {"User-Agent": "Tab/0.1 (claude-agent-runner)"}
         req = urllib.request.Request(url, headers=headers)
         try:
             with urllib.request.urlopen(req, timeout=timeout) as resp:

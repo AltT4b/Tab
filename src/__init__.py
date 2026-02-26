@@ -1,4 +1,4 @@
-"""4gents — Claude-based agent runner."""
+"""Tab — Claude-based agent runner."""
 
 __version__ = "0.1.0"
 __all__ = ["AgentRunner", "load_role"]

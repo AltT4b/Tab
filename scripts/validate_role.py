@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-validate_role.py — 4gents role bundle validator.
+validate_role.py — Tab role bundle validator.
 
 Usage:
     python scripts/validate_role.py roles/researcher
@@ -204,7 +204,7 @@ def validate_role(role_dir: Path, schema: dict, allow_abstract: bool = False) ->
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Validate one or all 4gents role bundles against the role schema."
+        description="Validate one or all Tab role bundles against the role schema."
     )
     parser.add_argument(
         "role_path",

@@ -1,4 +1,4 @@
-# 4gents
+# Tab
 
 A monorepo framework for defining, composing, and running Claude-based AI agents. The central concept is the **role** — a self-describing directory bundle that encapsulates everything needed to instantiate an agent: identity, model config, tool permissions, memory strategy, autonomy limits, output contracts, and Claude-native artifacts.
 
@@ -7,7 +7,7 @@ A monorepo framework for defining, composing, and running Claude-based AI agents
 ## Repository Structure
 
 ```
-4gents/
+Tab/
 ├── roles/                  # All role definitions
 │   ├── _base/              # Abstract base roles (not directly runnable)
 │   │   ├── agent/          # Root base: safe defaults for all roles
@@ -56,7 +56,7 @@ system_prompt: "You are a helpful assistant."
 
 ### Full role.yml reference
 
-See [docs/plans/2026-02-25-4gents-design.md](docs/plans/2026-02-25-4gents-design.md) for the complete annotated schema, or inspect [schemas/role.schema.json](schemas/role.schema.json) directly.
+See [docs/plans/2026-02-25-tab-design.md](docs/plans/2026-02-25-tab-design.md) for the complete annotated schema, or inspect [schemas/role.schema.json](schemas/role.schema.json) directly.
 
 ---
 
@@ -162,5 +162,5 @@ The validator checks:
 
 ## Design Docs
 
-- [System Design](docs/plans/2026-02-25-4gents-design.md)
-- [Implementation Plan](docs/plans/2026-02-25-4gents-implementation-plan.md)
+- [System Design](docs/plans/2026-02-25-tab-design.md)
+- [Implementation Plan](docs/plans/2026-02-25-tab-implementation-plan.md)

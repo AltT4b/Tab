@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "4gents"
+name = "tab"
 version = "0.1.0"
 description = "A monorepo framework for defining, composing, and running Claude-based AI agents."
 authors = []

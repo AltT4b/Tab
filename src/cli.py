@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-4gents CLI.
+Tab CLI.
 
 Usage:
     tab run "Research the Claude Agent SDK and write a summary"
@@ -23,7 +23,7 @@ load_dotenv()
 
 app = typer.Typer(
     name="tab",
-    help="4gents — run Claude-based agents from role definitions",
+    help="Tab — run Claude-based agents from role definitions",
     add_completion=False,
 )
 
@@ -64,8 +64,8 @@ def run(
 
     resolved_run_id = run_id or f"run-{uuid.uuid4().hex[:8]}"
 
-    typer.echo(f"[4gents] run_id={resolved_run_id}  role={role}")
-    typer.echo(f"[4gents] task: {prompt[:120]}")  # type: ignore[index]
+    typer.echo(f"[Tab] run_id={resolved_run_id}  role={role}")
+    typer.echo(f"[Tab] task: {prompt[:120]}")  # type: ignore[index]
     typer.echo("─" * 60)
 
     try:
@@ -82,18 +82,18 @@ def run(
     try:
         runner.run(prompt)
     except AutonomyLimitError as e:
-        typer.echo(f"\n[4gents] Run halted: {e}", err=True)
+        typer.echo(f"\n[Tab] Run halted: {e}", err=True)
         raise typer.Exit(2)
     except KeyboardInterrupt:
-        typer.echo("\n[4gents] Interrupted.", err=True)
+        typer.echo("\n[Tab] Interrupted.", err=True)
         raise typer.Exit(1)
     except Exception as e:
-        typer.echo(f"\n[4gents] Unexpected error: {e}", err=True)
+        typer.echo(f"\n[Tab] Unexpected error: {e}", err=True)
         if debug:
             raise
         raise typer.Exit(1)
 
-    typer.echo(f"\n[4gents] Done. run_id={resolved_run_id}")
+    typer.echo(f"\n[Tab] Done. run_id={resolved_run_id}")
 
 
 def main() -> None:

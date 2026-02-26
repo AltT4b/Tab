@@ -1,12 +1,11 @@
 ---
-name: 4gents-role-creator
-description: This skill should be used when the user wants to create a new role, scaffold a new agent, add a role config, or set up a new worker/orchestrator/peer in the 4gents directory. Activates on phrases like "create a role", "new role", "add a role config", "scaffold an agent", "new agent role", or when describing a new specialized agent to build.
-version: 1.0.0
+name: role-creator
+description: This skill should be used when the user wants to create a new role, scaffold a new agent, add a role config, or set up a new worker/orchestrator/peer in the Tab directory. Activates on phrases like "create a role", "new role", "add a role config", "scaffold an agent", "new agent role", or when describing a new specialized agent to build.
 ---
 
-# 4gents Role Creator
+# Tab Role Creator
 
-Guides creation of new role configurations for the 4gents multi-agent framework at `/Users/alttab-macbook/AltT4b/4gents`.
+Guides creation of new role configurations for the Tab multi-agent framework at `/Users/alttab-macbook/AltT4b/Tab`.
 
 ## Role Directory Structure
 
@@ -76,7 +75,7 @@ roles/<role-name>/
 Always run after creating or modifying a role:
 
 ```bash
-cd /Users/alttab-macbook/AltT4b/4gents
+cd /Users/alttab-macbook/AltT4b/Tab
 python scripts/validate_role.py roles/<role-name>/role.yml
 ```
 
