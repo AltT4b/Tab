@@ -166,11 +166,3 @@ The validator checks:
 - [Implementation Plan](docs/plans/2026-02-25-tab-implementation-plan.md)
 
 ---
-
-## History
-
-### `claude-agent.zip` — Tab's First Software
-
-`claude-agent.zip` (committed 2026-02-26) is the first piece of software Tab ever wrote.
-
-It doesn't quite work yet, but it's close — and that feels pretty neat.
