@@ -7,14 +7,14 @@
 
 ## Goal
 
-Scaffold the Tab monorepo with a validated role schema, a set of abstract base roles, and concrete example roles. The focus is on the role definition system — no runner or processing layer.
+Scaffold the Tab monorepo with a set of abstract base agents and concrete example agents. The focus is on the agent definition system — no runner or processing layer.
 
 ---
 
 ## Phases
 
 ### Phase 1 — Monorepo Scaffold
-Create the full directory skeleton: `roles/`, `schemas/`, `docs/`.
+Create the full directory skeleton: `agents/`, `docs/`.
 Add `.gitignore` (ignores `.env`, `*.secrets.yml`, `__pycache__`, `.DS_Store`).
 
 ### Phase 2 — JSON Schema (`schemas/role.schema.json`)
@@ -22,19 +22,19 @@ Write the authoritative JSON Schema for `role.yml`. Covers all top-level section
 identity, model, system_prompt, tools, memory, autonomy, output, orchestration, claude, metadata.
 This schema drives both validation and IDE autocompletion.
 
-### Phase 3 — Abstract Base Roles
-- `roles/_base/agent/` — minimal base: model defaults, conservative autonomy limits, ephemeral memory
-- `roles/_base/analyst/` — extends `_base/agent`; adds read-only tool defaults, summarize context strategy
+### Phase 3 — Abstract Base Agents
+- `agents/_base/agent/` — minimal base: model defaults, conservative autonomy limits, ephemeral memory
+- `agents/_base/analyst/` — extends `_base/agent`; adds read-only tool defaults, summarize context strategy
 
-### Phase 4 — Concrete Example Roles
-- `roles/researcher/` — worker; extends `_base/analyst`; web fetch + bash; persistent memory; parallel delegation
-- `roles/writer/` — worker; extends `_base/agent`; write-focused tools; structured output contract
-- `roles/orchestrator/` — orchestrator; extends `_base/agent`; can spawn researcher + writer; sequential delegation
+### Phase 4 — Concrete Example Agents
+- `agents/researcher/` — worker; extends `_base/analyst`; web fetch + bash; persistent memory; parallel delegation
+- `agents/writer/` — worker; extends `_base/agent`; write-focused tools; structured output contract
+- `agents/orchestrator/` — orchestrator; extends `_base/agent`; can spawn researcher + writer; sequential delegation
 
-Each concrete role includes a `system_prompt.j2` template.
+Each concrete agent has an `AGENT.md` with frontmatter + behavioral instructions.
 
 ### Phase 5 — README
-Top-level `README.md` covering: what Tab is, repo structure, how to define a role, inheritance rules, orchestration model.
+Top-level `README.md` covering: what Tab is, repo structure, how to define an agent, inheritance rules, orchestration model.
 
 ---
 
@@ -44,28 +44,21 @@ Top-level `README.md` covering: what Tab is, repo structure, how to define a rol
 Tab/
 ├── .gitignore
 ├── README.md
-├── roles/
+├── agents/
 │   ├── _base/
 │   │   ├── agent/
-│   │   │   ├── role.yml
-│   │   │   └── system_prompt.j2
+│   │   │   └── AGENT.md
 │   │   └── analyst/
-│   │       ├── role.yml
-│   │       └── system_prompt.j2
+│   │       └── AGENT.md
 │   ├── researcher/
-│   │   ├── role.yml
-│   │   ├── system_prompt.j2
+│   │   ├── AGENT.md
 │   │   └── rules/
 │   │       └── no_pii.md
 │   ├── writer/
-│   │   ├── role.yml
-│   │   ├── system_prompt.j2
+│   │   ├── AGENT.md
 │   │   └── output_schema.json
 │   └── orchestrator/
-│       ├── role.yml
-│       └── system_prompt.j2
-├── schemas/
-│   └── role.schema.json
+│       └── AGENT.md
 └── docs/
     └── plans/
         ├── 2026-02-25-tab-design.md

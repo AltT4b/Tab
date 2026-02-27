@@ -8,9 +8,9 @@
 
 ## Overview
 
-Tab is a monorepo framework for defining and composing Claude-based agents. The central concept is the **role** — a self-describing directory bundle that encapsulates everything needed to instantiate an agent: its identity, model configuration, tool permissions, memory strategy, autonomy limits, output contracts, orchestration position, and bundled Claude artifacts.
+Tab is a monorepo framework for defining and composing Claude-based agents. The central concept is the **agent** — a self-describing directory bundle that encapsulates everything needed to instantiate one: its identity, model configuration, tool permissions, memory strategy, autonomy limits, output contracts, orchestration position, and bundled Claude artifacts.
 
-The `roles/` directory is the core of the project.
+The `agents/` directory is the core of the project.
 
 ---
 
@@ -18,8 +18,8 @@ The `roles/` directory is the core of the project.
 
 ```
 Tab/
-├── roles/
-│   ├── _base/                    # Abstract base roles (not directly runnable)
+├── agents/
+│   ├── _base/                    # Abstract base agents (not directly runnable)
 │   │   ├── role.yml
 │   │   └── system_prompt.j2
 │   ├── researcher/
@@ -39,16 +39,16 @@ Tab/
 └── README.md
 ```
 
-Roles prefixed with `_` are abstract and exist for inheritance only. The runner refuses to instantiate them directly.
+Agents prefixed with `_` are abstract and exist for inheritance only. The runner refuses to instantiate them directly.
 
 ---
 
-## Role Directory Bundle Anatomy
+## Agent Directory Bundle Anatomy
 
-Only `role.yml` is required. All other files and directories are optional and discovered by convention.
+Only `AGENT.md` is required. All other files and directories are optional and discovered by convention.
 
 ```
-roles/<name>/
+agents/<name>/
 ├── role.yml              # Manifest — required
 ├── system_prompt.j2      # Jinja2 persona template — preferred over inline string
 ├── skills/               # Bundled Claude Code skills (SKILL.md folders)
@@ -191,6 +191,8 @@ The `orchestration` block defines each agent's position and permissions within a
 - **`worker`** — receives tasks, executes, returns output to `reports_to` target
 - **`peer`** — lateral collaboration; can call and be called by sibling agents without strict hierarchy
 
+**Position types** (`orchestration.role`): `orchestrator`, `worker`, `peer`
+
 **Example graph:**
 
 ```
@@ -215,7 +217,7 @@ The `can_spawn` and `can_delegate_to` lists define the permissions boundary for 
 | Decision | Choice | Rationale |
 |---|---|---|
 | LLM scope | Claude-only | Deep native integration; no abstraction overhead |
-| Role format | Directory bundle | Mirrors skills library pattern; scales from simple to complex |
+| Agent format | Directory bundle | Mirrors skills library pattern; scales from simple to complex |
 | Secrets | Env var refs only | Safe to commit; `${VAR}` syntax throughout |
 | Persona | Jinja2 template | Composable, testable, version-controllable |
 | Inheritance | Single extends, deep merge | Predictable; list union prevents guardrail loss |

@@ -1,5 +1,5 @@
 ---
-name: _base_agent
+name: agent
 description: "Abstract base for all Tab roles. Sets minimal safe defaults. Not directly runnable — extend this."
 ---
 

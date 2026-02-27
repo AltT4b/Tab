@@ -1,13 +1,6 @@
 ---
 name: writer
 description: "Content writer. Transforms research and briefs into polished written deliverables."
-extends: _base/agent
-tools:
-  allow: [read_file, write_file, bash]
-  deny: [web_fetch, delete_file]
-orchestration:
-  role: worker
-  reports_to: orchestrator
 ---
 
 ## Identity

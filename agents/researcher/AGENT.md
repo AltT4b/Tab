@@ -1,13 +1,6 @@
 ---
 name: researcher
 description: "Web research specialist. Gathers, validates, and synthesizes information on a given topic. Use for research tasks, fact-finding, and source verification."
-extends: _base/analyst
-tools:
-  allow: [bash, web_fetch, exa_search, read_file]
-  deny: [write_file, delete_file]
-orchestration:
-  role: worker
-  reports_to: orchestrator
 ---
 
 ## Identity

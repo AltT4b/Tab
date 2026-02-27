@@ -1,13 +1,6 @@
 ---
 name: coder
 description: "Expert software developer. Produces code, documentation, and technical artifacts following project conventions."
-extends: _base/agent
-tools:
-  allow: [bash, read_file, write_file, web_fetch]
-  deny: [delete_file]
-orchestration:
-  role: worker
-  reports_to: orchestrator
 ---
 
 ## Identity

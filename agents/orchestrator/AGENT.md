@@ -1,16 +1,6 @@
 ---
 name: orchestrator
 description: "Top-level coordinator. Decomposes tasks, delegates to specialist workers, and assembles the final deliverable."
-extends: _base/agent
-tools:
-  allow: [bash, read_file, write_file]
-  deny: [delete_file]
-orchestration:
-  role: orchestrator
-  can_spawn: [researcher, writer, coder]
-  can_delegate_to: [researcher, writer, coder]
-  max_sub_agents: 5
-  delegation_strategy: sequential
 ---
 
 ## Identity

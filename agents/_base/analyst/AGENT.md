@@ -1,10 +1,6 @@
 ---
-name: _base_analyst
+name: analyst
 description: "Abstract base for analysis-oriented roles. Read-heavy tooling and summarization defaults. Not directly runnable — extend this."
-extends: _base/agent
-tools:
-  allow: [read_file, web_fetch, bash]
-  deny: [write_file, delete_file]
 ---
 
 ## Identity

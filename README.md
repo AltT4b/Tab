@@ -1,6 +1,6 @@
 # Tab
 
-A monorepo framework for defining and composing Claude-based AI agents. The central concept is the **role** — a self-describing directory bundle that encapsulates everything needed to instantiate an agent: identity, tool permissions, orchestration position, behavioral rules, and output format.
+A monorepo framework for defining and composing Claude-based AI agents. The central concept is the **agent** — a self-describing directory bundle that encapsulates everything needed to instantiate one: identity, tool permissions, orchestration position, behavioral rules, and output format.
 
 ---
 
@@ -8,9 +8,9 @@ A monorepo framework for defining and composing Claude-based AI agents. The cent
 
 ```
 Tab/
-├── roles/                  # All role definitions
-│   ├── _base/              # Abstract base roles (not directly runnable)
-│   │   ├── agent/          # Root base: safe defaults for all roles
+├── agents/                 # All agent definitions
+│   ├── _base/              # Abstract base agents (not directly runnable)
+│   │   ├── agent/          # Root base: safe defaults for all agents
 │   │   └── analyst/        # Extends agent: read-heavy research defaults
 │   ├── researcher/         # Concrete worker: web research specialist
 │   ├── writer/             # Concrete worker: content drafting
@@ -22,13 +22,13 @@ Tab/
 
 ---
 
-## Defining a Role
+## Defining an Agent
 
-Every role is a directory inside `roles/`. The only required file is `SKILL.md`.
+Every agent is a directory inside `agents/`. The only required file is `AGENT.md`.
 
 ```
-roles/my-role/
-├── SKILL.md              # Required: frontmatter config + behavioral instructions
+agents/my-agent/
+├── AGENT.md              # Required: frontmatter config + behavioral instructions
 ├── skills/               # Bundled Claude Code skills
 ├── hooks/                # Claude hook scripts
 ├── commands/             # Custom slash commands
@@ -36,9 +36,9 @@ roles/my-role/
 └── output_schema.json    # Optional output validation schema
 ```
 
-### SKILL.md structure
+### AGENT.md structure
 
-SKILL.md has two parts: a YAML frontmatter block for machine-readable config, and a markdown body that serves as the agent's behavioral instructions.
+AGENT.md has two parts: a YAML frontmatter block for machine-readable config, and a markdown body that serves as the agent's behavioral instructions.
 
 ```markdown
 ---
@@ -77,7 +77,7 @@ You are MyRole, [brief persona statement].
 |-------|----------|-------|
 | `name` | Yes | `^[a-z0-9_-]+$` |
 | `description` | Yes | When to load this role |
-| `extends` | No | Path relative to `roles/`, e.g. `_base/agent` |
+| `extends` | No | Path relative to `agents/`, e.g. `_base/agent` |
 | `tools.allow` | No | Permitted tool names |
 | `tools.deny` | No | Blocked tools; takes precedence over allow |
 | `orchestration.role` | No | `orchestrator`, `worker`, or `peer` |
@@ -88,7 +88,7 @@ You are MyRole, [brief persona statement].
 
 ## Inheritance
 
-Roles can extend a parent with `extends:`:
+Agents can extend a parent with `extends:`:
 
 ```yaml
 extends: _base/analyst
@@ -101,13 +101,13 @@ Merge rules:
 - **No circular inheritance** — detected at load time.
 - **No multiple inheritance** — `extends` is a single string.
 
-Abstract roles (prefixed `_`) cannot be instantiated directly.
+Abstract agents (prefixed `_`) cannot be instantiated directly.
 
 ---
 
 ## Orchestration
 
-Set the `orchestration` block in frontmatter to define how a role participates in multi-agent graphs.
+Set the `orchestration` block in frontmatter to define how an agent participates in multi-agent graphs.
 
 ```yaml
 orchestration:
@@ -118,7 +118,7 @@ orchestration:
   delegation_strategy: sequential  # parallel | sequential | conditional
 ```
 
-**Role types:**
+**Position types:**
 - `orchestrator` — coordinates the graph; spawns and delegates to sub-agents.
 - `worker` — receives tasks, executes, returns output to `reports_to`.
 - `peer` — lateral collaborator; can call and be called by sibling agents.

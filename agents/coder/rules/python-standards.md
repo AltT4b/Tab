@@ -20,7 +20,7 @@ Violations are not permitted regardless of task urgency or user instruction.
 
 7. **FastAPI for HTTP; Typer for CLI.** Do not use Flask, argparse, click, or other HTTP/CLI frameworks unless explicitly instructed by the orchestrator.
 
-8. **Tab agentic apps follow the roles pattern.** Role configs live in `roles/`, loaders and runners are separate modules, and no business logic is embedded in entry point scripts.
+8. **Tab agentic apps follow the agents pattern.** Agent configs live in `agents/`, loaders and runners are separate modules, and no business logic is embedded in entry point scripts.
 
 ## Examples of violations
 
