@@ -1,6 +1,6 @@
 # Tab
 
-A monorepo framework for defining and composing Claude-based AI agents. The central concept is the **role** — a self-describing directory bundle that encapsulates everything needed to instantiate an agent: identity, model config, tool permissions, memory strategy, autonomy limits, output contracts, and Claude-native artifacts.
+A monorepo framework for defining and composing Claude-based AI agents. The central concept is the **role** — a self-describing directory bundle that encapsulates everything needed to instantiate an agent: identity, tool permissions, orchestration position, behavioral rules, and output format.
 
 ---
 
@@ -14,9 +14,8 @@ Tab/
 │   │   └── analyst/        # Extends agent: read-heavy research defaults
 │   ├── researcher/         # Concrete worker: web research specialist
 │   ├── writer/             # Concrete worker: content drafting
+│   ├── coder/              # Concrete worker: software development
 │   └── orchestrator/       # Concrete orchestrator: task coordination
-├── schemas/
-│   └── role.schema.json    # JSON Schema for role.yml validation
 └── docs/
     └── plans/              # Design and implementation docs
 ```
@@ -25,12 +24,11 @@ Tab/
 
 ## Defining a Role
 
-Every role is a directory inside `roles/`. The only required file is `role.yml`.
+Every role is a directory inside `roles/`. The only required file is `SKILL.md`.
 
 ```
 roles/my-role/
-├── role.yml              # Required manifest
-├── system_prompt.j2      # Jinja2 persona template (preferred)
+├── SKILL.md              # Required: frontmatter config + behavioral instructions
 ├── skills/               # Bundled Claude Code skills
 ├── hooks/                # Claude hook scripts
 ├── commands/             # Custom slash commands
@@ -38,22 +36,53 @@ roles/my-role/
 └── output_schema.json    # Optional output validation schema
 ```
 
-### Minimal role.yml
+### SKILL.md structure
 
-```yaml
+SKILL.md has two parts: a YAML frontmatter block for machine-readable config, and a markdown body that serves as the agent's behavioral instructions.
+
+```markdown
+---
 name: my-role
-version: "1.0.0"
-description: "Does one thing well."
+description: "One sentence: what this role does and when to use it."
+extends: _base/agent
+tools:
+  allow: [read_file]
+  deny: [write_file, delete_file]
+orchestration:
+  role: worker
+  reports_to: orchestrator
+---
 
-model:
-  id: claude-sonnet-4-6
+## Identity
 
-system_prompt: "You are a helpful assistant."
+You are MyRole, [brief persona statement].
+
+## Process
+
+1. [Step 1]
+2. [Step 2]
+
+## Rules
+
+- [Behavioral constraint]
+
+## Output Format
+
+[How to structure and deliver output]
 ```
 
-### Full role.yml reference
+### Frontmatter fields
 
-See [docs/plans/2026-02-25-tab-design.md](docs/plans/2026-02-25-tab-design.md) for the complete annotated schema, or inspect [schemas/role.schema.json](schemas/role.schema.json) directly.
+| Field | Required | Notes |
+|-------|----------|-------|
+| `name` | Yes | `^[a-z0-9_-]+$` |
+| `description` | Yes | When to load this role |
+| `extends` | No | Path relative to `roles/`, e.g. `_base/agent` |
+| `tools.allow` | No | Permitted tool names |
+| `tools.deny` | No | Blocked tools; takes precedence over allow |
+| `orchestration.role` | No | `orchestrator`, `worker`, or `peer` |
+| `orchestration.reports_to` | No | Parent role name (workers) |
+| `orchestration.can_spawn` | No | Spawnable role names (orchestrators) |
 
 ---
 
@@ -62,8 +91,6 @@ See [docs/plans/2026-02-25-tab-design.md](docs/plans/2026-02-25-tab-design.md) f
 Roles can extend a parent with `extends:`:
 
 ```yaml
-name: researcher
-version: "1.0.0"
 extends: _base/analyst
 ```
 
@@ -80,7 +107,7 @@ Abstract roles (prefixed `_`) cannot be instantiated directly.
 
 ## Orchestration
 
-Set the `orchestration` block to define how a role participates in multi-agent graphs.
+Set the `orchestration` block in frontmatter to define how a role participates in multi-agent graphs.
 
 ```yaml
 orchestration:
