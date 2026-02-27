@@ -1,6 +1,14 @@
 # Tab
 
-A monorepo framework for defining and composing Claude-based AI agents. The central concept is the **agent** — a self-describing directory bundle that encapsulates everything needed to instantiate one: identity, tool permissions, orchestration position, behavioral rules, and output format.
+Tab is a monorepo framework for defining and composing Claude-based AI agents. It treats the **agent** as a first-class, file-system primitive: everything an agent needs — its identity, tool permissions, behavioral rules, output format, and position in an orchestration hierarchy — lives in a single directory bundle.
+
+The core artifact is `AGENT.md`: a file combining YAML frontmatter (configuration) with a markdown body (behavioral instructions that become the system prompt). This file-first approach keeps agents self-describing, diff-friendly, and composable without runtime configuration overhead.
+
+Agents can extend one another through an `extends` field, inheriting and overriding settings from parent definitions. Abstract base agents (prefixed `_`) establish shared defaults; concrete agents like `researcher`, `writer`, `coder`, and `orchestrator` build on top of them.
+
+Orchestration is declared, not hardwired. Each agent specifies its role — `orchestrator`, `worker`, or `peer` — and the relationships between agents are resolved at dispatch time via the `/run-agent` Claude Code skill.
+
+Tab is designed for developers who want a structured, auditable way to build multi-agent Claude workflows without reaching for a full orchestration framework.
 
 ---
 
@@ -42,20 +50,13 @@ AGENT.md has two parts: a YAML frontmatter block for machine-readable config, an
 
 ```markdown
 ---
-name: my-role
-description: "One sentence: what this role does and when to use it."
-extends: _base/agent
-tools:
-  allow: [read_file]
-  deny: [write_file, delete_file]
-orchestration:
-  role: worker
-  reports_to: orchestrator
+name: my-agent
+description: "One sentence: what this agent does and when to use it."
 ---
 
 ## Identity
 
-You are MyRole, [brief persona statement].
+You are MyAgent, [brief persona statement].
 
 ## Process
 
@@ -76,68 +77,12 @@ You are MyRole, [brief persona statement].
 | Field | Required | Notes |
 |-------|----------|-------|
 | `name` | Yes | `^[a-z0-9_-]+$` |
-| `description` | Yes | When to load this role |
-| `extends` | No | Path relative to `agents/`, e.g. `_base/agent` |
-| `tools.allow` | No | Permitted tool names |
-| `tools.deny` | No | Blocked tools; takes precedence over allow |
-| `orchestration.role` | No | `orchestrator`, `worker`, or `peer` |
-| `orchestration.reports_to` | No | Parent role name (workers) |
-| `orchestration.can_spawn` | No | Spawnable role names (orchestrators) |
+| `description` | Yes | When to load this agent |
+
+See [Inheritance](#inheritance) and [Orchestration](#orchestration) for additional frontmatter fields.
 
 ---
 
 ## Inheritance
 
-Agents can extend a parent with `extends:`:
-
-```yaml
-extends: _base/analyst
-```
-
-Merge rules:
-- **Scalar fields** — child wins over parent.
-- **List fields** (`tools.allow`, `rules`, `skills`, etc.) — union merged; child never loses parent guardrails.
-- **Max depth** — 3 levels.
-- **No circular inheritance** — detected at load time.
-- **No multiple inheritance** — `extends` is a single string.
-
-Abstract agents (prefixed `_`) cannot be instantiated directly.
-
----
-
-## Orchestration
-
-Set the `orchestration` block in frontmatter to define how an agent participates in multi-agent graphs.
-
-```yaml
-orchestration:
-  role: orchestrator        # orchestrator | worker | peer
-  can_spawn: [researcher, writer]
-  can_delegate_to: [researcher, writer]
-  max_sub_agents: 5
-  delegation_strategy: sequential  # parallel | sequential | conditional
-```
-
-**Position types:**
-- `orchestrator` — coordinates the graph; spawns and delegates to sub-agents.
-- `worker` — receives tasks, executes, returns output to `reports_to`.
-- `peer` — lateral collaborator; can call and be called by sibling agents.
-
----
-
-## Available Models
-
-| Model | ID |
-|---|---|
-| Claude Opus 4.6 | `claude-opus-4-6` |
-| Claude Sonnet 4.6 | `claude-sonnet-4-6` |
-| Claude Haiku 4.5 | `claude-haiku-4-5-20251001` |
-
----
-
-## Design Docs
-
-- [System Design](docs/plans/2026-02-25-tab-design.md)
-- [Implementation Plan](docs/plans/2026-02-25-tab-implementation-plan.md)
-
----
+Base Agent: _base/agent/AGENT.md
