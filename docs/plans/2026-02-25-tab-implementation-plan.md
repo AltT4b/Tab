@@ -7,14 +7,14 @@
 
 ## Goal
 
-Scaffold the Tab monorepo with a validated role schema, a set of abstract base roles, three concrete example roles, and a CLI validation utility. The runner (`src/`) is out of scope for this phase.
+Scaffold the Tab monorepo with a validated role schema, a set of abstract base roles, and concrete example roles. The focus is on the role definition system — no runner or processing layer.
 
 ---
 
 ## Phases
 
 ### Phase 1 — Monorepo Scaffold
-Create the full directory skeleton: `roles/`, `schemas/`, `src/`, `scripts/`, `docs/`.
+Create the full directory skeleton: `roles/`, `schemas/`, `docs/`.
 Add `.gitignore` (ignores `.env`, `*.secrets.yml`, `__pycache__`, `.DS_Store`).
 
 ### Phase 2 — JSON Schema (`schemas/role.schema.json`)
@@ -33,15 +33,8 @@ This schema drives both validation and IDE autocompletion.
 
 Each concrete role includes a `system_prompt.j2` template.
 
-### Phase 5 — Validation Utility (`scripts/validate_role.py`)
-CLI script: `python scripts/validate_role.py roles/researcher`
-- Loads `role.yml`, validates against `schemas/role.schema.json`
-- Checks inheritance chain resolves without cycles or depth violations
-- Reports errors with clear messages; exits non-zero on failure
-- Accepts `--all` flag to validate every role in `roles/`
-
-### Phase 6 — README
-Top-level `README.md` covering: what Tab is, repo structure, how to define a role, inheritance rules, orchestration model, how to run the validator.
+### Phase 5 — README
+Top-level `README.md` covering: what Tab is, repo structure, how to define a role, inheritance rules, orchestration model.
 
 ---
 
@@ -73,12 +66,8 @@ Tab/
 │       └── system_prompt.j2
 ├── schemas/
 │   └── role.schema.json
-├── scripts/
-│   └── validate_role.py
-├── src/
-│   └── .gitkeep
 └── docs/
     └── plans/
-        ├── 2026-02-25-Tab-design.md
-        └── 2026-02-25-Tab-implementation-plan.md
+        ├── 2026-02-25-tab-design.md
+        └── 2026-02-25-tab-implementation-plan.md
 ```

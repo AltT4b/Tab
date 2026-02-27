@@ -1,6 +1,6 @@
 # Tab
 
-A monorepo framework for defining, composing, and running Claude-based AI agents. The central concept is the **role** — a self-describing directory bundle that encapsulates everything needed to instantiate an agent: identity, model config, tool permissions, memory strategy, autonomy limits, output contracts, and Claude-native artifacts.
+A monorepo framework for defining and composing Claude-based AI agents. The central concept is the **role** — a self-describing directory bundle that encapsulates everything needed to instantiate an agent: identity, model config, tool permissions, memory strategy, autonomy limits, output contracts, and Claude-native artifacts.
 
 ---
 
@@ -17,9 +17,6 @@ Tab/
 │   └── orchestrator/       # Concrete orchestrator: task coordination
 ├── schemas/
 │   └── role.schema.json    # JSON Schema for role.yml validation
-├── scripts/
-│   └── validate_role.py    # CLI validator
-├── src/                    # Future agent runner
 └── docs/
     └── plans/              # Design and implementation docs
 ```
@@ -49,7 +46,7 @@ version: "1.0.0"
 description: "Does one thing well."
 
 model:
-  id: claude-sonnet-4-5-20250929
+  id: claude-sonnet-4-6
 
 system_prompt: "You are a helpful assistant."
 ```
@@ -73,7 +70,7 @@ extends: _base/analyst
 Merge rules:
 - **Scalar fields** — child wins over parent.
 - **List fields** (`tools.allow`, `rules`, `skills`, etc.) — union merged; child never loses parent guardrails.
-- **Max depth** — 3 levels. The validator enforces this.
+- **Max depth** — 3 levels.
 - **No circular inheritance** — detected at load time.
 - **No multiple inheritance** — `extends` is a single string.
 
@@ -99,61 +96,14 @@ orchestration:
 - `worker` — receives tasks, executes, returns output to `reports_to`.
 - `peer` — lateral collaborator; can call and be called by sibling agents.
 
-The runner enforces spawn/delegate permissions at runtime — unauthorized actions are blocked and logged.
-
----
-
-## Secrets
-
-All sensitive values live in `.env`. The runtime reads them via `os.getenv()` — never put raw secrets into role files.
-
-```
-EXA_API_KEY=your-key-here
-ANTHROPIC_API_KEY=your-key-here
-```
-
----
-
-## Validating Roles
-
-Install dependencies:
-
-```bash
-poetry install
-```
-
-Validate a single role:
-
-```bash
-python scripts/validate_role.py roles/researcher
-```
-
-Validate all concrete roles:
-
-```bash
-python scripts/validate_role.py --all
-```
-
-Validate including abstract base roles:
-
-```bash
-python scripts/validate_role.py --all --allow-abstract
-```
-
-The validator checks:
-1. `role.yml` is present and valid YAML.
-2. All fields conform to `schemas/role.schema.json`.
-3. Inheritance chain resolves with no cycles and within depth limits.
-4. All referenced files (templates, hooks, rules, etc.) exist on disk.
-
 ---
 
 ## Available Models
 
 | Model | ID |
 |---|---|
-| Claude Opus 4.5 | `claude-opus-4-5-20251101` |
-| Claude Sonnet 4.5 | `claude-sonnet-4-5-20250929` |
+| Claude Opus 4.6 | `claude-opus-4-6` |
+| Claude Sonnet 4.6 | `claude-sonnet-4-6` |
 | Claude Haiku 4.5 | `claude-haiku-4-5-20251001` |
 
 ---

@@ -8,11 +8,6 @@ version: "1.0.0"
 extends: _base/agent
 description: "One sentence: what this role does and what it produces."
 
-model:
-  id: claude-sonnet-4-5-20250929
-  temperature: 0.5
-  max_tokens: 8096
-
 system_prompt:
   template: system_prompt.j2
   vars:
@@ -23,18 +18,6 @@ system_prompt:
 tools:
   allow: [read_file]
   deny: [write_file, delete_file]
-
-memory:
-  type: ephemeral
-  scratchpad: true
-  context_strategy: summarize
-
-autonomy:
-  max_tool_calls: 25
-  max_cost_usd: 0.50
-  checkpoint_every: 10
-  allowed_paths: ["./workspace/**"]
-  forbidden_patterns: ["rm -rf", "DROP TABLE"]
 
 output:
   format: markdown
@@ -61,11 +44,6 @@ version: "1.0.0"
 extends: _base/agent
 description: "Coordinates X and Y workers to accomplish Z."
 
-model:
-  id: claude-opus-4-5-20251101
-  temperature: 0.4
-  max_tokens: 16384
-
 system_prompt:
   template: system_prompt.j2
   vars:
@@ -78,32 +56,15 @@ tools:
   allow: [bash, read_file, write_file]
   deny: [delete_file]
 
-memory:
-  type: persistent
-  backend: sqlite
-  scratchpad: true
-  context_strategy: summarize
-
-autonomy:
-  max_tool_calls: 100
-  max_cost_usd: 10.00
-  checkpoint_every: 25
-  allowed_paths: ["./workspace/**", "./outputs/**"]
-  forbidden_patterns: ["rm -rf", "DROP TABLE"]
-
 output:
   format: markdown
   destinations:
-    - type: file
-      path: "./outputs/{{ run_id }}/final.md"
     - type: stdout
 
 orchestration:
   role: orchestrator
   can_spawn: [worker-a, worker-b]
   can_delegate_to: [worker-a, worker-b]
-  max_sub_agents: 5
-  delegation_strategy: sequential
 
 metadata:
   tags: [orchestration]
@@ -121,11 +82,6 @@ version: "1.0.0"
 extends: _base/analyst
 description: "Researches and synthesizes information about X."
 
-model:
-  id: claude-sonnet-4-5-20250929
-  temperature: 0.3
-  max_tokens: 8096
-
 system_prompt:
   template: system_prompt.j2
   vars:
@@ -138,24 +94,9 @@ tools:
   allow: [bash, web_fetch, read_file]
   deny: [write_file, delete_file]
 
-memory:
-  type: persistent
-  backend: sqlite
-  scratchpad: true
-  context_strategy: summarize
-
-autonomy:
-  max_tool_calls: 60
-  max_cost_usd: 2.00
-  checkpoint_every: 20
-  allowed_paths: ["./workspace/**", "./outputs/**"]
-  forbidden_patterns: ["rm -rf", "DROP TABLE"]
-
 output:
   format: markdown
   destinations:
-    - type: file
-      path: "./outputs/{{ run_id }}/analysis.md"
     - type: stdout
 
 orchestration:

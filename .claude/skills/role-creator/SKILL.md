@@ -36,10 +36,6 @@ roles/<role-name>/
 2. **Base role** — choose the right parent:
    - `_base/agent` — general default, minimal tools
    - `_base/analyst` — pre-configured for read + web + summarize
-3. **Model** — pick by task complexity:
-   - `claude-opus-4-5-20251101` — orchestrators, complex multi-step reasoning
-   - `claude-sonnet-4-5-20250929` — standard workers (most roles)
-   - `claude-haiku-4-5-20251001` — fast/cheap, simple classification or routing
 4. **Orchestration role**:
    - `orchestrator` — top-level coordinator, spawns sub-agents
    - `worker` — executes focused tasks, reports to orchestrator

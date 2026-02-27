@@ -8,9 +8,9 @@
 
 ## Overview
 
-Tab is a monorepo framework for defining, composing, and eventually executing Claude-based agents. The central concept is the **role** — a self-describing directory bundle that encapsulates everything needed to instantiate and run an agent: its identity, model configuration, tool permissions, memory strategy, autonomy limits, output contracts, orchestration position, and bundled Claude artifacts.
+Tab is a monorepo framework for defining and composing Claude-based agents. The central concept is the **role** — a self-describing directory bundle that encapsulates everything needed to instantiate an agent: its identity, model configuration, tool permissions, memory strategy, autonomy limits, output contracts, orchestration position, and bundled Claude artifacts.
 
-The `roles/` directory is the core of the project. A custom agent runner (to be built in `src/`) reads these role definitions at runtime and uses them to spin up Claude-based agents.
+The `roles/` directory is the core of the project.
 
 ---
 
@@ -34,7 +34,6 @@ Tab/
 │       └── system_prompt.j2
 ├── schemas/
 │   └── role.schema.json          # JSON Schema — single source of truth for role.yml
-├── src/                          # Future runner
 ├── docs/
 │   └── plans/
 └── README.md
@@ -63,7 +62,7 @@ roles/<name>/
 └── output_schema.json    # Optional JSON Schema for output validation
 ```
 
-The runner translates bundled Claude artifacts (skills, hooks, commands, rules) into the equivalent Claude Code session configuration at startup.
+Bundled Claude artifacts (skills, hooks, commands, rules) map directly to Claude Code session configuration.
 
 ---
 
@@ -201,7 +200,7 @@ orchestrator (manager)
 └── spawns → reviewer     (peer with writer)
 ```
 
-The runner enforces the graph at runtime — if an agent attempts to spawn a role not in its `can_spawn` list, the action is blocked and logged.
+The `can_spawn` and `can_delegate_to` lists define the permissions boundary for each role in the graph.
 
 **Delegation strategies:**
 

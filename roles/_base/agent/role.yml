@@ -5,11 +5,6 @@ name: _base_agent
 version: "1.0.0"
 description: "Minimal abstract base for all Tab roles. Sets safe defaults."
 
-model:
-  id: claude-sonnet-4-5-20250929
-  temperature: 0.5
-  max_tokens: 8096
-
 system_prompt:
   template: system_prompt.j2
   vars:
@@ -20,18 +15,6 @@ system_prompt:
 tools:
   allow: [read_file]
   deny: []
-
-memory:
-  type: ephemeral
-  scratchpad: true
-  context_strategy: summarize
-
-autonomy:
-  max_tool_calls: 25
-  max_cost_usd: 0.50
-  checkpoint_every: 10
-  allowed_paths: ["./workspace/**"]
-  forbidden_patterns: ["rm -rf", "DROP TABLE", "DROP DATABASE", ":(){:|:&};:"]
 
 output:
   format: markdown

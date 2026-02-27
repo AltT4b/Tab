@@ -3,11 +3,6 @@ version: "1.0.0"
 extends: _base/agent
 description: "Expert software developer. Produces technical documentation, frontend artifacts, and Python packaged apps following Poetry + pydantic best practices."
 
-model:
-  id: claude-sonnet-4-5-20250929
-  temperature: 0.2
-  max_tokens: 16384
-
 system_prompt:
   template: system_prompt.j2
   vars:
@@ -20,18 +15,6 @@ system_prompt:
 tools:
   allow: [bash, read_file, write_file, web_fetch]
   deny: [delete_file]
-
-memory:
-  type: ephemeral
-  scratchpad: true
-  context_strategy: full
-
-autonomy:
-  max_tool_calls: 50
-  max_cost_usd: 1.00
-  checkpoint_every: 15
-  allowed_paths: ["./workspace/**"]
-  forbidden_patterns: ["rm -rf", "DROP TABLE"]
 
 output:
   format: markdown

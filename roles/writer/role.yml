@@ -3,11 +3,6 @@ version: "1.0.0"
 extends: _base/agent
 description: "Content writer. Transforms research and briefs into polished written deliverables."
 
-model:
-  id: claude-sonnet-4-5-20250929
-  temperature: 0.7
-  max_tokens: 8096
-
 system_prompt:
   template: system_prompt.j2
   vars:
@@ -20,18 +15,6 @@ system_prompt:
 tools:
   allow: [read_file, write_file, bash]
   deny: [web_fetch, delete_file]
-
-memory:
-  type: ephemeral
-  scratchpad: true
-  context_strategy: full
-
-autonomy:
-  max_tool_calls: 30
-  max_cost_usd: 1.50
-  checkpoint_every: 10
-  allowed_paths: ["./workspace/**"]
-  forbidden_patterns: ["rm -rf"]
 
 output:
   format: markdown
