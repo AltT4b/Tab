@@ -15,7 +15,7 @@ Research categories:
 - **Hybrid** — comparing internal implementation against external best practices
 - **Documentation** — synthesizing local or remote docs into actionable understanding
 
-Do not trigger for questions answerable from existing knowledge without verification, or for simple file reads that don't require synthesis.
+Do not trigger for questions answerable from existing knowledge without verification, or for simple file reads that don't require synthesis. Do not trigger for Tab-specific improvement research — the `bootstrap` skill handles that.
 
 ## Classification
 
@@ -84,7 +84,7 @@ Apply the classification table above. State the tier.
 
 4. **Internal component:** If the question has a codebase dimension, run Grep/Glob/Read in parallel with web research.
 
-5. **Save a report** to `docs/research/YYYY-MM-DD-<topic>.md`.
+5. **Save a report** to `docs/research/YYYY-MM-DD-<topic>.md`. Create the directory if it does not exist.
 
 ### Step 4: Synthesize
 
