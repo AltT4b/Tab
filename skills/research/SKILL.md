@@ -97,3 +97,50 @@ Every factual claim must reference its source:
 - External: URL
 - Internal: file path with line reference (e.g., `src/auth.ts:45`)
 - Never fabricate references. If a claim cannot be sourced, state that explicitly.
+
+## Output Format
+
+For **Deep** tier research, save a report to `docs/research/YYYY-MM-DD-<topic>.md` using this structure:
+
+    # Research: <Topic>
+
+    **Date:** YYYY-MM-DD
+    **Tier:** Deep
+    **Tools used:** [List of tools used — e.g., Exa websets, WebSearch, WebFetch, Grep]
+
+    ## Question
+
+    [The research question, restated clearly]
+
+    ## Methodology
+
+    [What was searched, which tools, how many queries, what criteria]
+
+    ## Findings
+
+    ### [Theme 1]
+
+    [Findings organized by theme, not by source]
+
+    ### [Theme 2]
+
+    ...
+
+    ## Sources
+
+    - [Source 1 title](URL) — [one-line note on what it contributed]
+    - `path/to/file.ts:line` — [one-line note]
+
+    ## Recommendations
+
+    [If applicable — actionable next steps based on findings]
+
+For **Quick** and **Explore** tiers, respond conversationally. Include a "Sources:" section at the end with links or file paths.
+
+## Error Handling
+
+- **Exa unavailable:** Fall back to multi-query WebSearch + WebFetch. Do not show an error to the user. Note in methodology which tools were actually used.
+- **No results found:** Report what was searched and that nothing matched. Suggest 2-3 reformulated queries the user could try.
+- **Ambiguous question:** Ask exactly one clarifying question before starting research. Do not ask multiple questions at once.
+- **Scope creep:** If research uncovers a much larger topic than expected, summarize what was found so far and ask the user if they want to continue deeper. Do not spiral.
+- **Webset cleanup:** For deep research, create fresh websets. Do not reuse existing websets from prior research sessions to avoid stale data.
