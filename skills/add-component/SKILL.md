@@ -126,18 +126,18 @@ description: "<One sentence: when Claude should invoke this skill.>"
 **What commands are:** User-invoked slash commands. Explicitly triggered by users (e.g., `/greet`), not automatically loaded like rules or AI-invoked like skills.
 
 **Placement:**
-- **Shared:** `commands/<name>/<name>.md`
-- **Agent-local:** `agents/<agent>/commands/<name>/<name>.md`
+- **Shared:** `commands/<name>.md`
+- **Agent-local:** `agents/<agent>/commands/<name>.md`
 
 Agent-local commands take precedence over shared commands with the same name.
 
-**Naming:** Lowercase, hyphenated. The directory and file share the same name.
+**Naming:** Lowercase, hyphenated. The file name matches the command name.
 
 **Frontmatter:**
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| `name` | Yes | Matches directory and file name |
+| `name` | Yes | Matches file name (without .md extension) |
 | `description` | Yes | One sentence: what the command does |
 
 **Template:**
