@@ -1,10 +1,13 @@
 {
   "name": "Tab",
   "description": "A framework for defining Claude-based AI agents as file-system primitives.",
+  "owner": {
+    "name": "AltT4b"
+  },
   "plugins": [
     {
       "name": "Tab",
-      "path": "."
+      "source": "."
     }
   ]
 }
