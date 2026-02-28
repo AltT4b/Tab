@@ -222,20 +222,20 @@ Invoke this skill whenever you are about to create a new Tab rule from scratch.
 **What rules are:** Always-on behavioral guardrails. Rules are loaded automatically — they are never explicitly invoked by users or agents.
 
 **Placement:**
-- **Shared** (applies to all agents): `rules/<name>.md`
-- **Agent-local** (overrides shared for that agent): `agents/<agent>/rules/<name>.md`
+- **Shared** (applies to all agents): `rules/<name>/<name>.md`
+- **Agent-local** (overrides shared for that agent): `agents/<agent>/rules/<name>/<name>.md`
 
 Agent-local rules take precedence over shared rules with the same name.
 
-**Structure:** A single `.md` file (no wrapping directory, unlike skills).
+**Structure:** A directory named after the rule, containing a single `.md` file of the same name.
 
-**Naming:** Lowercase, hyphenated (e.g., `no-pii`).
+**Naming:** Lowercase, hyphenated (e.g., `no-pii`). The directory and file share the same name.
 
 ## Workflow
 
 1. Determine the rule name (lowercase-hyphenated).
 2. Determine scope: shared (`rules/`) or agent-local (`agents/<agent>/rules/`)?
-3. Write the rule `.md` file at the chosen path using the template below.
+3. Create the directory and file: `rules/<name>/<name>.md`
 4. Keep the rule focused and specific — one guardrail per file.
 5. Confirm the file is complete before finishing.
 
@@ -255,7 +255,7 @@ Agent-local rules take precedence over shared rules with the same name.
 
 ```bash
 ls rules/
-# Should include no-pii.md as reference
+# Should include no-pii/ as reference
 head -5 skills/create-rule/SKILL.md
 # Expected: ---\nname: create-rule\n...
 ```
@@ -290,28 +290,28 @@ Invoke this skill whenever you are about to create a new Tab slash command from 
 
 ## Tab Command Conventions
 
-**What commands are:** User-invoked slash commands. Commands are explicitly triggered by users (e.g., `/doot`), not automatically loaded like rules or AI-invoked like skills.
+**What commands are:** User-invoked slash commands. Commands are explicitly triggered by users (e.g., `/greet`), not automatically loaded like rules or AI-invoked like skills.
 
 **Placement:**
-- **Shared** (available to all agents): `commands/<name>.md`
-- **Agent-local** (overrides shared for that agent): `agents/<agent>/commands/<name>.md`
+- **Shared** (available to all agents): `commands/<name>/<name>.md`
+- **Agent-local** (overrides shared for that agent): `agents/<agent>/commands/<name>/<name>.md`
 
 Agent-local commands take precedence over shared commands with the same name.
 
-**Naming:** Lowercase, hyphenated (e.g., `doot`). The name matches the file name.
+**Naming:** Lowercase, hyphenated (e.g., `greet`). The directory and file share the same name.
 
 **Frontmatter fields:**
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| `name` | Yes | Matches file name (e.g., `doot`) |
+| `name` | Yes | Matches directory and file name (e.g., `greet`) |
 | `description` | Yes | One sentence: what the command does |
 
 ## Workflow
 
 1. Determine the command name.
 2. Determine scope: shared (`commands/`) or agent-local (`agents/<agent>/commands/`)?
-3. Create the path: `commands/<name>.md`
+3. Create the directory and file: `commands/<name>/<name>.md`
 4. Write the command `.md` using the template below.
 5. Confirm the file is complete before finishing.
 
@@ -331,7 +331,7 @@ description: "<One sentence: what this command does.>"
 
 ```bash
 ls commands/
-# Should include doot.md as reference
+# Should include greet/ as reference
 head -5 skills/create-command/SKILL.md
 # Expected: ---\nname: create-command\n...
 ```

@@ -10,12 +10,15 @@ This file-first approach keeps agents self-describing, diff-friendly, and compos
 
 ```
 Tab/
-├── agents/                 # All agent definitions
+├── .claude-plugin/
+│   └── plugin.json         # Plugin manifest
+├── agents/                 # Agent directory bundles
 │   └── _base/              # Abstract base agents (not directly runnable)
 │       └── agent/          # Root base: safe defaults for all agents
 ├── skills/                 # Shared Claude Code skills
 ├── commands/               # Shared slash commands
-└── rules/                  # Shared guardrails
+├── rules/                  # Shared guardrails (referenced from settings.json)
+└── settings.json           # Plugin settings, including rule references
 ```
 
 ---

@@ -1,0 +1,5 @@
+{
+  "instructions": [
+    "rules/no-pii/no-pii.md"
+  ]
+}

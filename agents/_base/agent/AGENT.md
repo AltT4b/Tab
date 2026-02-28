@@ -1,6 +1,6 @@
 ---
 name: agent
-description: "Abstract base for all Tab roles. Sets minimal safe defaults. Not directly runnable — extend this."
+description: "Abstract base for all Tab agents. Sets minimal safe defaults. Not directly runnable — extend this."
 ---
 
 ## Identity

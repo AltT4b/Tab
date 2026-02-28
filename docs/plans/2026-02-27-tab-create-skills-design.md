@@ -68,7 +68,7 @@ Each skill is a directory named after the skill, containing a `SKILL.md`. This m
 
 **Covers:**
 - Rules are always-on behavioral guardrails — not explicitly invoked
-- Placement: `rules/<name>.md` (shared) or `agents/<agent>/rules/<name>.md` (agent-local)
+- Placement: `rules/<name>/<name>.md` (shared) or `agents/<agent>/rules/<name>/<name>.md` (agent-local)
 - Agent-local rules override shared rules of the same name
 - Naming: lowercase-hyphenated
 
@@ -82,8 +82,8 @@ Each skill is a directory named after the skill, containing a `SKILL.md`. This m
 
 **Covers:**
 - Commands are user-invoked slash commands
-- Placement: `commands/<name>.md` (shared) or `agents/<agent>/commands/<name>.md` (agent-local)
-- Naming: `command-name` (e.g., `doot`)
+- Placement: `commands/<name>/<name>.md` (shared) or `agents/<agent>/commands/<name>/<name>.md` (agent-local)
+- Naming: `command-name` (e.g., `greet`)
 - Frontmatter: `name`, `description`
 
 **Template:** Command `.md` stub with frontmatter + body.

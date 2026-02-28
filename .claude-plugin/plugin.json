@@ -1,8 +1,11 @@
 {
-  "name": "Tab",
+  "name": "tab",
   "description": "A framework for defining Claude-based AI agents as file-system primitives.",
   "version": "1.0.0",
   "author": {
     "name": "AltT4b"
-  }
+  },
+  "skills": "./skills/",
+  "commands": "./commands/",
+  "agents": "./agents/"
 }

@@ -13,23 +13,30 @@ Invoke this skill whenever you are about to create a new Tab rule from scratch.
 
 **What rules are:** Always-on behavioral guardrails. Rules are loaded automatically — they are never explicitly invoked by users or agents.
 
-**Placement:**
-- **Shared** (applies to all agents): `rules/<name>.md`
-- **Agent-local** (overrides shared for that agent): `agents/<agent>/rules/<name>.md`
+**Placement:** `rules/<name>/<name>.md`
 
-Agent-local rules take precedence over shared rules with the same name.
+**Registration:** After creating the rule file, add its path to the `instructions` array in `settings.json` so Claude Code loads it automatically:
 
-**Structure:** A single `.md` file (no wrapping directory, unlike skills).
+```json
+{
+  "instructions": [
+    "rules/<name>/<name>.md"
+  ]
+}
+```
 
-**Naming:** Lowercase, hyphenated (e.g., `no-pii`).
+**Structure:** A directory named after the rule, containing a single `.md` file of the same name.
+
+**Naming:** Lowercase, hyphenated (e.g., `no-pii`). The directory and file share the same name.
 
 ## Workflow
 
 1. Determine the rule name (lowercase-hyphenated).
 2. Determine scope: shared (`rules/`) or agent-local (`agents/<agent>/rules/`)?
-3. Write the rule `.md` file at the chosen path using the template below.
+3. Create the directory and file: `rules/<name>/<name>.md`
 4. Keep the rule focused and specific — one guardrail per file.
-5. Confirm the file is complete before finishing.
+5. Add the file path to `settings.json` → `instructions` array.
+6. Confirm the file is complete before finishing.
 
 ## Template
 
