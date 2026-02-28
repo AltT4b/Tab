@@ -16,7 +16,7 @@ This is an active learning project. Conventions evolve as Claude Code best pract
 
 **Skills, commands, and rules serve distinct purposes.**
 - **Skills** — AI-invoked instruction sets (`skills/<name>/SKILL.md`)
-- **Commands** — user-invoked slash commands (`commands/<name>/<name>.md`)
+- **Commands** — user-invoked slash commands (`commands/<name>.md`)
 - **Rules** — always-on behavioral guardrails (`rules/<name>/<name>.md`, referenced from `settings.json`)
 
 **Shared assets live at the repo root; agent-local assets take precedence.**
