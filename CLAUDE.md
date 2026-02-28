@@ -2,15 +2,13 @@
 
 ## Context
 
-Tab is a Claude Code plugin that provides a ready-to-use multi-agent system. When installed, users get an orchestrator that decomposes tasks and dispatches specialist sub-agents — researcher, writer, coder — via the Task tool. Each agent is defined as an `AGENT.md` file: YAML frontmatter for config, markdown body for behavioral instructions.
+Tab is a framework for defining Claude-based AI agents as file-system primitives. Each agent lives in a self-contained directory bundle: `AGENT.md` provides YAML frontmatter for configuration and a markdown body for behavioral instructions.
 
 This is an active learning project. Conventions evolve as Claude Code best practices become clearer. The README is the user-facing reference; this file captures where we are, why decisions were made, and what the rules are right now.
 
 ---
 
 ## Decisions
-
-**Orchestrators dispatch; workers execute.** The orchestrator is the user-facing entry point. It decomposes tasks and dispatches workers as sub-agents via the Task tool. Workers never spawn further agents. This distinction is enforced by tool permissions: orchestrators have `Task`; workers do not.
 
 **AGENT.md is the canonical agent definition.** Config in frontmatter, behavior in the markdown body. Self-describing, diff-friendly, no runtime config.
 
@@ -34,13 +32,8 @@ Tab/
 ├── rules/                # Shared guardrails
 ├── commands/             # Shared slash commands
 └── agents/
-    ├── _base/            # Abstract base agents (not runnable)
-    │   ├── agent/
-    │   └── analyst/
-    ├── orchestrator/     # User-facing entry point
-    ├── researcher/       # Worker: web research
-    ├── writer/           # Worker: drafting and editing
-    └── coder/            # Worker: software development
+    └── _base/            # Abstract base agents (not runnable)
+        └── agent/        # Root base: safe defaults for all agents
 ```
 
 Agent directory:
