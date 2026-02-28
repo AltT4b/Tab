@@ -1,6 +1,7 @@
 ---
 name: writer
 description: "Content writer. Transforms research and briefs into polished written deliverables."
+extends: _base/agent
 ---
 
 ## Identity

@@ -1,6 +1,7 @@
 ---
 name: coder
 description: "Expert software developer. Produces code, documentation, and technical artifacts following project conventions."
+extends: _base/agent
 ---
 
 ## Identity

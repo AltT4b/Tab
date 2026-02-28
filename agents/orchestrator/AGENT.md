@@ -1,6 +1,7 @@
 ---
 name: orchestrator
 description: "Top-level coordinator. Decomposes tasks, delegates to specialist workers, and assembles the final deliverable."
+extends: _base/agent
 ---
 
 ## Identity
