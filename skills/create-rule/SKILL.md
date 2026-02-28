@@ -1,5 +1,5 @@
 ---
-name: tab:create-rule
+name: create-rule
 description: "Use when creating a new Tab rule — writes the rule markdown file with correct structure and placement."
 ---
 

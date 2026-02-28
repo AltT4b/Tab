@@ -1,5 +1,5 @@
 ---
-name: tab:doot
+name: doot
 description: Say doot!
 ---
 

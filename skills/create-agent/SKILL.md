@@ -1,5 +1,5 @@
 ---
-name: tab:create-agent
+name: create-agent
 description: "Use when creating a new Tab agent — writes the AGENT.md file with correct frontmatter, structure, and placement."
 ---
 

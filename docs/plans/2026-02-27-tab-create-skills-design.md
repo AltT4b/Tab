@@ -1,20 +1,20 @@
 # Tab Create Skills Design
 
 **Date:** 2026-02-27
-**Topic:** `tab/create-*` skills for authoring Tab artifacts
+**Topic:** `create-*` skills for authoring Tab artifacts
 
 ---
 
 ## Goal
 
-Add four skills to `skills/tab/` that guide humans and agents through creating Tab artifacts from scratch. Each skill is self-contained: it knows the relevant conventions, provides a workflow, and embeds a canonical template.
+Add four skills to `skills/` that guide humans and agents through creating Tab artifacts from scratch. Each skill is self-contained: it knows the relevant conventions, provides a workflow, and embeds a canonical template.
 
 ---
 
 ## Structure
 
 ```
-skills/tab/
+skills/
 ├── create-agent/
 │   └── SKILL.md
 ├── create-skill/
@@ -82,8 +82,8 @@ Each skill is a directory named after the skill, containing a `SKILL.md`. This m
 
 **Covers:**
 - Commands are user-invoked slash commands
-- Placement: `commands/<namespace>/<name>.md` (shared) or `agents/<agent>/commands/<namespace>/<name>.md` (agent-local)
-- Naming: `namespace:command-name` (e.g., `tab:doot`)
+- Placement: `commands/<name>.md` (shared) or `agents/<agent>/commands/<name>.md` (agent-local)
+- Naming: `command-name` (e.g., `doot`)
 - Frontmatter: `name`, `description`
 
 **Template:** Command `.md` stub with frontmatter + body.

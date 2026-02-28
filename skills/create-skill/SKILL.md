@@ -1,5 +1,5 @@
 ---
-name: tab:create-skill
+name: create-skill
 description: "Use when creating a new Tab skill — writes the SKILL.md file with correct frontmatter, structure, and placement."
 ---
 
@@ -21,13 +21,13 @@ Agent-local skills take precedence over shared skills with the same name.
 
 **Structure:** Each skill is a directory named after the skill, containing a single `SKILL.md` file.
 
-**Naming:** Lowercase, hyphenated (e.g., `create-agent`). For namespaced skills, use a directory prefix (e.g., `tab/create-agent`).
+**Naming:** Lowercase, hyphenated (e.g., `create-agent`). The name matches the directory name.
 
 **Frontmatter fields:**
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| `name` | Yes | Matches directory path (e.g., `tab:create-agent`) |
+| `name` | Yes | Matches directory name (e.g., `create-agent`) |
 | `description` | Yes | One sentence describing when Claude should invoke this skill |
 
 ## Workflow
@@ -43,7 +43,7 @@ Agent-local skills take precedence over shared skills with the same name.
 
 ```markdown
 ---
-name: <namespace>:<skill-name>
+name: <skill-name>
 description: "<One sentence: when Claude should invoke this skill.>"
 ---
 

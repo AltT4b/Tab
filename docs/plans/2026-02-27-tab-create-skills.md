@@ -2,9 +2,9 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Create four skills in `skills/tab/` that guide humans and agents through authoring Tab artifacts (agents, skills, rules, commands) from scratch.
+**Goal:** Create four skills in `skills/` that guide humans and agents through authoring Tab artifacts (agents, skills, rules, commands) from scratch.
 
-**Architecture:** Four independent `SKILL.md` files, each in its own directory under `skills/tab/`. No dispatcher — each skill is self-contained with its own trigger context, Tab conventions, workflow, and embedded template.
+**Architecture:** Four independent `SKILL.md` files, each in its own directory under `skills/`. No dispatcher — each skill is self-contained with its own trigger context, Tab conventions, workflow, and embedded template.
 
 **Tech Stack:** Markdown, YAML frontmatter.
 
@@ -13,13 +13,13 @@
 ### Task 1: `create-agent` skill
 
 **Files:**
-- Create: `skills/tab/create-agent/SKILL.md`
+- Create: `skills/create-agent/SKILL.md`
 
 **Step 1: Create the directory and write the skill**
 
 ```markdown
 ---
-name: tab:create-agent
+name: create-agent
 description: "Use when creating a new Tab agent — writes the AGENT.md file with correct frontmatter, structure, and placement."
 ---
 
@@ -94,17 +94,17 @@ You are <Name>, [brief persona statement].
 Confirm the file exists and has valid YAML frontmatter:
 
 ```bash
-ls skills/tab/create-agent/
+ls skills/create-agent/
 # Expected: SKILL.md
-head -5 skills/tab/create-agent/SKILL.md
-# Expected: ---\nname: tab:create-agent\n...
+head -5 skills/create-agent/SKILL.md
+# Expected: ---\nname: create-agent\n...
 ```
 
 **Step 3: Commit**
 
 ```bash
-git add skills/tab/create-agent/SKILL.md
-git commit -m "feat: add tab/create-agent skill"
+git add skills/create-agent/SKILL.md
+git commit -m "feat: add create-agent skill"
 ```
 
 ---
@@ -112,13 +112,13 @@ git commit -m "feat: add tab/create-agent skill"
 ### Task 2: `create-skill` skill
 
 **Files:**
-- Create: `skills/tab/create-skill/SKILL.md`
+- Create: `skills/create-skill/SKILL.md`
 
 **Step 1: Create the directory and write the skill**
 
 ```markdown
 ---
-name: tab:create-skill
+name: create-skill
 description: "Use when creating a new Tab skill — writes the SKILL.md file with correct frontmatter, structure, and placement."
 ---
 
@@ -140,13 +140,13 @@ Agent-local skills take precedence over shared skills with the same name.
 
 **Structure:** Each skill is a directory named after the skill, containing a single `SKILL.md` file.
 
-**Naming:** Lowercase, hyphenated (e.g., `create-agent`). For namespaced skills, use a directory prefix (e.g., `tab/create-agent`).
+**Naming:** Lowercase, hyphenated (e.g., `create-agent`). The name matches the directory name.
 
 **Frontmatter fields:**
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| `name` | Yes | Matches directory path (e.g., `tab:create-agent`) |
+| `name` | Yes | Matches directory name (e.g., `create-agent`) |
 | `description` | Yes | One sentence describing when Claude should invoke this skill |
 
 ## Workflow
@@ -162,7 +162,7 @@ Agent-local skills take precedence over shared skills with the same name.
 
 ```markdown
 ---
-name: <namespace>:<skill-name>
+name: <skill-name>
 description: "<One sentence: when Claude should invoke this skill.>"
 ---
 
@@ -183,17 +183,17 @@ description: "<One sentence: when Claude should invoke this skill.>"
 **Step 2: Verify structure**
 
 ```bash
-ls skills/tab/create-skill/
+ls skills/create-skill/
 # Expected: SKILL.md
-head -5 skills/tab/create-skill/SKILL.md
-# Expected: ---\nname: tab:create-skill\n...
+head -5 skills/create-skill/SKILL.md
+# Expected: ---\nname: create-skill\n...
 ```
 
 **Step 3: Commit**
 
 ```bash
-git add skills/tab/create-skill/SKILL.md
-git commit -m "feat: add tab/create-skill skill"
+git add skills/create-skill/SKILL.md
+git commit -m "feat: add create-skill skill"
 ```
 
 ---
@@ -201,13 +201,13 @@ git commit -m "feat: add tab/create-skill skill"
 ### Task 3: `create-rule` skill
 
 **Files:**
-- Create: `skills/tab/create-rule/SKILL.md`
+- Create: `skills/create-rule/SKILL.md`
 
 **Step 1: Create the directory and write the skill**
 
 ```markdown
 ---
-name: tab:create-rule
+name: create-rule
 description: "Use when creating a new Tab rule — writes the rule markdown file with correct structure and placement."
 ---
 
@@ -256,15 +256,15 @@ Agent-local rules take precedence over shared rules with the same name.
 ```bash
 ls rules/
 # Should include no-pii.md as reference
-head -5 skills/tab/create-rule/SKILL.md
-# Expected: ---\nname: tab:create-rule\n...
+head -5 skills/create-rule/SKILL.md
+# Expected: ---\nname: create-rule\n...
 ```
 
 **Step 3: Commit**
 
 ```bash
-git add skills/tab/create-rule/SKILL.md
-git commit -m "feat: add tab/create-rule skill"
+git add skills/create-rule/SKILL.md
+git commit -m "feat: add create-rule skill"
 ```
 
 ---
@@ -272,13 +272,13 @@ git commit -m "feat: add tab/create-rule skill"
 ### Task 4: `create-command` skill
 
 **Files:**
-- Create: `skills/tab/create-command/SKILL.md`
+- Create: `skills/create-command/SKILL.md`
 
 **Step 1: Create the directory and write the skill**
 
 ```markdown
 ---
-name: tab:create-command
+name: create-command
 description: "Use when creating a new Tab command — writes the command markdown file with correct frontmatter, naming, and placement."
 ---
 
@@ -290,28 +290,28 @@ Invoke this skill whenever you are about to create a new Tab slash command from 
 
 ## Tab Command Conventions
 
-**What commands are:** User-invoked slash commands. Commands are explicitly triggered by users (e.g., `/tab:doot`), not automatically loaded like rules or AI-invoked like skills.
+**What commands are:** User-invoked slash commands. Commands are explicitly triggered by users (e.g., `/doot`), not automatically loaded like rules or AI-invoked like skills.
 
 **Placement:**
-- **Shared** (available to all agents): `commands/<namespace>/<name>.md`
-- **Agent-local** (overrides shared for that agent): `agents/<agent>/commands/<namespace>/<name>.md`
+- **Shared** (available to all agents): `commands/<name>.md`
+- **Agent-local** (overrides shared for that agent): `agents/<agent>/commands/<name>.md`
 
 Agent-local commands take precedence over shared commands with the same name.
 
-**Naming:** `namespace:command-name` (e.g., `tab:doot`). The namespace matches the directory, the command name matches the file.
+**Naming:** Lowercase, hyphenated (e.g., `doot`). The name matches the file name.
 
 **Frontmatter fields:**
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| `name` | Yes | `namespace:command-name` format |
+| `name` | Yes | Matches file name (e.g., `doot`) |
 | `description` | Yes | One sentence: what the command does |
 
 ## Workflow
 
-1. Determine the command name and namespace.
+1. Determine the command name.
 2. Determine scope: shared (`commands/`) or agent-local (`agents/<agent>/commands/`)?
-3. Create the path: `commands/<namespace>/<name>.md`
+3. Create the path: `commands/<name>.md`
 4. Write the command `.md` using the template below.
 5. Confirm the file is complete before finishing.
 
@@ -319,7 +319,7 @@ Agent-local commands take precedence over shared commands with the same name.
 
 ```markdown
 ---
-name: <namespace>:<command-name>
+name: <command-name>
 description: "<One sentence: what this command does.>"
 ---
 
@@ -330,15 +330,15 @@ description: "<One sentence: what this command does.>"
 **Step 2: Verify structure**
 
 ```bash
-ls commands/tab/
+ls commands/
 # Should include doot.md as reference
-head -5 skills/tab/create-command/SKILL.md
-# Expected: ---\nname: tab:create-command\n...
+head -5 skills/create-command/SKILL.md
+# Expected: ---\nname: create-command\n...
 ```
 
 **Step 3: Commit**
 
 ```bash
-git add skills/tab/create-command/SKILL.md
-git commit -m "feat: add tab/create-command skill"
+git add skills/create-command/SKILL.md
+git commit -m "feat: add create-command skill"
 ```
