@@ -1,0 +1,12 @@
+{
+  "name": "tab",
+  "description": "A framework for defining Claude-based AI agents as file-system primitives, using AGENT.md for configuration and behavioral instructions.",
+  "version": "0.1.0",
+  "author": {
+    "name": "AltT4b"
+  },
+  "homepage": "https://github.com/AltT4b/Tab",
+  "repository": "https://github.com/AltT4b/Tab",
+  "license": "MIT",
+  "keywords": ["agents", "framework", "claude-code"]
+}
