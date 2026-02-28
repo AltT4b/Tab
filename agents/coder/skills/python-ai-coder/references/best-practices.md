@@ -5,7 +5,6 @@
 - [Readability Over Cleverness](#readability-over-cleverness)
 - [Security & Prompt Injection](#security--prompt-injection)
 - [Async Best Practices](#async-best-practices)
-- [CrewAI-Specific Patterns](#crewai-specific-patterns)
 
 ---
 
@@ -99,15 +98,3 @@ results = await asyncio.gather(
 result_a = await agent_a.execute(task_a)
 result_b = await agent_b.execute(task_b)
 ```
-
----
-
-## CrewAI-Specific Patterns
-
-- Define agents in `agents.yaml` — keep Python code for logic, not config
-- Use `{variable}` interpolation in YAML for dynamic personas — avoid string formatting in Python
-- Assign tools explicitly per agent — never give all tools to all agents
-- Use `allow_delegation=False` unless the agent genuinely needs to delegate
-- Set `max_iter` and `max_rpm` on all agents in production — unbounded agents are a cost and reliability risk
-- Pass structured context between tasks using `context=[previous_task]` — don't rely on agent memory alone
-- Use `verbose=False` in production; enable per-agent with an env flag for debugging
