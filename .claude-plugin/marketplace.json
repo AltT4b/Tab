@@ -3,7 +3,7 @@
   "description": "A framework for defining Claude-based AI agents as file-system primitives.",
   "plugins": [
     {
-      "name": "tab",
+      "name": "Tab",
       "path": "."
     }
   ]
