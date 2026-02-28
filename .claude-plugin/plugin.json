@@ -6,6 +6,5 @@
     "name": "AltT4b"
   },
   "skills": "./skills/",
-  "commands": "./commands/",
-  "agents": "./agents/"
+  "commands": "./commands/"
 }
