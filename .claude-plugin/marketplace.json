@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "Tab",
-      "source": "."
+      "source": "./"
     }
   ]
 }
