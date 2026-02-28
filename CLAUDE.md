@@ -23,6 +23,8 @@ This is an active learning project. Conventions evolve as Claude Code best pract
 
 **Plugin structure follows Claude Code conventions where possible.** `.claude-plugin/plugin.json` is the manifest. Component directories (`skills/`, `commands/`, `agents/`) live at the plugin root. Rules are wired through `settings.json` instructions. Agent directory bundles are a Tab-specific convention; Tab handles its own agent discovery.
 
+**Tab has a summoning mechanism.** Users can address Tab by name ("Hey Tab", "Tab, …", "@Tab") to activate the default agent. The `defaultAgent` field in `settings.json` controls which agent activates — its value is a path relative to `agents/` (e.g., `_base/agent`). The `summon-tab` skill handles activation. To change the default agent, edit the `defaultAgent` value in `settings.json`. This is a fundamental design tenet: Tab should always have a named, addressable identity that users can summon conversationally.
+
 ---
 
 ## Conventions
@@ -39,7 +41,7 @@ Tab/
 ├── skills/               # Shared across all agents
 ├── commands/             # Shared slash commands
 ├── rules/                # Shared guardrails
-└── settings.json         # Plugin settings (references rules)
+└── settings.json         # Plugin settings (defaultAgent, rules)
 ```
 
 Agent directory format (e.g., `agents/my-agent/`):
@@ -62,3 +64,10 @@ AGENT.md frontmatter:
 | `extends` | No | Path to parent agent, relative to `agents/` |
 
 Naming: lowercase, hyphenated. Inheritance: no more than two levels deep.
+
+settings.json fields:
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `defaultAgent` | Yes | Path to the default agent, relative to `agents/`. Activated by the `summon-tab` skill. |
+| `instructions` | No | Array of rule file paths to load as always-on guardrails. |
