@@ -27,14 +27,13 @@ After confirming a Tab-addressed message, evaluate against this table in priorit
 
 | Priority | Keywords in message | Agent path (relative to `agents/`) |
 |----------|--------------------|------------------------------------|
-| 1 | "bootstrap", "grow" | `bootstrap/AGENT.md` |
-| 2 | *(default — no keyword match)* | Value of `defaultAgent` in `settings.json` |
+| 1 | *(default — no keyword match)* | Value of `defaultAgent` in `settings.json` |
 
-**Bootstrap is a special route.** It is Tab's meta-agent — the agent that improves Tab itself. Its route is hardcoded here, not configurable in `settings.json`. Future non-meta agents will be added as new rows in this table.
+Future agents will be added as new rows in this table before the default row.
 
 ## Workflow
 
-1. **Check routing.** Scan the user's message for routing keywords (see table above). If a keyword match is found, use that agent path. Otherwise, read the `defaultAgent` field from `settings.json`.
+1. **Check routing.** Scan the user's message for routing keywords (see table above). If a keyword match is found, use that agent path. Otherwise, read the `defaultAgent` field from `settings.json`. If no keyword matches, use `defaultAgent`.
 
 2. **Resolve the agent file.** For directory-bundle agents, the path is `agents/<path>` (e.g., `agents/bootstrap/AGENT.md`). For simple agents, the path is `agents/<filename>` (e.g., `agents/_base.md`).
 

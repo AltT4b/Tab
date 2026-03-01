@@ -22,6 +22,8 @@ This is an active learning project. Conventions evolve as Claude Code best pract
 
 **Tab has a summoning mechanism.** Users can address Tab by name ("Hey Tab", "Tab, …", "@Tab") to activate the default agent. The `defaultAgent` field in `settings.json` controls which agent activates — its value is a path relative to `agents/` (e.g., `_base.md` or `my-agent/AGENT.md`). The `summon-tab` skill handles activation. To change the default agent, edit the `defaultAgent` value in `settings.json`. This is a fundamental design tenet: Tab should always have a named, addressable identity that users can summon conversationally.
 
+**Tab does not grow itself.** Tab is a pure runtime framework. The `personal-assistant-builder` plugin (a sibling repository) handles research, planning, and scaffolding of new Tab components. Tab has no bootstrap or meta-agent of its own.
+
 ---
 
 ## Conventions
@@ -32,12 +34,7 @@ Tab/
 ├── .claude-plugin/
 │   └── plugin.json       # Plugin manifest (name, version, paths)
 ├── agents/               # Agent definitions
-│   ├── _base.md          # Abstract base agent (single file)
-│   └── bootstrap/        # Growth agent (directory bundle)
-│       ├── AGENT.md      #   Agent definition
-│       └── skills/       #   Agent-local skills
-│           └── add-component/
-│               └── SKILL.md
+│   └── _base.md          # Abstract base agent (single file)
 ├── skills/               # Shared skills
 │   ├── research/         #   General-purpose research
 │   └── summon-tab/       #   Agent routing and activation
