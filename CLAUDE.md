@@ -32,11 +32,15 @@ Tab/
 ├── .claude-plugin/
 │   └── plugin.json       # Plugin manifest (name, version, paths)
 ├── agents/               # Agent definitions
-│   ├── _base.md          # Simple agent (single file)
-│   └── my-agent/         # Complex agent (directory bundle)
+│   ├── _base.md          # Abstract base agent (single file)
+│   └── bootstrap/        # Growth agent (directory bundle)
 │       ├── AGENT.md      #   Agent definition
 │       └── skills/       #   Agent-local skills
-├── skills/               # Shared across all agents
+│           └── add-component/
+│               └── SKILL.md
+├── skills/               # Shared skills
+│   ├── research/         #   General-purpose research
+│   └── summon-tab/       #   Agent routing and activation
 ├── rules/                # Shared guardrails
 └── settings.json         # Plugin settings (defaultAgent, rules)
 ```
