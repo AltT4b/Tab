@@ -5,6 +5,5 @@
   "author": {
     "name": "AltT4b"
   },
-  "skills": "./skills/",
-  "commands": "./commands/"
+  "skills": "./skills/"
 }

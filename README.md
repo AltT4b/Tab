@@ -16,7 +16,6 @@ Tab/
 │   └── _base/              # Abstract base agents (not directly runnable)
 │       └── agent/          # Root base: safe defaults for all agents
 ├── skills/                 # Shared Claude Code skills
-├── commands/               # Shared slash commands
 ├── rules/                  # Shared guardrails (referenced from settings.json)
 └── settings.json           # Plugin settings, including rule references
 ```
@@ -31,7 +30,6 @@ Every agent is a directory inside `agents/`. The only required file is `AGENT.md
 agents/my-agent/
 ├── AGENT.md              # Required: frontmatter config + behavioral instructions
 ├── skills/               # Bundled Claude Code skills
-├── commands/             # Custom slash commands
 ├── rules/                # Guardrail markdown files
 └── output_schema.json    # Optional output validation schema
 ```
@@ -93,10 +91,9 @@ Inheritance is limited to two levels deep.
 
 ## Shared vs. Agent-Local Assets
 
-Skills, commands, and rules can live at the repo root (shared across all agents) or inside an agent directory (agent-specific). Agent-local assets take precedence over shared ones.
+Skills and rules can live at the repo root (shared across all agents) or inside an agent directory (agent-specific). Agent-local assets take precedence over shared ones.
 
 | Asset | Purpose |
 |-------|---------|
 | `skills/` | AI-invoked instruction sets |
-| `commands/` | User-invoked slash commands |
 | `rules/` | Always-on behavioral guardrails |

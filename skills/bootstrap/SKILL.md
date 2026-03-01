@@ -1,6 +1,6 @@
 ---
 name: bootstrap
-description: "Use when researching tools, frameworks, or practices to produce actionable growth plans for Tab with well-defined steps and outcomes."
+description: "Use when planning how to improve or extend Tab — evaluating new capabilities, adopting patterns, or deciding how Tab should grow. Produces actionable plans with concrete steps and outcomes."
 ---
 
 # Bootstrap
@@ -19,7 +19,7 @@ The goal is not imitation — Tab is building toward a uniquely usable personal 
    - Anthropic documentation and Claude Code best practices
    - Comparable tools and frameworks (agent builders, AI assistants, CLI tools)
    - Community patterns and emerging conventions
-   - Tab's current state (read existing agents, skills, commands, rules, CLAUDE.md)
+   - Tab's current state (read existing agents, skills, rules, CLAUDE.md)
 
 3. **Analyze against Tab's context.** For each finding, evaluate:
    - **Relevance:** Does this solve a real gap or friction in Tab?

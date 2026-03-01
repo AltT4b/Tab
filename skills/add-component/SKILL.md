@@ -1,17 +1,17 @@
 ---
 name: add-component
-description: "Use when creating a new Tab plugin component (agent, skill, command, or rule). Scaffolds the correct file structure, frontmatter, and placement."
+description: "Use when creating a new Tab plugin component (agent, skill, or rule). Scaffolds the correct file structure, frontmatter, and placement."
 ---
 
 # Add Component
 
 ## Overview
 
-Scaffolds a new Tab plugin component. Supports four component types: **agent**, **skill**, **command**, and **rule**. Each type has its own conventions, placement rules, and template.
+Scaffolds a new Tab plugin component. Supports three component types: **agent**, **skill**, and **rule**. Each type has its own conventions, placement rules, and template.
 
 ## Type Detection
 
-Infer the component type from the user's message. Look for keywords: "agent", "skill", "command", "rule". If the type is ambiguous or missing, ask the user to choose one.
+Infer the component type from the user's message. Look for keywords: "agent", "skill", "rule". If the type is ambiguous or missing, ask the user to choose one.
 
 ## Workflow
 
@@ -35,7 +35,6 @@ Infer the component type from the user's message. Look for keywords: "agent", "s
 agents/<name>/
 ├── AGENT.md              # Required
 ├── skills/               # Optional: agent-specific skills
-├── commands/             # Optional: agent-specific commands
 ├── rules/                # Optional: agent-specific rules
 └── output_schema.json    # Optional
 ```
@@ -81,7 +80,7 @@ You are <Name>, [brief persona statement].
 
 ## Skill
 
-**What skills are:** AI-invoked instruction sets. Skills are not user-invoked slash commands — those are commands.
+**What skills are:** AI-invoked instruction sets.
 
 **Placement:**
 - **Shared:** `skills/<name>/SKILL.md`
@@ -117,38 +116,6 @@ description: "<One sentence: when Claude should invoke this skill.>"
 1. [Step]
 2. [Step]
 3. [Step]
-```
-
----
-
-## Command
-
-**What commands are:** User-invoked slash commands. Explicitly triggered by users (e.g., `/greet`), not automatically loaded like rules or AI-invoked like skills.
-
-**Placement:**
-- **Shared:** `commands/<name>.md`
-- **Agent-local:** `agents/<agent>/commands/<name>.md`
-
-Agent-local commands take precedence over shared commands with the same name.
-
-**Naming:** Lowercase, hyphenated. The file name matches the command name.
-
-**Frontmatter:**
-
-| Field | Required | Notes |
-|-------|----------|-------|
-| `name` | Yes | Matches file name (without .md extension) |
-| `description` | Yes | One sentence: what the command does |
-
-**Template:**
-
-```markdown
----
-name: <command-name>
-description: "<One sentence: what this command does.>"
----
-
-[Instructions for what Claude should do when this command is invoked.]
 ```
 
 ---
