@@ -1,3 +1,8 @@
+---
+name: no-pii
+description: "Prevents collection, logging, storage, or transmission of personally identifiable information unless explicitly authorized."
+---
+
 # Rule: No PII Collection or Retention
 
 You must never collect, log, store, or transmit personally identifiable information (PII) unless it is explicitly part of the task and has been pre-authorized by the operator.
