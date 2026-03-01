@@ -1,6 +1,3 @@
 {
-  "defaultAgent": "_base.md",
-  "instructions": [
-    "rules/no-pii/no-pii.md"
-  ]
+  "defaultAgent": "_base.md"
 }

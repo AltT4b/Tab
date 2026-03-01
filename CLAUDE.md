@@ -2,64 +2,37 @@
 
 ## Context
 
-Tab is a framework for defining Claude-based AI agents as file-system primitives. Each agent is a markdown file in `agents/` with YAML frontmatter for configuration and a markdown body for behavioral instructions.
+Tab is a toolkit of AI capabilities — skills, agents, and rules — that extend Claude Code into a personal assistant. It's implemented as a Claude Code plugin.
 
-This is an active learning project. Conventions evolve as Claude Code best practices become clearer. The README is the user-facing reference; this file captures where we are, why decisions were made, and what the rules are right now.
+This is an active learning project. Conventions evolve as Claude Code best practices become clearer. The README is the user-facing reference; this file captures where we are and why decisions were made.
 
 ---
 
 ## Decisions
 
-**Each agent is a single markdown file in `agents/`.** Config in frontmatter, behavior in the markdown body. Self-describing, diff-friendly, no runtime config. Named `<agent-name>.md`.
-
-**Abstract agents are prefixed with `_`.** Not directly runnable — concrete agents extend them (e.g., `_base`).
-
 **Skills and rules serve distinct purposes.**
 - **Skills** — AI-invoked instruction sets (`skills/<name>/SKILL.md`)
-- **Rules** — always-on behavioral guardrails (`rules/<name>/<name>.md`, referenced from `settings.json`)
+- **Rules** — always-on behavioral guardrails (`rules/<name>.md`, referenced from `settings.json`)
 
-**Plugin structure follows Claude Code conventions where possible.** `.claude-plugin/plugin.json` is the manifest. Component directories (`skills/`, `agents/`) live at the plugin root. Rules are wired through `settings.json` instructions.
+**Plugin structure follows Claude Code conventions.** `.claude-plugin/plugin.json` is the manifest. Component directories (`skills/`, `agents/`) live at the plugin root. Rules are wired through `settings.json` instructions.
 
-**Tab has a summoning mechanism.** Users can address Tab by name ("Hey Tab", "Tab, …", "@Tab") to activate the default agent. The `defaultAgent` field in `settings.json` controls which agent activates — its value is a path relative to `agents/` (e.g., `_base.md` or `my-agent/AGENT.md`). The `summon-tab` skill handles activation. To change the default agent, edit the `defaultAgent` value in `settings.json`. This is a fundamental design tenet: Tab should always have a named, addressable identity that users can summon conversationally.
+**Tab has a summoning mechanism.** Users can address Tab by name ("Hey Tab", "Tab, …", "@Tab") to activate the default agent. The `defaultAgent` field in `settings.json` controls which agent activates. The `summon-tab` skill handles activation. This is a fundamental design tenet: Tab should always have a named, addressable identity that users can summon conversationally.
 
-**Tab does not grow itself.** Tab is a pure runtime framework. The `personal-assistant-builder` plugin (a sibling repository) handles research, planning, and scaffolding of new Tab components. Tab has no bootstrap or meta-agent of its own.
+**Tab does not grow itself.** Tab is a pure runtime toolkit. The `personal-assistant-builder` plugin (a sibling repository) handles research, planning, and scaffolding of new Tab components. Tab has no bootstrap or meta-agent of its own.
 
 ---
 
-## Conventions
+## Repo Structure
 
-Repo structure:
 ```
 Tab/
 ├── .claude-plugin/
-│   └── plugin.json       # Plugin manifest (name, version, paths)
+│   └── plugin.json       # Plugin manifest
 ├── agents/               # Agent definitions
-│   └── _base.md          # Abstract base agent (single file)
-├── skills/               # Shared skills
+│   └── _base.md          # Default agent
+├── skills/               # Skills
 │   ├── research/         #   General-purpose research
 │   └── summon-tab/       #   Agent routing and activation
-├── rules/                # Shared guardrails
-└── settings.json         # Plugin settings (defaultAgent, rules)
+├── rules/                # Behavioral guardrails
+└── settings.json         # Plugin settings
 ```
-
-Agents come in two forms:
-
-- **Simple** — a single file: `agents/my-agent.md`
-- **Directory bundle** — a directory with local assets: `agents/my-agent/AGENT.md` + siblings (skills, rules, etc.)
-
-Frontmatter (in the agent `.md` file):
-
-| Field | Required | Notes |
-|-------|----------|-------|
-| `name` | Yes | Matches filename or directory name |
-| `description` | Yes | One sentence: what it does and when to use it |
-| `extends` | No | Path to parent agent, relative to `agents/` (e.g., `_base.md`) |
-
-Naming: lowercase, hyphenated. Inheritance: no more than two levels deep.
-
-settings.json fields:
-
-| Field | Required | Notes |
-|-------|----------|-------|
-| `defaultAgent` | Yes | Path to agent file, relative to `agents/` (e.g., `_base.md`). Activated by the `summon-tab` skill. |
-| `instructions` | No | Array of rule file paths to load as always-on guardrails. |

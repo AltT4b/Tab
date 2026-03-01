@@ -1,99 +1,48 @@
 # Tab
 
-Tab is a framework for defining Claude-based AI agents as file-system primitives. Each agent lives in a self-contained directory bundle: an `AGENT.md` file combines YAML frontmatter (configuration) with a markdown body (behavioral instructions that become the system prompt).
-
-This file-first approach keeps agents self-describing, diff-friendly, and composable without runtime configuration overhead.
+Tab is a toolkit of AI capabilities — skills, agents, and rules — that extend Claude Code into a personal assistant. Implemented as a Claude Code plugin.
 
 ---
 
-## Repository Structure
+## Capabilities
+
+### Summon Tab
+
+Address Tab by name to activate the assistant.
+
+> "Hey Tab, what's the best way to handle auth tokens?"
+
+Trigger phrases: "Hey Tab", "Tab, ...", "@Tab", or any message that speaks to Tab directly. Tab activates its default agent and responds in character.
+
+### Research
+
+General-purpose knowledge gathering across web, codebase, and documentation.
+
+Tab classifies each request by complexity and routes accordingly:
+
+- **Quick** — single-source factual lookups
+- **Explore** — multi-source comparisons, option surveys
+- **Deep** — entity discovery, landscape mapping, structured reports (uses Exa websets when available)
+
+All findings are cited with sources.
+
+### Rules
+
+Always-on behavioral guardrails applied across all interactions.
+
+- **no-pii** — prevents collection, storage, or transmission of personally identifiable information unless explicitly authorized
+
+---
+
+## Structure
 
 ```
 Tab/
-├── .claude-plugin/
-│   └── plugin.json         # Plugin manifest
-├── agents/                 # Agent directory bundles
-│   └── _base/              # Abstract base agents (not directly runnable)
-│       └── agent/          # Root base: safe defaults for all agents
-├── skills/                 # Shared Claude Code skills
-├── rules/                  # Shared guardrails (referenced from settings.json)
-└── settings.json           # Plugin settings, including rule references
+├── .claude-plugin/plugin.json   # Plugin manifest
+├── agents/_base.md              # Default agent
+├── skills/
+│   ├── research/SKILL.md        # Knowledge gathering
+│   └── summon-tab/SKILL.md      # Agent activation
+├── rules/no-pii.md              # PII guardrail
+└── settings.json                # Plugin settings
 ```
-
----
-
-## Defining an Agent
-
-Every agent is a directory inside `agents/`. The only required file is `AGENT.md`.
-
-```
-agents/my-agent/
-├── AGENT.md              # Required: frontmatter config + behavioral instructions
-├── skills/               # Bundled Claude Code skills
-├── rules/                # Guardrail markdown files
-└── output_schema.json    # Optional output validation schema
-```
-
-### AGENT.md structure
-
-AGENT.md has two parts: a YAML frontmatter block for machine-readable config, and a markdown body that serves as the agent's behavioral instructions.
-
-```markdown
----
-name: my-agent
-description: "One sentence: what this agent does and when to use it."
----
-
-## Identity
-
-You are MyAgent, [brief persona statement].
-
-## Conduct
-
-- [Behavioral constraint]
-
-## Output
-
-[How to structure and deliver output]
-```
-
-### Frontmatter fields
-
-| Field | Required | Notes |
-|-------|----------|-------|
-| `name` | Yes | `^[a-z0-9_-]+$`, matches directory name |
-| `description` | Yes | One sentence: what it does and when to use it |
-| `extends` | No | Path to parent agent, relative to `agents/` |
-
----
-
-## Inheritance
-
-Agents can extend a parent via `extends`. The child inherits all parent settings and overrides what it redefines.
-
-Abstract base agents (prefixed `_`) establish shared defaults and are not directly runnable. Concrete agents extend them.
-
-```markdown
----
-name: researcher
-description: "Web research specialist."
-extends: _base/agent
----
-
-## Identity
-
-You are Researcher, a specialist in gathering information from the web.
-```
-
-Inheritance is limited to two levels deep.
-
----
-
-## Shared vs. Agent-Local Assets
-
-Skills and rules can live at the repo root (shared across all agents) or inside an agent directory (agent-specific). Agent-local assets take precedence over shared ones.
-
-| Asset | Purpose |
-|-------|---------|
-| `skills/` | AI-invoked instruction sets |
-| `rules/` | Always-on behavioral guardrails |

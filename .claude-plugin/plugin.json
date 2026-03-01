@@ -1,6 +1,6 @@
 {
   "name": "tab",
-  "description": "A framework for defining Claude-based AI agents as file-system primitives.",
+  "description": "A toolkit of AI capabilities that extend Claude Code into a personal assistant.",
   "version": "1.0.0",
   "author": {
     "name": "AltT4b"
