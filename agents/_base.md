@@ -1,5 +1,5 @@
 ---
-name: agent
+name: _base
 description: "Abstract base for all Tab agents. Sets minimal safe defaults. Not directly runnable — extend this."
 ---
 
