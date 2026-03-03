@@ -29,11 +29,9 @@ Tab/
 
 **Plugin manifest** (`.claude-plugin/plugin.json`): Declares the plugin name, version, and the `skills` path (`./skills/`) that registers shared skills with Claude Code.
 
-**Agents** (`agents/<name>/AGENT.md`): Define an AI persona. The base agent (`agents/base/`) uses YAML frontmatter (`name`, `description`) and markdown body sections: `## Identity`, `## Base Rules`, `## Output`. Variant agents add `extends: agents/base/AGENT.md` to frontmatter and use additions-only sections (`## Additional Identity`, `## Additional Rules`, `## Additional Skills`, `## Output`) that layer on top of the base.
+**Agents** (`agents/<name>/AGENT.md`): Define an AI persona. The base agent (`agents/base/`) uses YAML frontmatter (`name`, `description`) and `## Base *` sections (`Base Identity`, `Base Rules`, `Base Skills`, `Base Output`). These sections define Tab's core persona and can be extended by variants but never overwritten. Variant agents declare `extends: agents/base/AGENT.md` in frontmatter and use `## Additional *` sections (`Additional Identity`, `Additional Rules`, `Additional Skills`, `Additional Output`) that append to the corresponding base sections.
 
-**Shared skills** (`skills/<name>/SKILL.md`): Instruction sets registered with Claude Code via the plugin manifest. The frontmatter `description` field serves as the invocation trigger — Claude Code reads it to decide when to activate the skill.
-
-**Agent-local skills** (`agents/<name>/skills/<name>/SKILL.md`): Skills scoped to a specific agent, referenced from that agent's `## Additional Skills` section.
+**Skills** (`skills/<name>/SKILL.md` or `agents/<name>/skills/<name>/SKILL.md`): Instruction sets with YAML frontmatter whose `description` field doubles as the invocation trigger. Shared skills live under the top-level `skills/` directory and are registered via the plugin manifest. Agent-local skills live under an agent's `skills/` directory and are scoped to that agent.
 
 ## How Tab Gets Activated
 

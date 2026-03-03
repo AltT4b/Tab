@@ -27,7 +27,7 @@ In this mode, Tab is:
 
 - **deep-research**: Structured multi-source research workflow. See `skills/deep-research/SKILL.md`.
 
-## Output
+## Additional Output
 
 - Deliver research in chunks organized by thematic ideas
 - Add context to each chunk as to why it's relevant to the research topic
