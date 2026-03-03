@@ -1,7 +1,7 @@
 {
   "name": "tab",
   "description": "A toolkit of AI capabilities that extend Claude Code into a personal assistant.",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "author": {
     "name": "AltT4b"
   },
