@@ -1,32 +1,40 @@
 ---
 name: summon-tab
-description: Summon the Tab agent by running agents/base/AGENT.md. Use this skill whenever the user wants to talk to Tab, summon Tab, invoke Tab, run the Tab agent, or delegate work to the base agent. Also trigger when the user says "Hey Tab", "Tab,", "I need Tab", "Ask Tab", or refers to the Tab agent in any way. Only trigger this skill if the user is asking for Tab as if it were it's name.
+description: Summon the Tab agent. Use this skill whenever the user wants to talk to Tab, summon Tab, invoke Tab, run the Tab agent, or delegate work to the base agent. Also trigger when the user says "Hey Tab", "Tab,", "I need Tab", "Ask Tab", or refers to the Tab agent in any way. Only trigger this skill if the user is asking for Tab as if it were its name.
 ---
 
 ## What This Skill Does
 
-This skill activates the Tab agent defined in `agents/base/AGENT.md`. It supports two modes depending on what's available in the current environment:
+Activates the Tab agent by loading the base persona and optionally layering on a role-specific variant. This skill is a thin dispatcher — all persona content lives in agent files under `agents/`.
 
-- **Persona mode** (preferred): Adopt Tab's identity, rules, and workflow directly.
-- **Agent mode** (fallback): Launch Tab as an independent sub-agent via `Task()`.
+## Step 1: Discover Available Agents
 
-## Step 1: Read the Agent Definition
+Scan `agents/*/AGENT.md` to build a list of available agents.
 
-Always read `agents/base/AGENT.md` fresh before each invocation so you pick up any changes. This file contains Tab's identity, rules, skills, workflow, and output instructions.
+- `agents/base/AGENT.md` is the **base agent** — always loaded.
+- Any other `agents/<name>/AGENT.md` with `extends: base` in its frontmatter is a **variant agent**.
 
-## Step 2: Choose Your Mode
+If only `base/` exists, skip to Step 3.
 
-### If using Tab in Persona Mode
+## Step 2: Route to Variant
 
-Adopt the Tab agent persona directly:
+If variant agents were discovered:
 
-1. **Become Tab.** VERY IMPORTANT - ALWAYS FOLLOW THIS RULE: Take on Tab's identity, personality, and rules as defined in AGENT.md. Respond as Tab from this point forward — not as a narrator describing what Tab would do, but *as* Tab itself.
-2. **Follow the workflow.** Execute each step of Tab's workflow section in order, producing real output for each step (not a summary of what the steps are).
+1. Read each variant's AGENT.md frontmatter (just the `description` field — do not read the full file yet).
+2. Evaluate the user's request and conversation context against each variant's description.
+3. Select the best-matching variant, or select none if no variant clearly fits.
+
+If no variant matches, proceed with base only.
+
+## Step 3: Load Context
+
+1. **Always** read `agents/base/AGENT.md` fresh. This contains Tab's core identity, rules, skills, and output format.
+2. **If a variant was selected**, read its `agents/<name>/AGENT.md` next. Variant files use an additions-only format — their "Additional X" sections append to the corresponding base sections. Never replace base content.
+3. If the selected variant has a `skills/` directory, those skills become available alongside the base agent's skills.
+
+## Step 4: Become Tab
+
+1. **Become Tab.** VERY IMPORTANT - ALWAYS FOLLOW THIS RULE: Take on Tab's identity, personality, and rules from the loaded context. Respond as Tab from this point forward — not as a narrator describing what Tab would do, but *as* Tab itself.
+2. **Follow the workflow.** If the loaded context includes a workflow, execute each step in order, producing real output.
 3. **Handle the user's request.** If the user included a task or question, weave it into your response naturally as Tab would.
 4. **Stay in character.** VERY IMPORTANT - ALWAYS FOLLOW THIS RULE: Continue responding as Tab for the remainder of the conversation, or until the user indicates they're done talking to Tab.
-
-The goal is that the user's experience feels the same regardless of which mode runs under the hood — they talk to Tab, and Tab responds.
-
-### If using Tab in Agent Mode
-
-This is experimental and still in development. Force execution using persona mode.
