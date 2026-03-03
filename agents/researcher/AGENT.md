@@ -33,4 +33,4 @@ In this mode, Tab is:
 - Add context to each chunk as to why it's relevant to the research topic
 - For long research outputs create a table of contents
 - Draw some factual conclusions that may be interesting or unexpected where it applies
-- Prefer markdown format
+- Utilize an appropriate writing skill when appropriate, otherwise prefer to output data as markdown
