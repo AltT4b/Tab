@@ -12,19 +12,22 @@ Tab is a Claude Code plugin that implements a personal AI assistant entirely in 
 Tab/
 ├── .claude-plugin/plugin.json       # Plugin manifest (entry point)
 ├── agents/
-│   └── base/
-│       ├── AGENT.md                 # Tab's persona definition
-│       └── skills/
-│           └── draw-dino/SKILL.md   # Agent-local skill
+│   ├── base/
+│   │   ├── AGENT.md                 # Tab's core persona (always loaded)
+│   │   └── skills/
+│   │       └── draw-dino/SKILL.md   # Agent-local skill
+│   └── <variant>/                   # Future: role-specific variants
+│       ├── AGENT.md                 # Additions-only (extends: base)
+│       └── skills/                  # Variant-local skills
 └── skills/
-    └── summon-tab/SKILL.md          # Shared skill (registered via plugin)
+    └── summon-tab/SKILL.md          # Shared skill: agent dispatcher
 ```
 
 ## Architecture
 
 **Plugin manifest** (`.claude-plugin/plugin.json`): Declares the plugin name, version, and the `skills` path (`./skills/`) that registers shared skills with Claude Code.
 
-**Agents** (`agents/<name>/AGENT.md`): Define an AI persona. AGENT.md uses YAML frontmatter (`name`, `description`) and markdown body sections: `## Identity`, `## Additional Rules`, `## Additional Skills`, `## Output`.
+**Agents** (`agents/<name>/AGENT.md`): Define an AI persona. The base agent (`agents/base/`) uses YAML frontmatter (`name`, `description`) and markdown body sections: `## Identity`, `## Additional Rules`, `## Additional Skills`, `## Output`. Variant agents add `extends: base` to frontmatter and use additions-only sections (`## Additional Identity`, `## Additional Rules`, `## Additional Skills`) that layer on top of the base.
 
 **Shared skills** (`skills/<name>/SKILL.md`): Instruction sets registered with Claude Code via the plugin manifest. The frontmatter `description` field serves as the invocation trigger — Claude Code reads it to decide when to activate the skill.
 
@@ -32,11 +35,12 @@ Tab/
 
 ## How Tab Gets Activated
 
-The `summon-tab` shared skill triggers on phrases like "Hey Tab", "@Tab", etc. It reads `agents/base/AGENT.md` fresh each time, then Claude adopts Tab's persona for the rest of the conversation. Agent mode (sub-agent via `Task()`) is listed but not yet implemented.
+The `summon-tab` shared skill triggers on phrases like "Hey Tab", "@Tab", etc. It scans `agents/` to discover available agents, always loads `agents/base/AGENT.md`, and optionally layers on a variant agent matched by conversation context. Claude then adopts the merged persona for the rest of the conversation.
 
 ## Conventions
 
 - **Naming**: lowercase, hyphenated for all component directories (e.g., `draw-dino`, `summon-tab`)
 - **Frontmatter**: all AGENT.md and SKILL.md files use YAML frontmatter with at minimum `name` and `description`
 - **Skill triggers**: the `description` frontmatter field in SKILL.md doubles as the trigger condition
+- **Variant agents**: variant AGENT.md files declare `extends: base` in frontmatter and use only "Additional X" sections (additive, never replace)
 - **Git commits**: conventional commit prefixes (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`)
