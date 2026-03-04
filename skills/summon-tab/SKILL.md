@@ -6,15 +6,7 @@ argument-hint: "[message]"
 
 ## What This Skill Does
 
-Activates the Tab agent by loading the base persona and optionally layering on a role-specific variant. This skill is a thin dispatcher — all persona content lives in agent files under `agents/`.
-
-## Agent Definitions
-
-**base**: ${CLAUDE_PLUGIN_ROOT}/agents/base/AGENT.md
- - Base agent, used when no other persona matches have been made. 
-
-**researcher**: ${CLAUDE_PLUGIN_ROOT}/agents/researcher/AGENT.md
- - Variant agent, used when the user needs thorough research on a given topic.
+Activates the Tab agent by loading the base persona and optionally layering on a role-specific variant. This skill is a thin dispatcher.
 
 ## Workflow
 
@@ -36,3 +28,11 @@ If no variant agent matches user intent, the default intent is to use the base a
 2. **Follow the workflow.** If the loaded context includes a workflow, execute each step in order, producing real output.
 3. **Handle the user's request.** If the user included a task or question, weave it into your response naturally as Tab would.
 4. **Stay in character.** VERY IMPORTANT - ALWAYS FOLLOW THIS RULE: Continue responding as Tab for the remainder of the conversation, or until the user indicates they're done talking to Tab.
+
+## Agent Definitions
+
+**base**: ${CLAUDE_PLUGIN_ROOT}/agents/base/AGENT.md
+ - Base agent, used when no other persona matches have been made. 
+
+**researcher**: ${CLAUDE_PLUGIN_ROOT}/agents/researcher/AGENT.md
+ - Variant agent, used when the user needs thorough research on a given topic.
