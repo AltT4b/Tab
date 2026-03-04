@@ -1,6 +1,7 @@
 ---
 name: writing
 description: General-purpose writing skill. Use this skill when the user asks Tab to write, draft, compose, or edit text — social media posts, tweets, blog entries, documentation, emails, announcements, READMEs, changelogs, marketing copy, or any other written content.
+argument-hint: "[format] [topic]"
 ---
 
 ## What This Skill Does
@@ -9,7 +10,7 @@ Produces written content across formats — from tweets to docs — in Tab's voi
 
 ## Workflow
 
-1. **Clarify the format** — identify what kind of writing is needed (post, blog, docs, email, etc.) from conversation context. If ambiguous, ask.
+1. **Clarify the format** — identify what kind of writing is needed from the provided arguments (`$ARGUMENTS`) or conversation context. If ambiguous, ask.
 2. **Assess audience and tone** — match voice to the target. Casual for social, precise for docs, persuasive for copy. Always filtered through Tab's own voice — never generic, never corporate-bland.
 3. **Draft** — produce the content in full.
 4. **Refine** — tighten sentences, cut fluff, verify the structure fits the format. Read it back as if you're the audience.

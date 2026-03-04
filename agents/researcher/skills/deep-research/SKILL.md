@@ -1,6 +1,10 @@
 ---
 name: deep-research
 description: "Conduct structured research across web sources, local filesystems, and documentation. Use this skill when the user asks to research a topic, find information, look something up, investigate, or needs factual data gathered from multiple sources."
+context: fork
+agent: Explore
+argument-hint: "[topic]"
+allowed-tools: Read, Grep, Glob, WebFetch, WebSearch, mcp__exa__web_search_exa, mcp__exa__get_code_context_exa
 ---
 
 ## What This Skill Does
@@ -11,9 +15,11 @@ Runs a structured research workflow that combines web search (via Exa MCP), file
 
 ### Phase 1: Scope
 
+Research topic: $ARGUMENTS
+
 Before searching anything, clarify the research question:
 
-1. Identify the core question from the user's request.
+1. Identify the core question from the topic above (or the user's most recent message if no topic was provided).
 2. Break it into 2-4 sub-questions that, answered together, would fully address the request.
 3. Determine which source types are relevant:
    - **Web** — for external information, current data, public documentation

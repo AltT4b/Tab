@@ -10,17 +10,19 @@ Tab is a Claude Code plugin that implements a personal AI assistant entirely in 
 
 ```
 Tab/
-├── .claude-plugin/plugin.json       # Plugin manifest (entry point)
+├── .claude-plugin/
+│   ├── plugin.json                  # Plugin manifest (entry point)
+│   └── .mcp.json                    # Bundled MCP servers (Exa web search)
 ├── agents/
 │   ├── base/
 │   │   ├── AGENT.md                 # Tab's core persona (always loaded)
 │   │   └── skills/
-│   │       ├── draw-dino/SKILL.md   # Agent-local skill
+│   │       ├── draw-dino/SKILL.md   # Agent-local skill (model: haiku)
 │   │       └── writing/SKILL.md     # General-purpose writing skill
 │   └── researcher/                  # Research-focused variant
 │       ├── AGENT.md                 # Additions-only (extends base)
 │       └── skills/
-│           └── deep-research/SKILL.md
+│           └── deep-research/SKILL.md  # Forked context, Explore agent
 └── skills/
     └── summon-tab/SKILL.md          # Shared skill: agent dispatcher
 ```
@@ -37,10 +39,31 @@ Tab/
 
 The `summon-tab` shared skill triggers on phrases like "Hey Tab", "@Tab", etc. It scans `agents/` to discover available agents, always loads `agents/base/AGENT.md`, and optionally layers on a variant agent matched by conversation context. Claude then adopts the merged persona for the rest of the conversation.
 
+## Skill Frontmatter
+
+Skills use these optional frontmatter fields beyond `name` and `description`:
+
+| Field | Purpose | Example |
+|-------|---------|---------|
+| `context: fork` | Run skill in isolated subagent (no conversation history) | deep-research |
+| `agent` | Subagent type when `context: fork` is set (`Explore`, `Plan`, etc.) | deep-research uses `Explore` |
+| `model` | Override model (`haiku`, `sonnet`, `opus`, `inherit`) | draw-dino uses `haiku` |
+| `argument-hint` | Autocomplete hint shown in `/` menu | `"[topic]"`, `"[format] [topic]"` |
+| `allowed-tools` | Restrict available tools (comma-separated) | deep-research: read-only + web |
+| `$ARGUMENTS` | In skill body, replaced with user's slash command arguments | `/deep-research quantum computing` |
+
+## Bundled MCP
+
+Tab bundles Exa web search via `.claude-plugin/.mcp.json` using Exa's free hosted endpoint (`https://mcp.exa.ai/mcp`). No API key required — free tier with rate limiting. Starts automatically when the plugin is enabled.
+
 ## Conventions
 
 - **Naming**: lowercase, hyphenated for all component directories (e.g., `draw-dino`, `summon-tab`)
-- **Frontmatter**: all AGENT.md and SKILL.md files use YAML frontmatter with at minimum `name` and `description`
+- **Frontmatter**: all AGENT.md and SKILL.md files use YAML frontmatter with at minimum `name`, `description`, `arguement-hint`
 - **Skill triggers**: the `description` frontmatter field in SKILL.md doubles as the trigger condition
 - **Variant agents**: variant AGENT.md files declare `extends: agents/base/AGENT.md` in frontmatter and use only "Additional X" sections (additive, never replace)
 - **Git commits**: conventional commit prefixes (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`)
+
+## Upgrade Plan
+
+Active implementation plan lives at `.tab/upgrades-for-tab/p3-p7-implementation-plan.md`. Phases 1-2 (frontmatter upgrades + bundled MCP) are complete. Phases 3-5 (variant agents, hooks, auto-activation) are pending.
