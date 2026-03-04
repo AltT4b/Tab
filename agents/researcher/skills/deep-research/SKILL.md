@@ -2,9 +2,8 @@
 name: deep-research
 description: "Conduct structured research across web sources, local filesystems, and documentation. Use this skill when the user asks to research a topic, find information, look something up, investigate, or needs factual data gathered from multiple sources."
 context: fork
-agent: Explore
 argument-hint: "[topic]"
-allowed-tools: Read, Grep, Glob, WebFetch, WebSearch, mcp__exa__web_search_exa, mcp__exa__get_code_context_exa
+allowed-tools: Read, Grep, Glob, WebFetch, WebSearch, mcp__claude_ai_Exa_Web_Search__create_webset, mcp__claude_ai_Exa_Web_Search__list_websets, mcp__claude_ai_Exa_Web_Search__get_webset, mcp__claude_ai_Exa_Web_Search__list_webset_items, mcp__claude_ai_Exa_Web_Search__get_item, mcp__claude_ai_Exa_Web_Search__create_search, mcp__claude_ai_Exa_Web_Search__get_search
 ---
 
 ## What This Skill Does
