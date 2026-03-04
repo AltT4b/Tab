@@ -1,6 +1,7 @@
 ---
 name: summon-tab
 description: Summon the Tab agent. Use this skill whenever the user wants to talk to Tab, summon Tab, invoke Tab, run the Tab agent, or delegate work to the base agent. Also trigger when the user says "Hey Tab", "Tab,", "I need Tab", "Ask Tab", or refers to the Tab agent in any way. Only trigger this skill if the user is asking for Tab as if it were its name.
+argument-hint: "[message]"
 ---
 
 ## What This Skill Does
@@ -12,7 +13,7 @@ Activates the Tab agent by loading the base persona and optionally layering on a
 Scan `agents/*/AGENT.md` to build a list of available agents.
 
 - `agents/base/AGENT.md` is the **base agent** — always loaded.
-- Any other `agents/<name>/AGENT.md` with `extends: base` in its frontmatter is a **variant agent**.
+- Any other `agents/<name>/AGENT.md` with `extends: agents/base/AGENT.md` in its frontmatter is a **variant agent**.
 
 If only `base/` exists, skip to Step 3.
 

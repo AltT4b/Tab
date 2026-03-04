@@ -52,14 +52,14 @@ Skills use these optional frontmatter fields beyond `name` and `description`:
 | `allowed-tools` | Restrict available tools (comma-separated) | deep-research: read-only + web |
 | `$ARGUMENTS` | In skill body, replaced with user's slash command arguments | `/deep-research quantum computing` |
 
-## Bundled MCP
+## MCP Servers
 
-Tab bundles Exa web search via `.claude-plugin/.mcp.json` using Exa's free hosted endpoint (`https://mcp.exa.ai/mcp`). No API key required — free tier with rate limiting. Starts automatically when the plugin is enabled.
+Exa web search is bundled with the plugin via `.claude-plugin/.mcp.json`, using Exa's hosted MCP endpoint (`https://mcp.exa.ai/mcp`). Claude Code automatically discovers `.mcp.json` inside plugin directories, so the MCP server is available in any project where Tab is installed — no per-repo configuration needed. Requires the `EXA_API_KEY` environment variable to be set.
 
 ## Conventions
 
 - **Naming**: lowercase, hyphenated for all component directories (e.g., `draw-dino`, `summon-tab`)
-- **Frontmatter**: all AGENT.md and SKILL.md files use YAML frontmatter with at minimum `name`, `description`, `arguement-hint`
+- **Frontmatter**: all SKILL.md files use YAML frontmatter with at minimum `name`, `description`, `argument-hint`. AGENT.md files use `name` and `description` at minimum.
 - **Skill triggers**: the `description` frontmatter field in SKILL.md doubles as the trigger condition
 - **Variant agents**: variant AGENT.md files declare `extends: agents/base/AGENT.md` in frontmatter and use only "Additional X" sections (additive, never replace)
 - **Git commits**: conventional commit prefixes (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`)
