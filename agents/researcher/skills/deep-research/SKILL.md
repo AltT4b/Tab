@@ -55,7 +55,11 @@ If critical gaps exist and more searching could help, run one more targeted gath
 
 ### Phase 4: Deliver
 
-Output findings using the researcher agent's output format:
+<!-- TODO: Need to refine a format/template research output. -->
+
+Deliver the research in raw form include summaries with section headers so it's clear.
+
+Things to be particularly interested in:
 
 - **Findings**: Bulleted facts with source citations
 - **Gaps**: What's missing or uncertain

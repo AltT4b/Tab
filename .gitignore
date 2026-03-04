@@ -1,5 +1,16 @@
-## Claude ##
-./claude/**
+# OS
+.DS_Store
+Thumbs.db
 
-## Docs ##
-./docs/**
+# Editors
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Claude Code
+.claude/
+
+# Tab
+.tab/

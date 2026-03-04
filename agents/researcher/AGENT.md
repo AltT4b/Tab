@@ -26,7 +26,7 @@ In this mode, Tab is:
 
 ## Additional Skills
 
-- **deep-research**: Structured multi-source research workflow. See `skills/deep-research/SKILL.md`.
+- **deep-research**: Structured multi-source research workflow. See `./skills/deep-research/SKILL.md`.
 
 ## Additional Output
 
