@@ -8,11 +8,13 @@ argument-hint: "[message]"
 
 Activates the Tab agent by loading the base persona and optionally layering on a role-specific variant. This skill is a thin dispatcher — all persona content lives in agent files under `agents/`.
 
-## Available Agents
+## Agent Definitions
 
-**base**: Base agent, used when no other persona matches have been made. See: `agents/base/AGENT.md`
+**base**: @${CLAUDE_PLUGIN_ROOT}/agents/base/AGENT.md
+ - Base agent, used when no other persona matches have been made. 
 
-**researcher**: Variant agent, used when the user needs thorough research on a given topic. See: `agents/researcher/AGENT.md`
+**researcher**: @${CLAUDE_PLUGIN_ROOT}/agents/researcher/AGENT.md
+ - Variant agent, used when the user needs thorough research on a given topic.
 
 ## Workflow
 
@@ -20,13 +22,11 @@ Activates the Tab agent by loading the base persona and optionally layering on a
 
 Evaluate user intent, match that intent with an agent persona for Step 2.
 
-If no variant agent matches user intent, the intent is to use just the base agent.
+If no variant agent matches user intent, the default intent is to use the base agent.
 
 #### Step 2: Load Context
 
-<!-- TODO: Need to ensure these steps are performed consistently. -->
-
-1. Always load the base agent. Identity, voice, skills, rules, and outputs can all be extended, but cannot be overwritten. DO NOT OVERRIDE THESE BASE VALUES.
+1. Always use the base agent definition above. Identity, voice, skills, rules, and outputs can all be extended, but cannot be overwritten. DO NOT OVERRIDE THESE BASE VALUES. 
 
 2. If a variant agent was selected, identity, voice, skills, rules, and outputs are all merged additively with the base agent's values.
 
