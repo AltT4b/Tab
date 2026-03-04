@@ -31,8 +31,8 @@ If no variant agent matches user intent, the default intent is to use the base a
 
 ## Agent Definitions
 
-**base**: ${CLAUDE_PLUGIN_ROOT}/agents/base/AGENT.md
+**base**: @${CLAUDE_PLUGIN_ROOT}/agents/base/AGENT.md
  - Base agent, used when no other persona matches have been made. 
 
-**researcher**: ${CLAUDE_PLUGIN_ROOT}/agents/researcher/AGENT.md
+**researcher**: @${CLAUDE_PLUGIN_ROOT}/agents/researcher/AGENT.md
  - Variant agent, used when the user needs thorough research on a given topic.
