@@ -17,12 +17,12 @@ Tab/
 │   ├── base/
 │   │   ├── AGENT.md                 # Tab's core persona (always loaded)
 │   │   └── skills/
-│   │       ├── draw-dino/SKILL.md   # Agent-local skill (model: haiku)
+│   │       ├── draw-dino/SKILL.md   # ASCII art dinosaur skill
 │   │       └── writing/SKILL.md     # General-purpose writing skill
 │   └── researcher/                  # Research-focused variant
 │       ├── AGENT.md                 # Additions-only (extends base)
 │       └── skills/
-│           └── deep-research/SKILL.md  # Forked context, Explore agent
+│           └── deep-research/SKILL.md  # Structured research skill
 └── skills/
     └── summon-tab/SKILL.md          # Shared skill: agent dispatcher
 ```
@@ -45,11 +45,7 @@ Skills use these optional frontmatter fields beyond `name` and `description`:
 
 | Field | Purpose | Example |
 |-------|---------|---------|
-| `context: fork` | Run skill in isolated subagent (no conversation history) | deep-research |
-| `agent` | Subagent type when `context: fork` is set (`Explore`, `Plan`, etc.) | deep-research uses `Explore` |
-| `model` | Override model (`haiku`, `sonnet`, `opus`, `inherit`) | draw-dino uses `haiku` |
 | `argument-hint` | Autocomplete hint shown in `/` menu | `"[topic]"`, `"[format] [topic]"` |
-| `allowed-tools` | Restrict available tools (comma-separated) | deep-research: read-only + web |
 | `$ARGUMENTS` | In skill body, replaced with user's slash command arguments | `/deep-research quantum computing` |
 
 ## MCP Servers
@@ -59,7 +55,7 @@ Exa web search is bundled with the plugin via `.claude-plugin/.mcp.json`, using 
 ## Conventions
 
 - **Naming**: lowercase, hyphenated for all component directories (e.g., `draw-dino`, `summon-tab`)
-- **Frontmatter**: all SKILL.md files use YAML frontmatter with at minimum `name`, `description`, `argument-hint`. AGENT.md files use `name` and `description` at minimum.
+- **Frontmatter**: SKILL.md files use YAML frontmatter with `name`, `description`, and optionally `argument-hint`. AGENT.md files use `name` and `description` at minimum.
 - **Skill triggers**: the `description` frontmatter field in SKILL.md doubles as the trigger condition
 - **Variant agents**: variant AGENT.md files declare `extends: agents/base/AGENT.md` in frontmatter and use only "Additional X" sections (additive, never replace)
 - **Git commits**: conventional commit prefixes (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`)
