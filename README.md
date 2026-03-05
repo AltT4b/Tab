@@ -9,14 +9,15 @@ Tab is a toolkit of AI capabilities — skills, agents, and rules — that exten
 ```
 Tab/
 ├── .claude-plugin/
-│   ├── plugin.json              # Plugin manifest
-│   └── .mcp.json                # Bundled MCP servers (Exa web search)
+│   └── plugin.json              # Plugin manifest
 ├── agents/
 │   ├── base/
 │   │   ├── AGENT.md             # Core persona (always loaded)
 │   │   └── skills/
 │   │       ├── draw-dino/       # ASCII art dinosaur skill
 │   │       └── writing/         # General-purpose writing skill
+│   ├── advisor/
+│   │   └── AGENT.md             # Advisory/critique variant (extends base)
 │   └── researcher/
 │       ├── AGENT.md             # Research variant (extends base)
 │       └── skills/

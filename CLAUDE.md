@@ -11,14 +11,15 @@ Tab is a Claude Code plugin that implements a personal AI assistant entirely in 
 ```
 Tab/
 ├── .claude-plugin/
-│   ├── plugin.json                  # Plugin manifest (entry point)
-│   └── .mcp.json                    # Bundled MCP servers (Exa web search)
+│   └── plugin.json                  # Plugin manifest (entry point)
 ├── agents/
 │   ├── base/
 │   │   ├── AGENT.md                 # Tab's core persona (always loaded)
 │   │   └── skills/
 │   │       ├── draw-dino/SKILL.md   # ASCII art dinosaur skill
 │   │       └── writing/SKILL.md     # General-purpose writing skill
+│   ├── advisor/                     # Advisory/critique variant
+│   │   └── AGENT.md                 # Additions-only (extends base)
 │   └── researcher/                  # Research-focused variant
 │       ├── AGENT.md                 # Additions-only (extends base)
 │       └── skills/
@@ -50,7 +51,7 @@ Skills use these optional frontmatter fields beyond `name` and `description`:
 
 ## MCP Servers
 
-Exa web search is bundled with the plugin via `.claude-plugin/.mcp.json`, using Exa's hosted MCP endpoint (`https://mcp.exa.ai/mcp`). Claude Code automatically discovers `.mcp.json` inside plugin directories, so the MCP server is available in any project where Tab is installed — no per-repo configuration needed. Requires the `EXA_API_KEY` environment variable to be set.
+No MCP servers are currently bundled. The researcher variant's deep-research skill can use any MCP search tools available in the user's environment (e.g., Exa), but none are shipped with the plugin.
 
 ## Conventions
 
@@ -62,4 +63,4 @@ Exa web search is bundled with the plugin via `.claude-plugin/.mcp.json`, using 
 
 ## Upgrade Plan
 
-Active implementation plan lives at `.tab/upgrades-for-tab/p3-p7-implementation-plan.md`. Phases 1-2 (frontmatter upgrades + bundled MCP) are complete. Phases 3-5 (variant agents, hooks, auto-activation) are pending.
+Active implementation plan lives at `.tab/upgrades-for-tab/p3-p7-implementation-plan.md`. Phases 3-5 (variant agents, hooks, auto-activation) are pending.

@@ -58,14 +58,22 @@ If critical gaps exist and more searching could help, run one more targeted gath
 
 ### Phase 4: Deliver
 
-<!-- TODO: Need to refine a format/template research output. -->
+Structure the output as follows:
 
-Deliver the research in raw form include summaries with section headers so it's clear.
+### Findings
 
-Things to be particularly interested in:
+Organize by sub-question or theme. For each section:
+- Use a descriptive header
+- Bulleted facts, each with a source citation (URL, file path, or document reference)
+- Add brief context for why each finding matters to the research topic
 
-- **Findings**: Bulleted facts with source citations
-- **Gaps**: What's missing or uncertain
-- **Confidence**: Overall assessment (High/Medium/Low)
+### Conflicts & Gaps
+
+- Note where sources disagree and which source is more credible
+- List sub-questions that remain unanswered or partially answered
+
+### Confidence
+
+Rate overall confidence: **High** / **Medium** / **Low**, with a one-line justification.
 
 Keep it tight. The user asked for facts, not a narrative.
