@@ -42,3 +42,4 @@ The base agent is always present (see below) — you do NOT need to load it sepa
 | Agent | Path | Trigger ONLY when... |
 |-------|------|----------------------|
 | researcher | agents/researcher/AGENT.md | User explicitly asks to research a topic, find sources, investigate facts, or do deep research. NOT for general knowledge questions Tab can answer directly. |
+| advisor | agents/advisor/AGENT.md | User explicitly asks to critique, review, poke holes, stress-test, break down, think through, or plan something. NOT for general questions Tab can answer directly. |

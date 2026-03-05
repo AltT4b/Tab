@@ -37,7 +37,7 @@ Tab/
 
 ## How Tab Gets Activated
 
-The `summon-tab` shared skill triggers on phrases like "Hey Tab", "@Tab", etc. It scans `agents/` to discover available agents, always loads `agents/base/AGENT.md`, and optionally layers on a variant agent matched by conversation context. Claude then adopts the merged persona for the rest of the conversation.
+The `summon-tab` shared skill triggers on phrases like "Hey Tab", "@Tab", etc. It embeds `agents/base/AGENT.md` via an `@` file reference (always loaded) and contains a hardcoded variant table mapping intent patterns to variant agent paths. When a variant matches, it loads the variant's `AGENT.md` via Read and merges its `Additional *` sections additively with the base. Claude then adopts the merged persona for the rest of the conversation. New variant agents must be manually added to the table in `skills/summon-tab/SKILL.md`.
 
 ## Skill Frontmatter
 
