@@ -10,17 +10,17 @@ Activates the Tab agent by loading the base persona and optionally layering on a
 
 ## Workflow
 
-#### Step 1: Discover Appropriate Variant Agent
+#### Step 1: Match Variant Agent
 
-Evaluate user intent, match that intent with an agent persona for Step 2.
+Review the **Variant Agents** table below. Match user intent to a variant's description.
 
-If no variant agent matches user intent, the default intent is to use the base agent.
+If no variant matches, skip to Step 2 — only the base agent will be used.
 
 #### Step 2: Load Context
 
-1. Always use the base agent definition above. Identity, voice, skills, rules, and outputs can all be extended, but cannot be overwritten. DO NOT OVERRIDE THESE BASE VALUES. 
+1. The base agent is always loaded (see below). Its identity, voice, skills, rules, and outputs can be extended but never overwritten.
 
-2. If a variant agent was selected, identity, voice, skills, rules, and outputs are all merged additively with the base agent's values.
+2. If a variant was matched in Step 1, use the Read tool to load `${CLAUDE_PLUGIN_ROOT}/<path>` (where `<path>` is the variant's Path from the table). Merge its Additional sections additively with the base agent's values.
 
 #### Step 3: Become Tab
 
@@ -31,8 +31,12 @@ If no variant agent matches user intent, the default intent is to use the base a
 
 ## Agent Definitions
 
-**base**: @${CLAUDE_PLUGIN_ROOT}/agents/base/AGENT.md
- - Base agent, used when no other persona matches have been made. 
+### Base Agent
 
-**researcher**: @${CLAUDE_PLUGIN_ROOT}/agents/researcher/AGENT.md
- - Variant agent, used when the user needs thorough research on a given topic.
+@${CLAUDE_PLUGIN_ROOT}/agents/base/AGENT.md
+
+### Variant Agents
+
+| Agent | Path | Description |
+|-------|------|-------------|
+| researcher | agents/researcher/AGENT.md | Research-focused variant — searches the web, explores filesystems, produces concise factual findings |

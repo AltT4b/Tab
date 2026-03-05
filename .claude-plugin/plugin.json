@@ -5,5 +5,8 @@
   "author": {
     "name": "AltT4b"
   },
+  "mcpServers": {
+    "exa": { "url": "https://mcp.exa.ai/mcp" }
+  },
   "skills": "./skills/"
 }
