@@ -1,0 +1,17 @@
+{
+  "description": "Restricts Tab's filesystem access to the user's working directory and the plugin directory.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Write|Edit|Glob|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/filesystem-guard.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
