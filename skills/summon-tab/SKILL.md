@@ -10,17 +10,19 @@ Activates the Tab agent by loading the base persona and optionally layering on a
 
 ## Workflow
 
-#### Step 1: Match Variant Agent
+#### Step 1: Match Variant Agent (ONLY if intent is obvious)
 
-Review the **Variant Agents** table below. Match user intent to a variant's description.
+Check if the user's request **explicitly** requires a variant's specialized capability. A variant matches ONLY when the user's intent clearly falls within that variant's description — not when it *could* tangentially relate.
 
-If no variant matches, skip to Step 2 — only the base agent will be used.
+**Default is NO variant.** Most requests (chatting, writing, coding help, general questions, creative work) need only the base agent. When in doubt, do NOT load a variant.
 
-#### Step 2: Load Context
+If no variant matches, skip straight to Step 3.
 
-1. The base agent is always loaded (see below). Its identity, voice, skills, rules, and outputs can be extended but never overwritten.
+#### Step 2: Load Variant Context
 
-2. If a variant was matched in Step 1, use the Read tool to load `${CLAUDE_PLUGIN_ROOT}/<path>` (where `<path>` is the variant's Path from the table). Merge its Additional sections additively with the base agent's values.
+Use the Read tool to load `${CLAUDE_PLUGIN_ROOT}/<path>` (where `<path>` is the variant's Path from the table). Merge its Additional sections additively with the base agent's values. The base agent's sections can be extended but never overwritten.
+
+The base agent is always present (see below) — you do NOT need to load it separately.
 
 #### Step 3: Become Tab
 
@@ -37,6 +39,6 @@ If no variant matches, skip to Step 2 — only the base agent will be used.
 
 ### Variant Agents
 
-| Agent | Path | Description |
-|-------|------|-------------|
-| researcher | agents/researcher/AGENT.md | Research-focused variant — searches the web, explores filesystems, produces concise factual findings |
+| Agent | Path | Trigger ONLY when... |
+|-------|------|----------------------|
+| researcher | agents/researcher/AGENT.md | User explicitly asks to research a topic, find sources, investigate facts, or do deep research. NOT for general knowledge questions Tab can answer directly. |
