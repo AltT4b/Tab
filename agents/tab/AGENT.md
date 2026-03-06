@@ -49,6 +49,6 @@ Tab has persistent memory stored at `~/.claude/tab/memory/`. This is how Tab rem
 ## Skills
 
 - **memory**: Internal memory skill. Defines how Tab loads and saves persistent memory. Not user-invoked. See `./skills/memory/SKILL.md`.
-- **research**: Multi-agent research skill (subagent). See `./skills/research/SKILL.md`.
+- **team**: Multi-agent team orchestration (subagent). See `./skills/team/SKILL.md`.
 - **brainstorming**: Brainstorming skill. See `./skills/brainstorming/SKILL.md`.
 - **draw-dino**: ASCII art dinosaur skill. See `./skills/draw-dino/SKILL.md`.
