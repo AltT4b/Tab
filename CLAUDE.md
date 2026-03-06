@@ -13,17 +13,14 @@ Tab/
 ├── .claude-plugin/
 │   └── plugin.json                  # Plugin manifest (entry point)
 ├── agents/
-│   ├── base/
-│   │   ├── AGENT.md                 # Tab's core persona (always loaded)
-│   │   └── skills/
-│   │       ├── draw-dino/SKILL.md   # ASCII art dinosaur skill
-│   │       └── writing/SKILL.md     # General-purpose writing skill
-│   ├── advisor/                     # Advisor sub-agent (capability spec)
-│   │   └── AGENT.md                 # Critique & structure capability spec
-│   └── researcher/                  # Researcher sub-agent (capability spec)
-│       ├── AGENT.md                 # Research capability spec
+│   └── tab/
+│       ├── AGENT.md                 # Tab's persona (always loaded)
 │       └── skills/
-│           └── deep-research/SKILL.md  # Structured research skill
+│           ├── advise/SKILL.md      # Critique & structure (subagent)
+│           ├── deep-research/SKILL.md  # Structured deep research (subagent)
+│           ├── draw-dino/SKILL.md   # ASCII art dinosaur skill
+│           ├── research/SKILL.md    # Quick research (subagent)
+│           └── writing/SKILL.md     # General-purpose writing skill
 └── skills/
     └── summon-tab/SKILL.md          # Shared skill: activates Tab
 ```
@@ -32,13 +29,13 @@ Tab/
 
 **Plugin manifest** (`.claude-plugin/plugin.json`): Declares the plugin name, version, and the `skills` path (`./skills/`) that registers shared skills with Claude Code.
 
-**Agents** (`agents/<name>/AGENT.md`): The base agent (`agents/base/`) defines Tab's core persona using `## Base *` sections. Sub-agents (`agents/advisor/`, `agents/researcher/`) are capability specs with `## Capability`, `## Behavior`, and `## Output` sections — no personality, no identity. Tab dispatches sub-agents internally via the Agent tool; the user never interacts with them directly.
+**Agent** (`agents/tab/AGENT.md`): Tab is the only agent. His persona defines identity, voice, rules, and a skills registry. Tab is conversational; everything else is his toolbox.
 
-**Skills** (`skills/<name>/SKILL.md` or `agents/<name>/skills/<name>/SKILL.md`): Instruction sets with YAML frontmatter whose `description` field doubles as the invocation trigger. Shared skills live under the top-level `skills/` directory and are registered via the plugin manifest. Agent-local skills live under an agent's `skills/` directory and are scoped to that agent.
+**Skills** (`skills/<name>/SKILL.md` or `agents/tab/skills/<name>/SKILL.md`): Instruction sets with YAML frontmatter whose `description` field doubles as the invocation trigger. Shared skills live under the top-level `skills/` directory and are registered via the plugin manifest. Tab-local skills live under `agents/tab/skills/`. Some skills are marked as subagent skills — Tab dispatches these via the Agent tool for independent execution, then synthesizes their results in his own voice.
 
 ## How Tab Gets Activated
 
-The `summon-tab` shared skill triggers on phrases like "Hey Tab", "@Tab", etc. It embeds `agents/base/AGENT.md` via an `@` file reference. Claude adopts Tab's persona for the rest of the conversation. Tab's base AGENT.md includes a `## Sub-Agents` registry listing available sub-agents and their capabilities. Tab autonomously decides when to dispatch sub-agents via the Agent tool and synthesizes their results in his own voice.
+The `summon-tab` shared skill triggers on phrases like "Hey Tab", "@Tab", etc. It embeds `agents/tab/AGENT.md` via an `@` file reference. Claude adopts Tab's persona for the rest of the conversation. Tab's AGENT.md includes a skills registry. Some skills are subagent skills — Tab autonomously decides when to dispatch them via the Agent tool and synthesizes their results in his own voice.
 
 ## Skill Frontmatter
 
@@ -51,13 +48,13 @@ Skills use these optional frontmatter fields beyond `name` and `description`:
 
 ## MCP Servers
 
-No MCP servers are currently bundled. The researcher sub-agent's deep-research skill can use any MCP search tools available in the user's environment (e.g., Exa), but none are shipped with the plugin.
+No MCP servers are currently bundled. The deep-research skill can use any MCP search tools available in the user's environment (e.g., Exa), but none are shipped with the plugin.
 
 ## Conventions
 
 - **Naming**: lowercase, hyphenated for all component directories (e.g., `draw-dino`, `summon-tab`)
 - **Frontmatter**: SKILL.md files use YAML frontmatter with `name`, `description`, and optionally `argument-hint`. AGENT.md files use `name` and `description` at minimum.
 - **Skill triggers**: the `description` frontmatter field in SKILL.md doubles as the trigger condition
-- **Sub-agents**: sub-agent AGENT.md files use `## Capability`, `## Behavior`, `## Output` sections. No `extends:` field, no personality.
+- **Subagent skills**: some skills include prose indicating they should run as a subagent via the Agent tool. This is a convention, not a frontmatter field.
 - **Git commits**: conventional commit prefixes (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`)
 

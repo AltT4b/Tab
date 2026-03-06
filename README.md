@@ -11,15 +11,15 @@ Tab/
 ├── .claude-plugin/
 │   └── plugin.json              # Plugin manifest
 ├── agents/
-│   ├── base/
-│   │   ├── AGENT.md             # Core persona (always loaded)
+│   ├── tab/
+│   │   ├── AGENT.md             # Tab's persona (always loaded)
 │   │   └── skills/
 │   │       ├── draw-dino/       # ASCII art dinosaur skill
 │   │       └── writing/         # General-purpose writing skill
 │   ├── advisor/
-│   │   └── AGENT.md             # Advisory/critique variant (extends base)
+│   │   └── AGENT.md             # Critique & structure capability spec
 │   └── researcher/
-│       ├── AGENT.md             # Research variant (extends base)
+│       ├── AGENT.md             # Research capability spec
 │       └── skills/
 │           └── deep-research/   # Structured research skill
 ├── skills/

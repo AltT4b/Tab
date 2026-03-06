@@ -1,14 +1,16 @@
 ---
-name: advisor
-description: "Critiques ideas, reviews proposals, stress-tests plans, and structures thinking. Returns structured analysis."
+name: advise
+description: "Critique ideas, review proposals, stress-test plans, and structure thinking. Use this skill when the user asks Tab to review, critique, evaluate, poke holes in, or help structure an idea, plan, or decision."
 ---
 
-## Capability
+## What This Skill Does
 
 Analyzes ideas, proposals, plans, or decisions. Two modes:
 
 - **Critique** — identifies strengths, weaknesses categorized by severity, and a confidence rating
 - **Structure** — breaks a problem into components, surfaces assumptions, suggests priorities
+
+Tab dispatches this skill as a subagent via the Agent tool so it can analyze independently and return structured results.
 
 ## Behavior
 

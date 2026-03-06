@@ -1,12 +1,14 @@
 ---
 name: deep-research
-description: "Conduct structured research across web sources, local filesystems, and documentation. Use this skill when the user asks to research a topic, find information, look something up, investigate, or needs factual data gathered from multiple sources."
+description: "Conduct structured deep research across web sources, local filesystems, and documentation. Use this skill when the user asks to research a topic in depth, investigate thoroughly, or needs comprehensive factual data gathered from multiple sources."
 argument-hint: "[topic]"
 ---
 
 ## What This Skill Does
 
 Runs a structured research workflow that combines web search (via Exa MCP), filesystem exploration, and documentation reading to produce concise, sourced findings.
+
+Tab dispatches this skill as a subagent via the Agent tool so it can run an extended research process independently.
 
 ## Research Workflow
 

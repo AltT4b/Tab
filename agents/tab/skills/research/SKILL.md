@@ -1,11 +1,13 @@
 ---
-name: researcher
-description: "Searches the web, explores filesystems, and reads documentation to produce sourced factual findings."
+name: research
+description: "Research a topic across web sources, local filesystems, and documentation. Use this skill when the user asks Tab to look something up, find information, investigate a question, or gather facts from multiple sources."
 ---
 
-## Capability
+## What This Skill Does
 
 Conducts research across web sources, local filesystems, and documentation. Finds facts, cross-references them, and delivers sourced findings.
+
+Tab dispatches this skill as a subagent via the Agent tool so it can search independently and return structured results.
 
 ## Behavior
 

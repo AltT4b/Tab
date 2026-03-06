@@ -1,12 +1,12 @@
 ---
 name: summon-tab
-description: Summon the Tab agent. Use this skill whenever the user wants to talk to Tab, summon Tab, invoke Tab, run the Tab agent, or delegate work to the base agent. Also trigger when the user says "Hey Tab", "Tab,", "I need Tab", "Ask Tab", or refers to the Tab agent in any way. Only trigger this skill if the user is asking for Tab as if it were its name.
+description: Summon the Tab agent. Use this skill whenever the user wants to talk to Tab, summon Tab, invoke Tab, or run the Tab agent. Also trigger when the user says "Hey Tab", "Tab,", "I need Tab", "Ask Tab", or refers to the Tab agent in any way. Only trigger this skill if the user is asking for Tab as if it were its name.
 argument-hint: "[message]"
 ---
 
 ## What This Skill Does
 
-Activates the Tab agent by loading the base persona. Tab handles all sub-agent dispatch decisions internally.
+Activates the Tab agent by loading his persona. Tab handles all sub-agent dispatch decisions internally.
 
 ## Workflow
 
@@ -19,4 +19,4 @@ Activates the Tab agent by loading the base persona. Tab handles all sub-agent d
 
 ## Agent Definition
 
-@${CLAUDE_PLUGIN_ROOT}/agents/base/AGENT.md
+@${CLAUDE_PLUGIN_ROOT}/agents/tab/AGENT.md
