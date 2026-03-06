@@ -18,27 +18,27 @@ Tab/
 │   │   └── skills/
 │   │       ├── draw-dino/SKILL.md   # ASCII art dinosaur skill
 │   │       └── writing/SKILL.md     # General-purpose writing skill
-│   ├── advisor/                     # Advisory/critique variant
-│   │   └── AGENT.md                 # Additions-only (extends base)
-│   └── researcher/                  # Research-focused variant
-│       ├── AGENT.md                 # Additions-only (extends base)
+│   ├── advisor/                     # Advisor sub-agent (capability spec)
+│   │   └── AGENT.md                 # Critique & structure capability spec
+│   └── researcher/                  # Researcher sub-agent (capability spec)
+│       ├── AGENT.md                 # Research capability spec
 │       └── skills/
 │           └── deep-research/SKILL.md  # Structured research skill
 └── skills/
-    └── summon-tab/SKILL.md          # Shared skill: agent dispatcher
+    └── summon-tab/SKILL.md          # Shared skill: activates Tab
 ```
 
 ## Architecture
 
 **Plugin manifest** (`.claude-plugin/plugin.json`): Declares the plugin name, version, and the `skills` path (`./skills/`) that registers shared skills with Claude Code.
 
-**Agents** (`agents/<name>/AGENT.md`): Define an AI persona. The base agent (`agents/base/`) uses YAML frontmatter (`name`, `description`) and `## Base *` sections (`Base Identity`, `Base Rules`, `Base Skills`, `Base Output`). These sections define Tab's core persona and can be extended by variants but never overwritten. Variant agents declare `extends: agents/base/AGENT.md` in frontmatter and use `## Additional *` sections (`Additional Identity`, `Additional Rules`, `Additional Skills`, `Additional Output`) that append to the corresponding base sections.
+**Agents** (`agents/<name>/AGENT.md`): The base agent (`agents/base/`) defines Tab's core persona using `## Base *` sections. Sub-agents (`agents/advisor/`, `agents/researcher/`) are capability specs with `## Capability`, `## Behavior`, and `## Output` sections — no personality, no identity. Tab dispatches sub-agents internally via the Agent tool; the user never interacts with them directly.
 
 **Skills** (`skills/<name>/SKILL.md` or `agents/<name>/skills/<name>/SKILL.md`): Instruction sets with YAML frontmatter whose `description` field doubles as the invocation trigger. Shared skills live under the top-level `skills/` directory and are registered via the plugin manifest. Agent-local skills live under an agent's `skills/` directory and are scoped to that agent.
 
 ## How Tab Gets Activated
 
-The `summon-tab` shared skill triggers on phrases like "Hey Tab", "@Tab", etc. It embeds `agents/base/AGENT.md` via an `@` file reference (always loaded) and contains a hardcoded variant table mapping intent patterns to variant agent paths. When a variant matches, it loads the variant's `AGENT.md` via Read and merges its `Additional *` sections additively with the base. Claude then adopts the merged persona for the rest of the conversation. New variant agents must be manually added to the table in `skills/summon-tab/SKILL.md`.
+The `summon-tab` shared skill triggers on phrases like "Hey Tab", "@Tab", etc. It embeds `agents/base/AGENT.md` via an `@` file reference. Claude adopts Tab's persona for the rest of the conversation. Tab's base AGENT.md includes a `## Sub-Agents` registry listing available sub-agents and their capabilities. Tab autonomously decides when to dispatch sub-agents via the Agent tool and synthesizes their results in his own voice.
 
 ## Skill Frontmatter
 
@@ -51,16 +51,13 @@ Skills use these optional frontmatter fields beyond `name` and `description`:
 
 ## MCP Servers
 
-No MCP servers are currently bundled. The researcher variant's deep-research skill can use any MCP search tools available in the user's environment (e.g., Exa), but none are shipped with the plugin.
+No MCP servers are currently bundled. The researcher sub-agent's deep-research skill can use any MCP search tools available in the user's environment (e.g., Exa), but none are shipped with the plugin.
 
 ## Conventions
 
 - **Naming**: lowercase, hyphenated for all component directories (e.g., `draw-dino`, `summon-tab`)
 - **Frontmatter**: SKILL.md files use YAML frontmatter with `name`, `description`, and optionally `argument-hint`. AGENT.md files use `name` and `description` at minimum.
 - **Skill triggers**: the `description` frontmatter field in SKILL.md doubles as the trigger condition
-- **Variant agents**: variant AGENT.md files declare `extends: agents/base/AGENT.md` in frontmatter and use only "Additional X" sections (additive, never replace)
+- **Sub-agents**: sub-agent AGENT.md files use `## Capability`, `## Behavior`, `## Output` sections. No `extends:` field, no personality.
 - **Git commits**: conventional commit prefixes (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`)
 
-## Upgrade Plan
-
-Active implementation plan lives at `.tab/upgrades-for-tab/p3-p7-implementation-plan.md`. Phases 3-5 (variant agents, hooks, auto-activation) are pending.
