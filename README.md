@@ -14,7 +14,7 @@ Tab/
 │   └── tab/
 │       ├── AGENT.md             # Tab's persona (always loaded)
 │       └── skills/
-│           ├── brainstorming/   # Brainstorming skill
+│           ├── brainstorm/      # Brainstorming skill
 │           ├── draw-dino/       # ASCII art dinosaur skill
 │           ├── memory/          # Internal memory system
 │           └── team/            # Multi-agent team orchestration
