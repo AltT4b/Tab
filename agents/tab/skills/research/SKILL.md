@@ -16,7 +16,7 @@ This is a subagent skill — Tab dispatches researcher agents via the Agent tool
 
 > "I need Exa MCP to run research — it's not available in your environment right now. Check your MCP server config and try again."
 
-Do not fall back to WebSearch. Do not proceed without Exa.
+Do not proceed without Exa.
 
 ## Inputs
 
