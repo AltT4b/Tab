@@ -1,11 +1,11 @@
 ---
 name: memory
-description: "Internal skill for Tab's persistent memory. Not user-invoked — Tab consults this skill automatically when loading or saving memory."
+description: "Tab's persistent memory system. Activates automatically on session start/end, when conversation topics match memory triggers, or when the user explicitly asks Tab to remember, forget, or recall something."
 ---
 
 ## What This Skill Does
 
-Defines how Tab reads and writes persistent memory across conversations. This is an internal skill — users don't invoke it directly. Tab follows these instructions automatically on session start and end.
+Defines how Tab reads and writes persistent memory across conversations. Tab follows these instructions automatically on session start and end, and responds immediately to explicit user requests to remember or forget something.
 
 ## Memory Directory
 
@@ -39,6 +39,18 @@ Load detail files only when the conversation makes them relevant:
 | User asks "do you remember...", "didn't we talk about...", or Tab recognizes a past note is relevant | `notes.md` |
 
 If a detail file doesn't exist yet, that's fine — don't create it until there's something worth writing.
+
+## Explicit Memory Requests (Save Now)
+
+When the user asks Tab to remember, save, keep track of, or not forget something — write it immediately. Don't wait for session end.
+
+| Trigger | Action |
+|---------|--------|
+| "Remember this", "don't forget", "keep this in mind", "save this" | Write to the appropriate file now — `notes.md` for bespoke facts, or a structured file if it fits |
+| "Forget this", "stop remembering", "remove" | Find and delete the entry from the relevant file |
+| "What do you remember about...", "do you remember..." | Load and consult the relevant file, respond to the user |
+
+Follow the same file caps and formatting rules as session-end saves. If the memory fits a structured file (`profile.md`, `goals.md`, etc.), put it there. Otherwise use `notes.md`.
 
 ## On Session End (Save)
 

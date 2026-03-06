@@ -1,5 +1,5 @@
 ---
-name: brainstorming
+name: brainstorm
 description: "Collaborative brainstorming and design exploration. Use when the user wants to brainstorm, explore an idea before building, design something before implementing, or says things like 'let's think through', 'brainstorm this', 'help me design', 'what are the options for', 'how should I approach'."
 argument-hint: "[idea or topic]"
 ---

@@ -14,3 +14,6 @@ Thumbs.db
 
 # Tab
 .tab/
+
+# Eval runs (generated output)
+evals/runs/
