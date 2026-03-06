@@ -40,28 +40,61 @@ This skill is designed to keep context windows small:
 
 ## Role archetypes
 
-Archetypes are a starter library of reusable roles. Tab picks from these based on the question, or invents custom roles when needed.
+Archetypes are reusable role templates with predefined skills and instructions. Tab can use archetypes or invent custom roles at planning time. **No archetypes are predefined yet.** They should emerge from repeated use, not speculation.
 
-Each archetype has a hardcoded `skills` list — skill files whose instructions are injected into the agent's prompt. This makes agent behavior predictable and repeatable.
+### When to create an archetype
 
-| Archetype | Skills | Purpose |
-|-----------|--------|---------|
-| Researcher | `research` | Evidence gathering via Exa, iterative search, source evaluation, citations |
-| Devil's Advocate | *(none)* | Argues against the emerging consensus |
-| Technical Analyst | *(none)* | Evaluates architecture, feasibility, tradeoffs |
-| User Advocate | *(none)* | Considers UX, user needs, accessibility |
-| Strategist | *(none)* | Big-picture positioning, market, timing |
-| Critic | *(none)* | Reviews prior round output for weak reasoning |
+Codify a role as an archetype when:
 
-Skills attach to archetypes in the archetype definition. Tab cannot add or swap skills at runtime.
+- **Tab keeps reinventing it.** If the same role with the same skills and similar instructions shows up across multiple unrelated tasks, it's earned a spot. One-off or domain-specific roles should stay custom.
+- **The instructions are non-obvious.** "Argue against the consensus" is simple enough that Tab can invent it on the fly. "Search iteratively, evaluate source primacy, cross-reference claims, cite everything" is a methodology — that benefits from being written down once and reused.
+- **Getting it wrong has a cost.** If sloppy execution of the role degrades the whole team's output (e.g., a researcher returning uncited claims), the guardrails deserve codification.
 
-> **Decision: hardcoded skill binding (option A).** We chose fixed skill-to-archetype binding over flexible or required+optional models. This keeps agent behavior predictable and debuggable. If this becomes limiting, evolve to a required + optional model — but only when a concrete case demands it.
+Don't create an archetype when:
+
+- The role has only come up once
+- The instructions are just "be good at X" — Tab already knows how to brief an agent for that
+- You're guessing at what might be useful someday
+
+### What makes a good archetype
+
+An archetype definition has three parts:
+
+1. **Purpose** — one line. What this role does on a team.
+2. **Skills** — capabilities the role needs. Tab resolves these before dispatch.
+3. **Skill instructions** — the imperative instructions injected into the agent's brief. These should be concise (under 10 lines), specific, and actionable. If the instructions are getting long, the role is probably too broad — split it.
+
+The skill instructions are the soul of the archetype. They turn a generic agent into a specialist. They should answer: *what does this agent do differently from an agent that just got a one-line brief?*
+
+### Two kinds of skills
+
+The Skills field resolves to two distinct things depending on what it references:
+
+1. **Capabilities** (e.g., `web search`, `coding`) — Tab resolves these to **tools**. Checks the environment for available tools that satisfy the capability, passes them to the agent. The agent gets access to do things.
+
+2. **Standards** (e.g., `coding standards`) — Tab resolves these to **context**. Loads a skill file containing preferences, conventions, and guardrails, then injects those instructions into the agent brief. The agent gets informed about *how* to do things.
+
+Both flow through the same Skills field. Tab distinguishes them at resolution time. An archetype can require both — e.g., a Developer role might need `coding` (tools) and `coding standards` (context).
+
+> **Decision: skills as capabilities, not tools.** Archetypes declare *what* they need (e.g., `web search`), not *which tool* provides it. Tab checks the environment, resolves capabilities to available tools (Exa MCP, WebSearch, etc.), and passes them to the agent. This keeps archetypes portable — they work regardless of which specific MCP servers are configured. If no tool satisfies a required capability, Tab tells the user before dispatching.
+
+### Archetype registry
+
+*(Empty. Add archetypes here as they earn their place through repeated use.)*
 
 ## Constraints
 
 - **Rounds:** default 2, hard cap 4
 - **Agents per round:** max 5
-- **Exa MCP:** required for Researcher archetype (check before dispatching, warn if unavailable)
+- **Search tools:** Researcher archetype requires at least one search tool. Tab checks availability before dispatch.
+
+## Memory and subagents
+
+Memory is Tab's. Subagents never write to `~/.claude/tab/memory/` — Tab handles all memory updates during synthesis.
+
+Tab *does* use his memory to write better agent briefs. User background, preferences, active goals — this context flows through the briefing template, not through granting agents memory access.
+
+> **Future consideration: read-only memory access.** Some roles (e.g., Strategist on a personal goal, User Advocate on preferences) could benefit from reading memory files directly rather than relying on Tab to pre-digest context. If added, this would be a new capability keyword (e.g., `user context`) that Tab resolves by granting read access to specific memory files — never the whole directory. Build this when Tab's briefs are consistently missing context that agents need.
 
 ## Replaces
 

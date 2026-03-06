@@ -16,13 +16,14 @@ Tab/
 │   └── tab/
 │       ├── AGENT.md                 # Tab's persona (always loaded)
 │       └── skills/
-│           ├── advise/SKILL.md      # Critique & structure (subagent)
-│           ├── deep-research/SKILL.md  # Structured deep research (subagent)
-│           ├── draw-dino/SKILL.md   # ASCII art dinosaur skill
-│           ├── research/SKILL.md    # Quick research (subagent)
-│           └── writing/SKILL.md     # General-purpose writing skill
-└── skills/
-    └── summon-tab/SKILL.md          # Shared skill: activates Tab
+│           ├── brainstorming/SKILL.md  # Brainstorming skill
+│           ├── draw-dino/SKILL.md      # ASCII art dinosaur skill
+│           ├── memory/SKILL.md         # Internal memory system (not user-invoked)
+│           └── team/SKILL.md           # Multi-agent team orchestration (subagent)
+├── docs/
+│   └── plans/                       # Design documents
+├── skills/
+│   └── summon-tab/SKILL.md          # Shared skill: activates Tab
 ```
 
 ## Architecture
@@ -48,7 +49,7 @@ Skills use these optional frontmatter fields beyond `name` and `description`:
 
 ## MCP Servers
 
-No MCP servers are currently bundled. The deep-research skill can use any MCP search tools available in the user's environment (e.g., Exa), but none are shipped with the plugin.
+No MCP servers are bundled. The team skill can use search tools available in the user's environment (e.g., Exa MCP, WebSearch) — Tab checks what's available and passes tools to subagents at dispatch time. See the team skill's "How Skills works" section and `docs/plans/2026-03-05-team-skill-design.md` for the capability resolution model.
 
 ## Conventions
 

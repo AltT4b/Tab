@@ -14,25 +14,27 @@ Orchestrates multiple AI agents working together on a complex question. Tab deco
 
 Analyze the user's question. Propose a plan with:
 
-1. **Team roster** — 1-5 agents, each with a role name, archetype (or "custom"), and a one-line brief describing their angle
+1. **Team roster** — 1-5 agents, each with a role name, a one-line brief describing their angle, and optionally a Skills field
 2. **Round structure** — what each round investigates (default 2 rounds, max 4)
 
 Present the plan and wait for user approval. Adjust if they request changes.
 
-**Lightweight mode:** If the question is simple and fact-finding only (e.g., "research X"), plan a single round with Researcher agents. Still present the plan, but keep it brief.
+**Lightweight mode:** If the question is simple and fact-finding only (e.g., "research X"), plan a single round with research-focused roles. Still present the plan, but keep it brief.
 
 ### Phase 2: Execute
 
 After approval, run autonomously:
 
-1. **Create run directory.** Generate a short run ID (topic slug + date, e.g., `crispr-ethics-20260305`). Create `.tab/team/<run-id>/`.
+1. **Check available tools.** If any roles declare capabilities in their Skills field, check the environment for tools that satisfy them. If a required capability can't be resolved, tell the user — offer to adjust the plan or ask them to check their tool config.
 
-2. **For each round:**
+2. **Create run directory.** Generate a short run ID (topic slug + date, e.g., `crispr-ethics-20260305`). Create `.tab/team/<run-id>/`.
+
+3. **For each round:**
    a. Spawn all agents in the round in parallel via the Agent tool.
    b. Each agent writes its output to `.tab/team/<run-id>/round-<n>/<role-name>.md`.
    c. Post a short status update to conversation: what was found, what gaps or conflicts emerged, what the next round will target.
 
-3. **Between rounds — curate context for the next wave.**
+4. **Between rounds — curate context for the next wave.**
    - Read the prior round's output files.
    - Extract only the findings relevant to each next-round agent's specific role.
    - Do NOT forward full reports. Each agent gets a brief (under 500 words) of prior context relevant to its assignment.
@@ -50,7 +52,7 @@ Every agent receives instructions in this format:
 ```
 You are a [role name] on a research team. Your task: [one-line brief].
 
-[If archetype has skills, inject skill instructions here.]
+[If role has skills, inject resolved tool/context instructions here.]
 
 [If Round 2+, inject curated context from prior rounds here — max 500 words.]
 
@@ -67,48 +69,24 @@ Output:
 
 The 1000-word output cap per agent keeps file sizes manageable and forces conciseness.
 
-## Role Archetypes
+## Roles
 
-Tab picks from these or invents custom roles. Each archetype has a fixed skill set.
+Tab invents roles at planning time based on the question. Each role gets a name, a one-line purpose, and optionally a **Skills** field declaring capabilities it needs.
 
-### Researcher
-**Skills:** research (Exa MCP)
-**Purpose:** Evidence gathering with source evaluation and citations.
-**Skill instructions injected into agent brief:**
+**How Skills works:** The Skills field describes *capabilities* the role needs, not specific tools. Skills resolve to two things:
 
-> Use Exa MCP tools exclusively for all searches. Do not use WebSearch.
-> Search iteratively — start broad, then refine. Run at least 2-3 searches.
-> Evaluate every source for primacy (prefer primary sources), recency (flag anything older than 2 years), authority (academic/institutional > blogs), and cross-referencing (note single-sourced claims).
-> Record full citations: title, author/org, URL, date.
-> Do not fabricate any information.
+- **Tools** (e.g., `web search`) — Tab checks the environment, finds available tools, passes them to the agent.
+- **Context** (e.g., `coding standards`) — Tab loads a skill file and injects its instructions into the agent brief.
 
-**Prerequisite:** Before dispatching any Researcher agent, verify Exa MCP tools are available. If not, tell the user: "I need Exa MCP for research roles — it's not available right now. I can still run the team with non-research roles, or you can check your MCP config."
+When a role has no Skills field, the agent works from reasoning alone. See the team skill design doc for full details on archetypes, when to codify them, and the capability/standards distinction.
 
-### Devil's Advocate
-**Skills:** none
-**Purpose:** Argues against the emerging consensus. Only used in Round 2+ since it needs prior findings to push back on.
-
-### Technical Analyst
-**Skills:** none
-**Purpose:** Evaluates architecture, feasibility, tradeoffs, implementation complexity.
-
-### User Advocate
-**Skills:** none
-**Purpose:** Considers end-user experience, needs, pain points, accessibility.
-
-### Strategist
-**Skills:** none
-**Purpose:** Big-picture positioning, market dynamics, timing, competitive landscape.
-
-### Critic
-**Skills:** none
-**Purpose:** Reviews prior round output for weak reasoning, unsupported claims, logical gaps. Only used in Round 2+.
+**No predefined archetypes yet.** Tab creates custom roles for each task. Archetypes will be codified when specific roles prove themselves through repeated use.
 
 ## Constraints
 
 - Default: 2 rounds. Hard cap: 4 rounds.
 - Max 5 agents per round.
-- Exa MCP required for Researcher archetype only.
+- Any role declaring a capability in its Skills field requires Tab to verify the tools are available before dispatch.
 - Agent output cap: 1000 words per agent.
 - Between-round briefs: max 500 words per agent.
 - All file output goes to `.tab/team/`. Never dump raw agent reports into conversation.
