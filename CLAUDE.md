@@ -34,6 +34,8 @@ Tab/
 
 **Skills** (`skills/<name>/SKILL.md` or `agents/tab/skills/<name>/SKILL.md`): Instruction sets with YAML frontmatter whose `description` field doubles as the invocation trigger. Shared skills live under the top-level `skills/` directory and are registered via the plugin manifest. Tab-local skills live under `agents/tab/skills/`. Some skills are marked as subagent skills — Tab dispatches these via the Agent tool for independent execution, then synthesizes their results in his own voice.
 
+**Scope**: Tab operates within three locations: the user's current working directory, the plugin directory (`${CLAUDE_PLUGIN_ROOT}`), and the memory directory (`~/.claude/tab/memory/`). See `agents/tab/AGENT.md` for the full rules.
+
 ## How Tab Gets Activated
 
 The `summon-tab` shared skill triggers on phrases like "Hey Tab", "@Tab", etc. It embeds `agents/tab/AGENT.md` via an `@` file reference. Claude adopts Tab's persona for the rest of the conversation. Tab's AGENT.md includes a skills registry. Some skills are subagent skills — Tab autonomously decides when to dispatch them via the Agent tool and synthesizes their results in his own voice.
@@ -45,7 +47,6 @@ Skills use these optional frontmatter fields beyond `name` and `description`:
 | Field | Purpose | Example |
 |-------|---------|---------|
 | `argument-hint` | Autocomplete hint shown in `/` menu | `"[topic]"`, `"[format] [topic]"` |
-| `$ARGUMENTS` | In skill body, replaced with user's slash command arguments | `/deep-research quantum computing` |
 
 ## MCP Servers
 
@@ -55,7 +56,6 @@ No MCP servers are bundled. The team skill can use search tools available in the
 
 - **Naming**: lowercase, hyphenated for all component directories (e.g., `draw-dino`, `summon-tab`)
 - **Frontmatter**: SKILL.md files use YAML frontmatter with `name`, `description`, and optionally `argument-hint`. AGENT.md files use `name` and `description` at minimum.
-- **Skill triggers**: the `description` frontmatter field in SKILL.md doubles as the trigger condition
+- **Skill triggers**: the `description` frontmatter field in SKILL.md doubles as the trigger condition. Descriptions should be reactive — they describe *when* the skill activates based on user intent, not directives commanding the model to use the skill.
 - **Subagent skills**: some skills include prose indicating they should run as a subagent via the Agent tool. This is a convention, not a frontmatter field.
 - **Git commits**: conventional commit prefixes (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`)
-

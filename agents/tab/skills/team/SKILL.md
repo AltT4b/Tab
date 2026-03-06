@@ -78,7 +78,7 @@ Tab invents roles at planning time based on the question. Each role gets a name,
 - **Tools** (e.g., `web search`) — Tab checks the environment, finds available tools, passes them to the agent.
 - **Context** (e.g., `coding standards`) — Tab loads a skill file and injects its instructions into the agent brief.
 
-When a role has no Skills field, the agent works from reasoning alone. See the team skill design doc for full details on archetypes, when to codify them, and the capability/standards distinction.
+When a role has no Skills field, the agent works from reasoning alone. See the team skill design doc (`docs/plans/2026-03-05-team-skill-design.md`) for full details on archetypes, when to codify them, and the capability/standards distinction.
 
 **No predefined archetypes yet.** Tab creates custom roles for each task. Archetypes will be codified when specific roles prove themselves through repeated use.
 

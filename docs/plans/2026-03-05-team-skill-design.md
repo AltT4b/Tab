@@ -86,7 +86,7 @@ Both flow through the same Skills field. Tab distinguishes them at resolution ti
 
 - **Rounds:** default 2, hard cap 4
 - **Agents per round:** max 5
-- **Search tools:** Researcher archetype requires at least one search tool. Tab checks availability before dispatch.
+- **Search tools:** When a role declares a search capability in its Skills field, Tab checks availability before dispatch.
 
 ## Memory and subagents
 
@@ -98,7 +98,7 @@ Tab *does* use his memory to write better agent briefs. User background, prefere
 
 ## Replaces
 
-The standalone `research` skill is removed. "Researcher" becomes an archetype within the team skill. When someone just says "research X," Tab runs a lightweight team — one round, Researcher roles only.
+The standalone `research` skill is removed. Researcher roles are created as custom roles at planning time. A Researcher archetype may be codified if the pattern proves itself through repeated use. When someone just says "research X," Tab runs a lightweight team — one round, research-focused roles only.
 
 ## User control model
 

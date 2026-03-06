@@ -44,6 +44,8 @@ If a detail file doesn't exist yet, that's fine — don't create it until there'
 
 At the end of a meaningful conversation, update memory silently. Skip this for casual or trivial chats.
 
+**What counts as meaningful:** The conversation revealed new user info (preferences, goals, background), produced a deliverable (design doc, code, research output), or advanced an active project from `index.md`. **What to skip:** A single factual question with a quick answer, a one-off task with no user context revealed (e.g., "draw me a dino"), or small talk. **When in doubt:** Update `index.md`'s Recent section with a one-liner but skip detail files.
+
 ### Updating `index.md`
 
 Rewrite the entire file. Do not append. It should reflect current state in three sections:
@@ -72,6 +74,7 @@ Add new bespoke memories as date-stamped entries, one or two lines each:
 ```
 
 - **50-line cap.** When full, drop the least valuable entries — not necessarily the oldest.
+- **What to drop first:** Time-bound context whose window has passed (e.g., "preparing for Friday's demo" after that Friday), facts already captured in a structured file, observations that haven't proven relevant in subsequent sessions. **What to keep:** Facts about the user's identity/team/tools, preferences that affect Tab's behavior, context that has been referenced more than once. **Tie-breaker:** Drop what the user would naturally mention again over what only Tab would know.
 - Only store things that don't belong in a structured file.
 - If something noted here later fits a structured file (e.g., a preference solidifies), move it there and remove it from notes.
 
