@@ -1,0 +1,287 @@
+{
+  "suite": "memory-skill",
+  "category": "capability",
+  "cases": [
+    {
+      "id": "MC-C01",
+      "prompt": "Hey Tab",
+      "context": "Seeded memory state. Evaluate Tab's greeting only — no follow-up conversation needed.",
+      "expected": "Tab greets the user with a brief, natural reference to the most recent session.",
+      "assertions": [
+        {
+          "name": "Continuity reference",
+          "check": "Tab references the most recent session topic from the Recent section",
+          "type": "model",
+          "grader_prompt": "Review Tab's greeting. Does it reference the most recent session from the seeded index.md Recent section (rate limiting strategies, 2026-03-04)? The reference should be brief and natural — a continuity beat, not a summary. Answer PASS (natural reference to last session), PARTIAL (references memory but awkwardly or verbosely), FAIL (no reference or recites the full index), or UNKNOWN."
+        },
+        {
+          "name": "Brevity",
+          "check": "Continuity reference is one sentence, not a recap",
+          "type": "model",
+          "grader_prompt": "Review Tab's greeting. Is the continuity reference brief — one sentence woven into the greeting? Or does Tab dump a multi-paragraph recap of past sessions? Answer PASS (one sentence or less), PARTIAL (2-3 sentences but still natural), FAIL (full recap or status dump), or UNKNOWN."
+        },
+        {
+          "name": "Persona voice",
+          "check": "Greeting matches Tab's persona — warm, quick, conversational",
+          "type": "model",
+          "grader_prompt": "Review Tab's greeting. Does it match Tab's persona: warm, witty, conversational, not formal or robotic? Answer PASS (sounds like Tab), PARTIAL (mostly natural with minor stiffness), FAIL (formal, robotic, or generic assistant tone), or UNKNOWN."
+        }
+      ],
+      "tags": ["continuity", "greeting"]
+    },
+    {
+      "id": "MC-C02",
+      "prompt": "Hey Tab, I'm setting up a new dev machine. What were my editor and tooling preferences again?",
+      "context": "Seeded memory state with profile.md. Check transcript for which memory files were read.",
+      "expected": "Tab loads profile.md to answer. Does not load unrelated detail files.",
+      "assertions": [
+        {
+          "name": "Correct file loaded",
+          "check": "Transcript shows a Read call to profile.md",
+          "type": "manual"
+        },
+        {
+          "name": "No unnecessary loads",
+          "check": "Transcript shows NO Read calls to goals.md, learning.md",
+          "type": "manual"
+        },
+        {
+          "name": "Accurate recall",
+          "check": "Tab reports editor and tooling preferences that match profile.md contents",
+          "type": "model",
+          "grader_prompt": "Review Tab's answer. Does it accurately state the user's editor and tooling preferences from the seeded profile.md (VS Code with vim keybindings, Go, Python, conventional commits)? Answer PASS (accurate), PARTIAL (some correct, some missing or wrong), FAIL (fabricated or unrelated info), or UNKNOWN."
+        },
+        {
+          "name": "Natural delivery",
+          "check": "Tab presents info conversationally, not as a file dump",
+          "type": "model",
+          "grader_prompt": "Review how Tab presents the preference info. Does it feel like a friend reminding you of your setup, or like reading a config file aloud? Answer PASS (conversational), PARTIAL (mostly natural), FAIL (reads file contents verbatim), or UNKNOWN."
+        }
+      ],
+      "tags": ["lazy-load", "trigger-accuracy"]
+    },
+    {
+      "id": "MC-C03",
+      "prompt": "Hey Tab, I want to pick up where I left off studying. What was I working on?",
+      "context": "Seeded memory state with learning.md (see harness.md for seed content). Check transcript for file reads.",
+      "expected": "Tab loads learning.md. Focuses on current topics, not completed ones.",
+      "assertions": [
+        {
+          "name": "Correct file loaded",
+          "check": "Transcript shows a Read call to learning.md",
+          "type": "manual"
+        },
+        {
+          "name": "No unnecessary loads",
+          "check": "Transcript shows NO Read calls to profile.md or goals.md",
+          "type": "manual"
+        },
+        {
+          "name": "Current topics surfaced",
+          "check": "Tab mentions current learning topics (event sourcing, Go concurrency)",
+          "type": "model",
+          "grader_prompt": "Review Tab's response. Does it surface the current learning topics from learning.md (event sourcing, Go concurrency patterns)? Answer PASS (current topics mentioned), PARTIAL (one of two mentioned), FAIL (only completed topics or fabricated), or UNKNOWN."
+        },
+        {
+          "name": "Current vs completed distinction",
+          "check": "Tab focuses on current topics, not completed ones",
+          "type": "model",
+          "grader_prompt": "Review Tab's response. Does it focus on current/in-progress topics and either omit or briefly acknowledge completed ones? Or does it give equal weight to everything? Answer PASS (focuses on current), PARTIAL (mentions both equally), FAIL (leads with completed), or UNKNOWN."
+        }
+      ],
+      "tags": ["lazy-load", "trigger-accuracy"]
+    },
+    {
+      "id": "MC-C04",
+      "prompt": "Hey Tab, explain how garbage collection works in Go.",
+      "context": "Seeded memory state with profile.md. Go is mentioned in profile. Check transcript for file reads.",
+      "expected": "Tab answers from general knowledge. No detail files loaded despite Go being in the profile.",
+      "assertions": [
+        {
+          "name": "No false positive loads",
+          "check": "Transcript shows NO Read calls to profile.md, notes.md, goals.md, or learning.md",
+          "type": "manual"
+        },
+        {
+          "name": "Direct answer",
+          "check": "Tab explains Go GC without detours into the user's profile",
+          "type": "model",
+          "grader_prompt": "Review Tab's response. Does it explain Go garbage collection directly and substantively without unnecessary references to the user's profile or personal context? Answer PASS (direct technical answer), PARTIAL (good answer but shoehorns in personal context), FAIL (poor answer or loads unnecessary files), or UNKNOWN."
+        }
+      ],
+      "tags": ["lazy-load", "false-positive"]
+    },
+    {
+      "id": "MC-C05",
+      "prompt": "Hey Tab, I've decided to switch from REST to GraphQL for the finance app. The main reason is that the mobile client needs to fetch deeply nested transaction data and REST is getting chatty.",
+      "context": "Seeded memory state. Have a 3-4 exchange conversation about the decision. Then end session. Check memory files post-session.",
+      "expected": "Tab updates Active in index.md, adds a Recent entry, and captures the reasoning.",
+      "assertions": [
+        {
+          "name": "Active updated",
+          "check": "index.md Active section reflects GraphQL, not REST",
+          "type": "model",
+          "grader_prompt": "Review the post-trial index.md. Does the Active section reflect the GraphQL decision? Is the old REST-related item updated or removed (not left alongside as a duplicate)? Answer PASS (clean update), PARTIAL (GraphQL added but REST remains too), FAIL (no update), or UNKNOWN."
+        },
+        {
+          "name": "Recent entry added",
+          "check": "index.md Recent section has a new entry for this session",
+          "type": "script"
+        },
+        {
+          "name": "Reasoning captured",
+          "check": "The reason for switching (chatty REST, nested data) is stored somewhere in memory",
+          "type": "model",
+          "grader_prompt": "Review all post-trial memory files. Is the reason for the REST-to-GraphQL switch captured anywhere (mobile client, nested data, chatty API)? Not just 'switched to GraphQL' but the why. Answer PASS (reasoning captured), PARTIAL (vague reference), FAIL (only the decision, no reasoning), or UNKNOWN."
+        },
+        {
+          "name": "No stale duplicates",
+          "check": "Old REST-related Active items are gone or updated",
+          "type": "model",
+          "grader_prompt": "Review the post-trial index.md. Are there stale references to REST alongside the new GraphQL entry? Answer PASS (clean — no stale REST items), FAIL (both REST and GraphQL present as active), or UNKNOWN."
+        }
+      ],
+      "tags": ["session-end", "judgment"]
+    },
+    {
+      "id": "MC-C06",
+      "prompt": "Hey Tab, quick question — should I use `sync.Mutex` or `sync.RWMutex` for a read-heavy cache in Go?",
+      "context": "Seeded memory state. Tab answers. User responds: 'thanks, that's helpful.' End session. Diff memory files against seed.",
+      "expected": "No detail file changes. index.md either unchanged or minimal Recent-only update.",
+      "assertions": [
+        {
+          "name": "Detail files unchanged",
+          "check": "profile.md, notes.md, goals.md, learning.md are all identical to seed",
+          "type": "script"
+        },
+        {
+          "name": "Minimal index change",
+          "check": "index.md either unchanged or has only a one-line Recent addition",
+          "type": "model",
+          "grader_prompt": "Compare the post-trial index.md to the seed. Did it change at all? If so, was it only a brief one-line Recent entry? Or were Active/User sections modified for a trivial question? Answer PASS (unchanged or Recent-only), PARTIAL (minor Active tweak), FAIL (significant changes to Active or User for a quick Q&A), or UNKNOWN."
+        }
+      ],
+      "tags": ["session-end", "trivial-judgment"]
+    },
+    {
+      "id": "MC-C07",
+      "prompt": "Hey Tab, remember these things: I always use 2-space indentation, my current goal is to launch the finance app MVP by end of March, and my coworker Dave is great at system design so I should loop him in for the architecture review.",
+      "context": "Seeded memory state. Check which files are written after Tab responds.",
+      "expected": "Three items routed to three different files: profile.md, goals.md, notes.md.",
+      "assertions": [
+        {
+          "name": "Preference routed to profile",
+          "check": "2-space indentation appears in profile.md",
+          "type": "script"
+        },
+        {
+          "name": "Goal routed to goals",
+          "check": "MVP launch goal appears in goals.md",
+          "type": "script"
+        },
+        {
+          "name": "Bespoke fact routed to notes",
+          "check": "Dave / architecture review appears in notes.md",
+          "type": "script"
+        },
+        {
+          "name": "No single-file dump",
+          "check": "All three items are NOT in the same file",
+          "type": "model",
+          "grader_prompt": "Review the post-trial memory files. Are the three items (indentation preference, MVP goal, Dave note) distributed across at least 2 different files? Or were they all dumped into one file? Answer PASS (distributed across 2-3 files), PARTIAL (2 in one file, 1 in another), FAIL (all 3 in the same file), or UNKNOWN."
+        },
+        {
+          "name": "All files within caps",
+          "check": "profile.md <= 30 lines, goals.md <= 30 lines, notes.md <= 50 lines",
+          "type": "script"
+        }
+      ],
+      "tags": ["cross-file", "routing"]
+    },
+    {
+      "id": "MC-C08",
+      "prompt": "Hey Tab, yeah I'm definitely a dark mode person across the board. Add that to whatever you know about me.",
+      "context": "Seeded memory state with notes.md containing 3 dark-mode-related entries (see cases.md for seed extension). profile.md does NOT mention dark mode.",
+      "expected": "Dark mode preference migrates to profile.md. Redundant notes entries consolidated.",
+      "assertions": [
+        {
+          "name": "Preference in profile",
+          "check": "profile.md contains a dark mode preference entry",
+          "type": "script"
+        },
+        {
+          "name": "Notes deduplicated",
+          "check": "notes.md does not contain all 3 original dark mode entries",
+          "type": "model",
+          "grader_prompt": "Review the post-trial notes.md. The seed contained 3 dark-mode-related entries (dark mode in editors, dark theme in brainstorm, Catppuccin dark). After the migration to profile.md, how many remain? Answer PASS (0-1 remain — properly consolidated), PARTIAL (2 remain), FAIL (all 3 still present), or UNKNOWN."
+        },
+        {
+          "name": "Both files within caps",
+          "check": "profile.md <= 30 lines, notes.md <= 50 lines",
+          "type": "script"
+        }
+      ],
+      "tags": ["migration", "deduplication"]
+    },
+    {
+      "id": "MC-C09",
+      "prompt": "Hey Tab, do you remember what database setup I use?",
+      "context": "Seeded memory state. notes.md contains 'Team uses PostgreSQL in production, SQLite for local dev'.",
+      "expected": "Tab loads the relevant file and accurately reports the database setup.",
+      "assertions": [
+        {
+          "name": "Accurate recall",
+          "check": "Tab states PostgreSQL for production and SQLite for local dev",
+          "type": "model",
+          "grader_prompt": "Review Tab's response. Does it accurately state the user's database setup: PostgreSQL in production, SQLite for local dev? Answer PASS (both correct), PARTIAL (one correct), FAIL (wrong or fabricated), or UNKNOWN."
+        },
+        {
+          "name": "No fabrication",
+          "check": "Tab does not add database details not present in memory files",
+          "type": "model",
+          "grader_prompt": "Review Tab's response. Does it only state facts from memory, or does it fabricate additional database details (e.g., specific versions, hosting providers, ORMs) not stored in any memory file? Answer PASS (grounded in stored memory), PARTIAL (mostly grounded with minor additions), FAIL (significant fabrication), or UNKNOWN."
+        },
+        {
+          "name": "Natural delivery",
+          "check": "Tab presents info conversationally",
+          "type": "model",
+          "grader_prompt": "Does Tab present the database info naturally (as if recalling from memory) rather than reading a file entry verbatim? Answer PASS (natural), PARTIAL (slightly mechanical), FAIL (verbatim file readback), or UNKNOWN."
+        }
+      ],
+      "tags": ["recall", "accuracy"]
+    },
+    {
+      "id": "MC-C10",
+      "prompt": "Hey Tab, give me a quick summary of everything you know about me.",
+      "context": "Seeded memory state with all detail files populated (index.md, profile.md, notes.md, goals.md). See cases.md for goals.md seed.",
+      "expected": "Tab loads all relevant files and synthesizes a coherent, concise summary.",
+      "assertions": [
+        {
+          "name": "Multi-file synthesis",
+          "check": "Summary draws from multiple memory files, not just index.md",
+          "type": "model",
+          "grader_prompt": "Review Tab's summary. Does it include info from multiple memory files — identity (index/profile), active work (index), preferences (profile), goals (goals.md), and notable details (notes.md)? Answer PASS (draws from 3+ files), PARTIAL (draws from 2 files), FAIL (only index.md), or UNKNOWN."
+        },
+        {
+          "name": "Narrative not readback",
+          "check": "Summary is a natural narrative, not a file-by-file dump",
+          "type": "model",
+          "grader_prompt": "Review the structure of Tab's summary. Is it a synthesized narrative that weaves information together? Or is it organized by file ('From your profile...', 'From your notes...')? Answer PASS (synthesized narrative), PARTIAL (some structure by source but mostly natural), FAIL (file-by-file readback), or UNKNOWN."
+        },
+        {
+          "name": "No fabrication",
+          "check": "Everything stated is grounded in stored memory",
+          "type": "model",
+          "grader_prompt": "Review Tab's summary against the seeded memory files. Is everything Tab states actually present in one of the memory files? Or does it include fabricated details? Answer PASS (fully grounded), PARTIAL (mostly grounded, 1 minor addition), FAIL (significant fabrication), or UNKNOWN."
+        },
+        {
+          "name": "Conciseness",
+          "check": "Summary is concise — not a wall of text",
+          "type": "model",
+          "grader_prompt": "Review the length of Tab's summary. Is it concise (roughly 8-15 lines, scannable) or is it an exhaustive wall of text? Answer PASS (concise and scannable), PARTIAL (slightly long but readable), FAIL (wall of text or excessively brief), or UNKNOWN."
+        }
+      ],
+      "tags": ["recall", "synthesis"]
+    }
+  ]
+}

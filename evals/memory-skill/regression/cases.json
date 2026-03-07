@@ -1,0 +1,304 @@
+{
+  "suite": "memory-skill",
+  "category": "regression",
+  "cases": [
+    {
+      "id": "MC-01",
+      "prompt": "Hey Tab",
+      "context": "Fresh memory state — delete ~/.claude/tab/memory/ before trial.",
+      "expected": "Tab creates index.md with User/Active/Recent sections and introduces itself.",
+      "assertions": [
+        {
+          "name": "Index file created",
+          "check": "~/.claude/tab/memory/index.md exists",
+          "type": "script"
+        },
+        {
+          "name": "Three sections present",
+          "check": "index.md contains '## User', '## Active', and '## Recent' headers",
+          "type": "script"
+        },
+        {
+          "name": "Index under 20 lines",
+          "check": "index.md has 20 or fewer lines",
+          "type": "script"
+        },
+        {
+          "name": "Brief intro given",
+          "check": "Tab introduces itself concisely",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab give a brief introduction (6-8 lines, mentions name, memory, skills, invitation to chat)? Score: 0 = no intro or extremely long, 1 = intro but too verbose or missing key elements, 2 = concise intro covering identity, memory, skills, and invitation."
+        }
+      ],
+      "tags": ["structural", "new-user"]
+    },
+    {
+      "id": "MC-02",
+      "prompt": "Hey Tab, I've been working on a bunch of new things. I started learning Rust, picked up a new side project building a game engine, joined a book club reading DDIA, started mentoring a junior dev, and I'm also prepping for a system design interview next month.",
+      "context": "Seeded memory state. End session after conversation to trigger save.",
+      "expected": "index.md stays at or under 20 lines despite many new active items.",
+      "assertions": [
+        {
+          "name": "Index cap respected",
+          "check": "index.md has 20 or fewer lines after session-end save",
+          "type": "script"
+        },
+        {
+          "name": "All sections present",
+          "check": "index.md contains '## User', '## Active', and '## Recent' headers",
+          "type": "script"
+        },
+        {
+          "name": "Content compressed not truncated",
+          "check": "Information is compressed cleanly, not cut off mid-sentence",
+          "type": "model",
+          "grader_prompt": "Review the post-trial index.md. Is the content compressed cleanly (short but complete lines) rather than truncated mid-sentence or missing sections? Score: 0 = truncated or missing sections, 1 = present but awkwardly compressed, 2 = clean compression with all key info retained."
+        }
+      ],
+      "tags": ["cap", "bloat-prevention"]
+    },
+    {
+      "id": "MC-03",
+      "prompt": "Hey Tab, remember all of these: I prefer dark mode everywhere, my cat's name is Pixel, I use Fish shell, my team standup is at 9:30am, I'm allergic to shellfish, my work laptop is a ThinkPad, I use Todoist for task management, my favorite font is JetBrains Mono, I deploy with GitHub Actions, and I prefer rebasing over merging.",
+      "context": "Seeded memory state with notes.md extended to 45 lines (pad seed with 41 additional date-stamped filler entries).",
+      "expected": "notes.md stays at or under 50 lines. Lower-value entries dropped to make room.",
+      "assertions": [
+        {
+          "name": "Notes cap respected",
+          "check": "notes.md has 50 or fewer lines after writes",
+          "type": "script"
+        },
+        {
+          "name": "New entries present",
+          "check": "At least 5 of the 10 new items appear in memory files (notes.md or structured files)",
+          "type": "script"
+        },
+        {
+          "name": "Triage quality",
+          "check": "Dropped entries are lower-value than kept entries",
+          "type": "model",
+          "grader_prompt": "Review the post-trial notes.md. Were the dropped entries less valuable than the kept entries? Durable preferences and identity facts should be kept over time-bound context. Score: 0 = valuable entries dropped while trivial ones kept, 1 = mixed quality triage, 2 = sensible triage — durable facts kept, ephemeral context dropped."
+        }
+      ],
+      "tags": ["cap", "bloat-prevention", "triage"]
+    },
+    {
+      "id": "MC-04",
+      "prompt": "Hey Tab, some updates on me: I switched to Neovim, started using Nix for package management, moved to Arch Linux, picked up Zig as a hobby language, started contributing to an open source project called Turso, joined a remote-first company, my new team uses Grafana and Prometheus for observability, and we do trunk-based development.",
+      "context": "Seeded memory state with profile.md extended to 25 lines.",
+      "expected": "profile.md stays at or under 30 lines with outdated info compressed.",
+      "assertions": [
+        {
+          "name": "Profile cap respected",
+          "check": "profile.md has 30 or fewer lines after save",
+          "type": "script"
+        },
+        {
+          "name": "New info integrated",
+          "check": "At least 4 of the 8 new items appear in profile.md",
+          "type": "script"
+        },
+        {
+          "name": "Outdated info updated",
+          "check": "Old entries (e.g., 'VS Code with vim keybindings') are updated or replaced, not duplicated alongside new entries",
+          "type": "model",
+          "grader_prompt": "Review the post-trial profile.md. Are outdated entries (e.g., VS Code) replaced by their updates (e.g., Neovim), or do both old and new coexist? Score: 0 = old and new duplicated, 1 = some updates but some duplication, 2 = clean replacement — outdated info gone, new info integrated."
+        }
+      ],
+      "tags": ["cap", "bloat-prevention"]
+    },
+    {
+      "id": "MC-05",
+      "prompt": "Hey Tab, let's design an event sourcing system for the finance app. I want to use CQRS with separate read and write models.",
+      "context": "Seeded memory state with index.md Recent section extended to exactly 5 entries. End session after conversation.",
+      "expected": "Recent section stays at 3-5 entries with newest added and oldest dropped.",
+      "assertions": [
+        {
+          "name": "Recent count in range",
+          "check": "Recent section has between 3 and 5 entries (inclusive)",
+          "type": "script"
+        },
+        {
+          "name": "Newest session present",
+          "check": "Recent section includes an entry for the current session's topic",
+          "type": "script"
+        },
+        {
+          "name": "No overflow",
+          "check": "Recent section does not have more than 5 entries",
+          "type": "script"
+        }
+      ],
+      "tags": ["cap", "bloat-prevention"]
+    },
+    {
+      "id": "MC-06",
+      "prompt": "Hey Tab, remember that my deploy target is always us-east-1.",
+      "context": "Seeded memory state. Check filesystem IMMEDIATELY after Tab responds, before session ends.",
+      "expected": "Entry written to disk immediately, not deferred to session end.",
+      "assertions": [
+        {
+          "name": "Immediate write",
+          "check": "A memory file contains 'us-east-1' immediately after Tab's response (before session-end save)",
+          "type": "script"
+        },
+        {
+          "name": "Correct file",
+          "check": "Entry is in notes.md or profile.md (either acceptable)",
+          "type": "script"
+        },
+        {
+          "name": "No memory system mention",
+          "check": "Tab does not explain the memory system in its response",
+          "type": "model",
+          "grader_prompt": "Review Tab's response to the 'remember' request. Did Tab mention memory files, storage mechanics, or the memory system? Score: 0 = explained memory internals, 1 = hinted at storage ('saved to my notes'), 2 = acknowledged naturally without any reference to memory infrastructure."
+        }
+      ],
+      "tags": ["explicit-command", "immediate"]
+    },
+    {
+      "id": "MC-07",
+      "prompt": "Hey Tab, forget that I have a demo next Friday.",
+      "context": "Seeded memory state. notes.md contains: '2026-03-02: Has a demo for the finance app next Friday (2026-03-07)'",
+      "expected": "The demo entry is removed from notes.md. Other entries untouched.",
+      "assertions": [
+        {
+          "name": "Entry removed",
+          "check": "notes.md does not contain 'demo' or '2026-03-07'",
+          "type": "script"
+        },
+        {
+          "name": "Other entries intact",
+          "check": "Other entries in notes.md are still present (e.g., rate limiting, PostgreSQL, session preferences)",
+          "type": "script"
+        },
+        {
+          "name": "Clean removal",
+          "check": "No commented-out lines, no 'removed' markers, no trace of the deleted entry",
+          "type": "script"
+        }
+      ],
+      "tags": ["explicit-command", "forget"]
+    },
+    {
+      "id": "MC-08",
+      "prompt": "Hey Tab, what's 2 + 2?",
+      "context": "Seeded memory state. After Tab responds, review the transcript for Read tool calls.",
+      "expected": "Only index.md is read. No detail files loaded.",
+      "assertions": [
+        {
+          "name": "Index loaded",
+          "check": "Transcript shows a Read call to ~/.claude/tab/memory/index.md",
+          "type": "manual"
+        },
+        {
+          "name": "No profile load",
+          "check": "Transcript shows NO Read call to profile.md",
+          "type": "manual"
+        },
+        {
+          "name": "No notes load",
+          "check": "Transcript shows NO Read call to notes.md",
+          "type": "manual"
+        },
+        {
+          "name": "No other memory files loaded",
+          "check": "Transcript shows NO Read calls to goals.md or learning.md",
+          "type": "manual"
+        },
+        {
+          "name": "Direct answer",
+          "check": "Tab answers '4' without unnecessary elaboration",
+          "type": "model",
+          "grader_prompt": "Did Tab answer the math question directly and concisely? Score: 0 = didn't answer or went on a tangent, 1 = answered but with excessive context, 2 = answered directly and concisely."
+        }
+      ],
+      "tags": ["lazy-load", "context-efficiency"]
+    },
+    {
+      "id": "MC-09",
+      "prompt": "Hey Tab, what's a good approach for database migrations in Go?",
+      "context": "Seeded memory state.",
+      "expected": "Tab answers helpfully without mentioning memory internals.",
+      "assertions": [
+        {
+          "name": "No memory references",
+          "check": "Response does not contain 'memory', 'index.md', 'notes.md', 'profile.md', 'saving', or 'stored'",
+          "type": "model",
+          "grader_prompt": "Review Tab's response. Does it mention any memory system internals — file names (index.md, notes.md, profile.md), the word 'memory' in reference to Tab's own storage, 'saving', 'stored', or any explanation of how Tab remembers things? Score: 0 = explicitly discusses memory system, 1 = subtle hint at memory mechanics ('I have that noted'), 2 = completely invisible — no reference to memory infrastructure."
+        },
+        {
+          "name": "Helpful answer",
+          "check": "Tab provides a substantive answer about Go database migrations",
+          "type": "model",
+          "grader_prompt": "Did Tab provide a helpful, substantive answer about database migration approaches in Go? Score: 0 = unhelpful or off-topic, 1 = surface-level, 2 = substantive with specific tools/patterns."
+        }
+      ],
+      "tags": ["invisibility"]
+    },
+    {
+      "id": "MC-10",
+      "prompt": "Hey Tab, what's the capital of France?",
+      "context": "Seeded memory state. End session after Tab answers. Diff memory files against seed.",
+      "expected": "No detail files modified. index.md either unchanged or minimal Recent update only.",
+      "assertions": [
+        {
+          "name": "Notes unchanged",
+          "check": "notes.md is identical to seed (byte-for-byte or semantically equivalent)",
+          "type": "script"
+        },
+        {
+          "name": "Profile unchanged",
+          "check": "profile.md is identical to seed",
+          "type": "script"
+        },
+        {
+          "name": "No new files created",
+          "check": "No new files (goals.md, learning.md) created in memory directory",
+          "type": "script"
+        },
+        {
+          "name": "Index minimal change",
+          "check": "index.md is either unchanged or has at most a one-line Recent addition",
+          "type": "model",
+          "grader_prompt": "Compare the post-trial index.md to the seed. Is it unchanged, or does it have at most a minimal one-line addition to the Recent section? Score: 0 = significant changes to User or Active sections, 1 = minor unnecessary changes beyond Recent, 2 = unchanged or only a brief Recent entry added."
+        }
+      ],
+      "tags": ["trivial-skip", "bloat-prevention"]
+    },
+    {
+      "id": "MC-11",
+      "prompt": "Hey Tab, I've decided to pivot the finance app to a budgeting focus instead of full personal finance. Also, I'm dropping event sourcing — going with plain CRUD.",
+      "context": "Seeded memory state. End session to trigger save. Diff index.md before and after.",
+      "expected": "index.md is fully rewritten — no duplicate sections, no appended content.",
+      "assertions": [
+        {
+          "name": "Single User section",
+          "check": "index.md contains exactly one '## User' header",
+          "type": "script"
+        },
+        {
+          "name": "Single Active section",
+          "check": "index.md contains exactly one '## Active' header",
+          "type": "script"
+        },
+        {
+          "name": "Single Recent section",
+          "check": "index.md contains exactly one '## Recent' header",
+          "type": "script"
+        },
+        {
+          "name": "Old active items updated",
+          "check": "index.md does not contain both 'event sourcing' and 'CRUD' — old item is replaced, not duplicated",
+          "type": "script"
+        },
+        {
+          "name": "Index cap after rewrite",
+          "check": "index.md has 20 or fewer lines",
+          "type": "script"
+        }
+      ],
+      "tags": ["rewrite", "integrity"]
+    }
+  ]
+}
