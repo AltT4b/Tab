@@ -1,0 +1,163 @@
+{
+  "suite": "team-skill",
+  "category": "regression",
+  "cases": [
+    {
+      "id": "TC-06",
+      "prompt": "What's the capital of France?",
+      "context": "Send directly after summoning Tab. No prior team activity.",
+      "expected": "Tab answers directly. No team orchestration triggered.",
+      "assertions": [
+        {
+          "name": "No team plan",
+          "check": "Tab does NOT propose a team plan or mention assembling agents",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab propose a team plan, mention assembling agents, or describe any multi-agent orchestration? Answer YES (team was proposed), NO (no team proposed), or UNKNOWN (unclear). A correct response is NO."
+        },
+        {
+          "name": "Direct answer",
+          "check": "Tab answers 'Paris' directly without orchestration ceremony",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab provide a direct answer to the question (the capital of France is Paris) without unnecessary ceremony? Answer YES (direct answer given), NO (answer missing or buried in orchestration), or UNKNOWN. A correct response is YES."
+        },
+        {
+          "name": "No run directory",
+          "check": "No new directory created in .tab/team/",
+          "type": "script"
+        }
+      ],
+      "tags": ["negative"]
+    },
+    {
+      "id": "TC-11",
+      "prompt": "How do I reverse a string in Python?",
+      "context": "Send directly after summoning Tab. No prior team activity.",
+      "expected": "Tab answers with code. No team orchestration triggered.",
+      "assertions": [
+        {
+          "name": "No team plan",
+          "check": "Tab does NOT propose a team plan or mention assembling agents",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab propose a team plan, mention assembling agents, or describe any multi-agent orchestration? Answer YES (team was proposed), NO (no team proposed), or UNKNOWN. A correct response is NO."
+        },
+        {
+          "name": "Direct answer with code",
+          "check": "Tab provides a code example for reversing a string",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab provide a direct code example showing how to reverse a string in Python (e.g., s[::-1], reversed(), or a loop)? Answer YES (code provided), NO (no code), or UNKNOWN. A correct response is YES."
+        },
+        {
+          "name": "No run directory",
+          "check": "No new directory created in .tab/team/",
+          "type": "script"
+        }
+      ],
+      "tags": ["negative"]
+    },
+    {
+      "id": "TC-12",
+      "prompt": "What do you think about pineapple on pizza?",
+      "context": "Send directly after summoning Tab. No prior team activity.",
+      "expected": "Tab responds conversationally. No team orchestration triggered.",
+      "assertions": [
+        {
+          "name": "No team plan",
+          "check": "Tab does NOT propose a team plan or mention assembling agents",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab propose a team plan, mention assembling agents, or describe any multi-agent orchestration? Answer YES (team was proposed), NO (no team proposed), or UNKNOWN. A correct response is NO."
+        },
+        {
+          "name": "Conversational response",
+          "check": "Tab responds in its own voice with a casual, conversational tone",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab respond to the pineapple-on-pizza question in a conversational, personality-driven way (not a dry factual report or orchestration plan)? Answer YES (conversational), NO (robotic or orchestrated), or UNKNOWN. A correct response is YES."
+        },
+        {
+          "name": "No run directory",
+          "check": "No new directory created in .tab/team/",
+          "type": "script"
+        }
+      ],
+      "tags": ["negative"]
+    },
+    {
+      "id": "TC-13",
+      "prompt": "What does this error mean? TypeError: cannot read property 'map' of undefined",
+      "context": "Send directly after summoning Tab. No prior team activity.",
+      "expected": "Tab explains the error directly. No team orchestration triggered.",
+      "assertions": [
+        {
+          "name": "No team plan",
+          "check": "Tab does NOT propose a team plan or mention assembling agents",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab propose a team plan, mention assembling agents, or describe any multi-agent orchestration? Answer YES (team was proposed), NO (no team proposed), or UNKNOWN. A correct response is NO."
+        },
+        {
+          "name": "Error explanation",
+          "check": "Tab explains that the variable is undefined/null and .map() requires an array",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab correctly explain the TypeError — specifically that the code is trying to call .map() on a value that is undefined (not an array)? Answer YES (correct explanation), NO (wrong or missing), or UNKNOWN. A correct response is YES."
+        },
+        {
+          "name": "No run directory",
+          "check": "No new directory created in .tab/team/",
+          "type": "script"
+        }
+      ],
+      "tags": ["negative"]
+    },
+    {
+      "id": "TC-14",
+      "prompt": "Remind me to take out the trash tomorrow.",
+      "context": "Send directly after summoning Tab. No prior team activity.",
+      "expected": "Tab acknowledges the reminder. No team orchestration triggered.",
+      "assertions": [
+        {
+          "name": "No team plan",
+          "check": "Tab does NOT propose a team plan or mention assembling agents",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab propose a team plan, mention assembling agents, or describe any multi-agent orchestration? Answer YES (team was proposed), NO (no team proposed), or UNKNOWN. A correct response is NO."
+        },
+        {
+          "name": "Reminder acknowledged",
+          "check": "Tab acknowledges the reminder request in some way",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab acknowledge the user's request to be reminded about taking out the trash? This could be saving it to memory, confirming the reminder, or explaining its reminder capabilities. Answer YES (acknowledged), NO (ignored or redirected to team), or UNKNOWN. A correct response is YES."
+        },
+        {
+          "name": "No run directory",
+          "check": "No new directory created in .tab/team/",
+          "type": "script"
+        }
+      ],
+      "tags": ["negative"]
+    },
+    {
+      "id": "TC-07",
+      "prompt": "Look into databases for me.",
+      "context": "Send directly after summoning Tab. No prior team activity. Variant: 'Get the team on this.' (zero context).",
+      "expected": "Tab asks clarifying questions before proposing any plan.",
+      "assertions": [
+        {
+          "name": "Scoping activates",
+          "check": "Tab asks at least 1 clarifying question before proposing a team",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab ask at least one clarifying question before proposing a team plan? Questions like 'What kind of databases?' or 'What's the use case?' count. Answer YES (asked before planning), NO (jumped straight to a team plan), or UNKNOWN. A correct response is YES."
+        },
+        {
+          "name": "Multiple choice offered",
+          "check": "At least one question uses multiple-choice format when options are finite",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab offer multiple-choice options in at least one of its clarifying questions (e.g., listing database types, use cases, or approaches to choose from)? Answer YES (multiple choice used), NO (only open-ended questions), or UNKNOWN. A correct response is YES."
+        },
+        {
+          "name": "No premature plan",
+          "check": "Tab does NOT propose a full team plan before receiving clarification",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab propose a complete team plan (with roles, rounds, etc.) BEFORE receiving answers to its clarifying questions? Answer YES (premature plan), NO (waited for answers), or UNKNOWN. A correct response is NO."
+        }
+      ],
+      "tags": ["edge-case", "scoping"]
+    }
+  ]
+}

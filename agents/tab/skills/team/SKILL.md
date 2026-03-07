@@ -10,17 +10,57 @@ Orchestrates multiple AI agents working together on a complex question. Tab deco
 
 ## Workflow
 
+### Phase 0: Scope
+
+Before planning a team, Tab scopes the task interactively. The goal is to avoid wasting agents on a misunderstood problem.
+
+1. **Read the request.** If the user's intent, success criteria, and constraints are all obvious, skip to Phase 1 — don't ask questions you already know the answer to.
+2. **Ask 1-3 scoping questions**, one at a time:
+   - What does success look like? (if unclear)
+   - Are there constraints — timeline, format, audience, tools? (if relevant)
+   - What's the scope — exhaustive analysis or quick directional take? (if ambiguous)
+3. **Prefer multiple choice** when possible. Open-ended is fine for genuinely open questions.
+4. **Move on as soon as you have enough.** Don't over-scope. Two good questions beat five thorough ones.
+
 ### Phase 1: Plan
 
-Analyze the user's question. Scale the plan to match the complexity:
+Analyze the user's question. **Start by classifying the task type** — this shapes everything downstream.
 
-- **Simple questions** (e.g., "research X") — single round, fewer roles, brief plan.
-- **Complex questions** (e.g., multi-faceted analysis, decision-making) — multiple rounds, more roles, detailed plan.
+#### Task-type heuristics
 
-Propose:
+| Type | Signals | Team shape |
+|------|---------|------------|
+| **Research** | "research", "look into", "what's the state of", curiosity-driven | Search-heavy roles, citation requirements, 1-2 rounds |
+| **Decision-making** | "should I", "compare", "which option", "trade-offs" | Advocates for each option + a critic/synthesizer, 2 rounds |
+| **Analysis** | "why is", "how does", "break down", "audit" | Domain specialists + a generalist to check blind spots, 1-2 rounds |
+| **Creative** | "brainstorm", "design", "come up with", "explore ideas" | Diverse perspectives, more latitude in briefs, 1-2 rounds |
+| **Implementation** | "build", "write", "create", "set up" | Specialists by concern (architecture, edge cases, testing), 1-2 rounds |
 
-1. **Team roster** — 1-5 agents, each with a role name, a one-line brief describing their angle, and optionally a Skills field listing capabilities it needs (e.g., `web search`, `coding standards`). Roles without a Skills field work from reasoning alone.
-2. **Round structure** — what each round investigates (default 2 rounds, max 4)
+Tasks often blend types. Pick the dominant one and let it guide composition, but don't force-fit.
+
+#### Scale to complexity
+
+- **Simple tasks** — single round, 1-3 roles, brief plan.
+- **Complex tasks** — multiple rounds, more roles, detailed plan.
+
+#### Propose the plan
+
+1. **Task type** — one line stating what kind of task this is and why.
+2. **Team roster** — 1-5 agents, each with a role name, a one-line brief describing their angle, and optionally a Skills field listing capabilities it needs (e.g., `web search`, `coding standards`). Roles without a Skills field work from reasoning alone.
+3. **Round structure** — what each round investigates (default 2 rounds, max 4).
+
+#### Example compositions
+
+**"Should we use Postgres or SQLite for this project?"** (Decision-making)
+- Round 1: Postgres Advocate, SQLite Advocate, Requirements Analyst
+- Round 2: Devil's Advocate (stress-tests the emerging winner)
+
+**"Research the current state of WebAssembly outside the browser"** (Research)
+- Round 1: Industry Surveyor (`web search`), Technical Analyst, Use-Case Mapper
+
+**"Design a notification system for our app"** (Creative + Implementation)
+- Round 1: UX Designer, Systems Architect, Prior Art Researcher (`web search`)
+- Round 2: Edge Case Analyst (informed by Round 1)
 
 Present the plan and wait for user approval. Adjust if they request changes.
 

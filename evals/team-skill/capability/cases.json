@@ -1,0 +1,526 @@
+{
+  "suite": "team-skill",
+  "category": "capability",
+  "cases": [
+    {
+      "id": "TC-01",
+      "prompt": "Research the current state of local-first software — who's building what, what patterns are emerging, and where the gaps are.",
+      "context": "Send directly after summoning Tab. No prior team activity.",
+      "expected": "Research task. 2 rounds, 3-4 agents. Search-heavy roles. Concrete citations in output.",
+      "assertions": [
+        {
+          "name": "P0: Scoping appropriate",
+          "check": "Tab skips scoping or asks at most 1 question — the prompt is specific enough",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab skip the scoping phase or ask at most 1 clarifying question before proposing a plan? Asking 2+ questions would be excessive for this specific prompt. Answer PASS (0-1 questions), FAIL (2+ questions), or UNKNOWN."
+        },
+        {
+          "name": "P1a: Task classification",
+          "check": "Tab labels this as Research (or equivalent)",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab explicitly classify this task as 'Research' or a synonymous label (e.g., 'investigation', 'survey')? Answer PASS (correct classification stated), FAIL (wrong type or not stated), or UNKNOWN."
+        },
+        {
+          "name": "P1b: Team composition",
+          "check": "Roles include search-heavy archetypes relevant to surveying a technology landscape",
+          "type": "model",
+          "grader_prompt": "Review the team plan in the transcript. Do the proposed roles make sense for surveying a technology landscape? Good examples: Industry Surveyor, Technical Analyst, Ecosystem Mapper. Bad examples: generic 'Researcher 1' and 'Researcher 2' with no differentiation. Answer PASS (distinct, relevant roles), FAIL (generic or mismatched roles), or UNKNOWN."
+        },
+        {
+          "name": "P1c: Complexity scaling",
+          "check": "2 rounds, 3-4 agents. Appropriate for a broad research task.",
+          "type": "model",
+          "grader_prompt": "Review the team plan. Did Tab propose approximately 2 rounds and 3-4 agents? Slight variations (2 rounds/2 agents or 2 rounds/5 agents) are acceptable if justified. 1 round with 1 agent would be under-scaled. Answer PASS (appropriate scale), FAIL (grossly over or under-scaled), or UNKNOWN."
+        },
+        {
+          "name": "P2a: File output structure",
+          "check": "Output files at .tab/team/<run-id>/round-N/<role>.md",
+          "type": "script"
+        },
+        {
+          "name": "P2b: Context curation",
+          "check": "Inter-round briefs are curated and under 500 words per agent",
+          "type": "model",
+          "grader_prompt": "Review the transcript for inter-round context passing. Were the briefs given to Round 2 agents curated summaries (under ~500 words each) rather than full Round 1 outputs dumped verbatim? If only 1 round occurred, answer N/A. Answer PASS (curated), FAIL (raw dumps or over 500 words), N/A (single round), or UNKNOWN."
+        },
+        {
+          "name": "P3a: Synthesis file",
+          "check": "synthesis.md exists in run directory with >50 words of integrated narrative",
+          "type": "script"
+        },
+        {
+          "name": "P3b: Synthesis delivery",
+          "check": "Tab presents a substantive summary in its own voice in conversation",
+          "type": "model",
+          "grader_prompt": "Review the transcript after agents completed. Did Tab present a substantive synthesis in conversation — summarizing findings in its own voice (warm, witty, conversational per its persona), not just saying 'see the file'? Answer PASS (substantive, in-voice synthesis), FAIL (no synthesis or 'see the file' only), or UNKNOWN."
+        },
+        {
+          "name": "Output quality: Citations",
+          "check": "Agent outputs include concrete examples, projects, or citations — not vague generalities",
+          "type": "model",
+          "grader_prompt": "Review the agent output files. Do they contain concrete examples (specific projects, companies, tools, papers) rather than vague statements like 'many companies are exploring this'? At least 3 specific examples across all outputs is the minimum bar. Answer PASS (concrete citations present), FAIL (vague generalities only), or UNKNOWN."
+        },
+        {
+          "name": "C1: Round cap",
+          "check": "No more than 4 rounds",
+          "type": "script"
+        },
+        {
+          "name": "C2: Agent output cap",
+          "check": "Each agent output file is under 1000 words",
+          "type": "script"
+        }
+      ],
+      "tags": ["task-type", "research"]
+    },
+    {
+      "id": "TC-02",
+      "prompt": "Should I use Postgres or SQLite for a side project that starts single-user but might grow to multi-tenant?",
+      "context": "Send directly after summoning Tab. No prior team activity.",
+      "expected": "Decision-making task. 2 rounds, 3 agents. Advocates for each option + critic. Clear recommendation in synthesis.",
+      "assertions": [
+        {
+          "name": "P0: Scoping appropriate",
+          "check": "Tab skips scoping or asks at most 1 constraint question",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab skip scoping or ask at most 1 clarifying question? The prompt provides enough context (side project, single-user, might grow). Answer PASS (0-1 questions), FAIL (2+ questions), or UNKNOWN."
+        },
+        {
+          "name": "P1a: Task classification",
+          "check": "Tab labels this as Decision-making (or equivalent)",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab classify this as a 'Decision-making' task or equivalent (e.g., 'comparison', 'trade-off analysis')? Answer PASS (correct classification), FAIL (wrong type or not stated), or UNKNOWN."
+        },
+        {
+          "name": "P1b: Team composition",
+          "check": "Team includes advocates for each DB option plus a critic or synthesizer role",
+          "type": "model",
+          "grader_prompt": "Review the team plan. Does it include an advocate or specialist for Postgres, an advocate or specialist for SQLite, and a critic/synthesizer/devil's advocate role? Answer PASS (all three perspectives present), FAIL (missing a key perspective), or UNKNOWN."
+        },
+        {
+          "name": "P1c: Complexity scaling",
+          "check": "2 rounds proposed. Round 1 = advocacy, Round 2 = stress-test or devil's advocate",
+          "type": "model",
+          "grader_prompt": "Review the team plan. Does it propose approximately 2 rounds with a clear progression (e.g., Round 1 for initial advocacy/analysis, Round 2 for stress-testing or challenging the recommendation)? Answer PASS (appropriate structure), FAIL (no progression or grossly over/under-scaled), or UNKNOWN."
+        },
+        {
+          "name": "P2a: File output structure",
+          "check": "Output files at .tab/team/<run-id>/round-N/<role>.md",
+          "type": "script"
+        },
+        {
+          "name": "P2b: Context curation",
+          "check": "Inter-round briefs curated and under 500 words per agent",
+          "type": "model",
+          "grader_prompt": "Review the transcript for inter-round context passing. Were Round 2 briefs curated summaries under ~500 words each? Answer PASS (curated), FAIL (raw dumps), N/A (single round), or UNKNOWN."
+        },
+        {
+          "name": "P3a: Synthesis file",
+          "check": "synthesis.md exists with >50 words of integrated narrative",
+          "type": "script"
+        },
+        {
+          "name": "P3b: Synthesis delivery",
+          "check": "Tab presents a substantive summary in its own voice",
+          "type": "model",
+          "grader_prompt": "Review the transcript after agents completed. Did Tab deliver a clear recommendation with reasoning in its own voice? Answer PASS (substantive, opinionated synthesis), FAIL (no synthesis, vague, or just 'see the file'), or UNKNOWN."
+        },
+        {
+          "name": "Output quality: Clear recommendation",
+          "check": "Synthesis includes a definitive recommendation, not a wishy-washy 'it depends'",
+          "type": "model",
+          "grader_prompt": "Review the synthesis. Does Tab commit to a recommendation (e.g., 'Start with SQLite, migrate when you need to' or 'Go with Postgres from day one') rather than a non-committal 'it depends on your needs'? Nuance is fine, but there should be a clear lean. Answer PASS (clear recommendation), FAIL (non-committal), or UNKNOWN."
+        },
+        {
+          "name": "C1: Round cap",
+          "check": "No more than 4 rounds",
+          "type": "script"
+        },
+        {
+          "name": "C2: Agent output cap",
+          "check": "Each agent output file is under 1000 words",
+          "type": "script"
+        }
+      ],
+      "tags": ["task-type", "decision-making"]
+    },
+    {
+      "id": "TC-03",
+      "prompt": "Why do LLM apps have such high tail latency? Break down every layer of the stack that contributes.",
+      "context": "Send directly after summoning Tab. No prior team activity.",
+      "expected": "Analysis task. 1-2 rounds, 3-4 agents. Domain specialists. Structured by layer.",
+      "assertions": [
+        {
+          "name": "P0: Scoping appropriate",
+          "check": "Tab skips scoping — request is clear",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab skip scoping entirely or ask at most 1 question? This prompt is specific and scoped. Answer PASS (0-1 questions), FAIL (2+ questions), or UNKNOWN."
+        },
+        {
+          "name": "P1a: Task classification",
+          "check": "Tab labels this as Analysis (or equivalent)",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab classify this as an 'Analysis' task or equivalent? Answer PASS (correct), FAIL (wrong or unstated), or UNKNOWN."
+        },
+        {
+          "name": "P1b: Team composition",
+          "check": "Roles include domain specialists covering different stack layers",
+          "type": "model",
+          "grader_prompt": "Review the team plan. Do the roles cover different layers of the LLM inference stack (e.g., model/inference layer, network/IO, application layer, infrastructure)? Answer PASS (distinct layer coverage), FAIL (generic or overlapping roles), or UNKNOWN."
+        },
+        {
+          "name": "P1c: Complexity scaling",
+          "check": "1-2 rounds, 3-4 agents",
+          "type": "model",
+          "grader_prompt": "Review the team plan. Is the scale appropriate — roughly 1-2 rounds and 3-4 agents for a technical deep-dive? Answer PASS (appropriate), FAIL (grossly over or under-scaled), or UNKNOWN."
+        },
+        {
+          "name": "P2a: File output structure",
+          "check": "Output files at .tab/team/<run-id>/round-N/<role>.md",
+          "type": "script"
+        },
+        {
+          "name": "P3a: Synthesis file",
+          "check": "synthesis.md exists with >50 words",
+          "type": "script"
+        },
+        {
+          "name": "P3b: Synthesis delivery",
+          "check": "Tab presents synthesis in conversation in its own voice",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab deliver a substantive synthesis in conversation in its own voice? Answer PASS, FAIL, or UNKNOWN."
+        },
+        {
+          "name": "Output quality: Structured by layer",
+          "check": "Output is organized by stack layer, not a monolithic wall of prose",
+          "type": "model",
+          "grader_prompt": "Review the agent outputs and synthesis. Is the analysis structured by stack layer (tokenization, batching, network, decoding, etc.) rather than presented as unstructured prose? Answer PASS (structured), FAIL (unstructured), or UNKNOWN."
+        },
+        {
+          "name": "C1: Round cap",
+          "check": "No more than 4 rounds",
+          "type": "script"
+        },
+        {
+          "name": "C2: Agent output cap",
+          "check": "Each agent output file is under 1000 words",
+          "type": "script"
+        }
+      ],
+      "tags": ["task-type", "analysis"]
+    },
+    {
+      "id": "TC-04",
+      "prompt": "Design a gamification system for a habit-tracking app aimed at adults who hate gamification.",
+      "context": "Send directly after summoning Tab. No prior team activity.",
+      "expected": "Creative task. 1-2 rounds, 2-3 agents. Diverse perspectives. Meaningfully different outputs.",
+      "assertions": [
+        {
+          "name": "P0: Scoping appropriate",
+          "check": "Tab skips scoping or asks one light question",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab skip scoping or ask at most 1 light question? The prompt is specific enough. Answer PASS (0-1 questions), FAIL (2+ questions), or UNKNOWN."
+        },
+        {
+          "name": "P1a: Task classification",
+          "check": "Tab labels this as Creative (or Creative + Implementation blend)",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab classify this as a 'Creative' task or a creative blend? Answer PASS (correct), FAIL (wrong or unstated), or UNKNOWN."
+        },
+        {
+          "name": "P1b: Team composition",
+          "check": "Roles bring diverse perspectives (e.g., Behavioral Psychologist, UX Designer, Skeptic)",
+          "type": "model",
+          "grader_prompt": "Review the team plan. Do the roles represent genuinely diverse perspectives (different disciplines, not just 'Creative Agent 1' and 'Creative Agent 2')? Answer PASS (diverse, distinct roles), FAIL (generic or homogeneous), or UNKNOWN."
+        },
+        {
+          "name": "P1c: Complexity scaling",
+          "check": "1-2 rounds, 2-3 agents. Not over-scaled.",
+          "type": "model",
+          "grader_prompt": "Review the team plan. Is the scale appropriate — 1-2 rounds and 2-3 agents? This is a focused creative task, not a research project. Over-scaling (3+ rounds, 5 agents) would be excessive. Answer PASS (appropriate), FAIL (over or under-scaled), or UNKNOWN."
+        },
+        {
+          "name": "P2a: File output structure",
+          "check": "Output files at .tab/team/<run-id>/round-N/<role>.md",
+          "type": "script"
+        },
+        {
+          "name": "P3a: Synthesis file",
+          "check": "synthesis.md exists with >50 words",
+          "type": "script"
+        },
+        {
+          "name": "P3b: Synthesis delivery",
+          "check": "Tab presents synthesis in conversation in its own voice",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab deliver a substantive synthesis in conversation in its own voice? Answer PASS, FAIL, or UNKNOWN."
+        },
+        {
+          "name": "Output quality: Diverse outputs",
+          "check": "Agent outputs are meaningfully different from each other — not rephrased versions of the same idea",
+          "type": "model",
+          "grader_prompt": "Review the agent output files. Do they present meaningfully different approaches, perspectives, or ideas? Or are they essentially the same idea rephrased? Answer PASS (genuinely diverse), FAIL (redundant or homogeneous), or UNKNOWN."
+        },
+        {
+          "name": "C1: Round cap",
+          "check": "No more than 4 rounds",
+          "type": "script"
+        },
+        {
+          "name": "C2: Agent output cap",
+          "check": "Each agent output file is under 1000 words",
+          "type": "script"
+        }
+      ],
+      "tags": ["task-type", "creative"]
+    },
+    {
+      "id": "TC-05",
+      "prompt": "Build a CLI tool in Python that takes a directory of markdown files and generates a static site with a table of contents.",
+      "context": "Send directly after summoning Tab. No prior team activity.",
+      "expected": "Implementation task. 1-2 rounds, 2-3 agents. Design decisions in output.",
+      "assertions": [
+        {
+          "name": "P0: Scoping appropriate",
+          "check": "Tab skips scoping — request is concrete",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab skip scoping? This is a concrete implementation request. Answer PASS (0-1 questions), FAIL (2+ questions), or UNKNOWN."
+        },
+        {
+          "name": "P1a: Task classification",
+          "check": "Tab labels this as Implementation (or equivalent)",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab classify this as 'Implementation' or equivalent (e.g., 'build', 'engineering')? Answer PASS (correct), FAIL (wrong or unstated), or UNKNOWN."
+        },
+        {
+          "name": "P1b: Team composition",
+          "check": "Roles split by concern (Architect, Edge Case, Quality)",
+          "type": "model",
+          "grader_prompt": "Review the team plan. Do the roles cover different implementation concerns (architecture/design, edge cases/robustness, testing/quality)? Answer PASS (concern-separated roles), FAIL (overlapping or generic), or UNKNOWN."
+        },
+        {
+          "name": "P1c: Complexity scaling",
+          "check": "1-2 rounds, 2-3 agents",
+          "type": "model",
+          "grader_prompt": "Review the team plan. Is the scale appropriate for a focused implementation task — 1-2 rounds and 2-3 agents? Answer PASS (appropriate), FAIL (over or under-scaled), or UNKNOWN."
+        },
+        {
+          "name": "P2a: File output structure",
+          "check": "Output files at .tab/team/<run-id>/round-N/<role>.md",
+          "type": "script"
+        },
+        {
+          "name": "P3a: Synthesis file",
+          "check": "synthesis.md exists with >50 words",
+          "type": "script"
+        },
+        {
+          "name": "P3b: Synthesis delivery",
+          "check": "Tab presents synthesis in conversation in its own voice",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab deliver a substantive synthesis in its own voice? Answer PASS, FAIL, or UNKNOWN."
+        },
+        {
+          "name": "Output quality: Actionable design",
+          "check": "Output includes concrete design decisions (file structure, libraries, CLI args), not abstract patterns",
+          "type": "model",
+          "grader_prompt": "Review the agent outputs. Do they contain concrete, actionable design decisions — specific libraries to use, file structure, CLI argument design, edge case handling — rather than abstract design patterns or generic advice? Answer PASS (concrete and actionable), FAIL (abstract or vague), or UNKNOWN."
+        },
+        {
+          "name": "C1: Round cap",
+          "check": "No more than 4 rounds",
+          "type": "script"
+        },
+        {
+          "name": "C2: Agent output cap",
+          "check": "Each agent output file is under 1000 words",
+          "type": "script"
+        }
+      ],
+      "tags": ["task-type", "implementation"]
+    },
+    {
+      "id": "TC-08",
+      "prompt": "Should I build my own auth system or use a third-party service? Research the options and then design whichever approach is better.",
+      "context": "Send directly after summoning Tab. No prior team activity.",
+      "expected": "Blended task (Decision + Research). 2+ rounds, 3-5 agents. Round 1 research, Round 2 design pivot.",
+      "assertions": [
+        {
+          "name": "P1a: Task classification",
+          "check": "Tab acknowledges the blend of task types",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab acknowledge that this task blends multiple types (research + decision-making, or research + implementation)? Answer PASS (blend acknowledged), FAIL (classified as single type only), or UNKNOWN."
+        },
+        {
+          "name": "P1b: Team composition",
+          "check": "Round 1 includes research/advocacy roles; Round 2 pivots to design",
+          "type": "model",
+          "grader_prompt": "Review the team plan. Does Round 1 include research or advocacy roles for both options (build vs buy), and does Round 2 pivot to design/implementation for the chosen approach? Answer PASS (clear progression), FAIL (no pivot or single-phase), or UNKNOWN."
+        },
+        {
+          "name": "P2a: File output structure",
+          "check": "Output files at .tab/team/<run-id>/round-N/<role>.md",
+          "type": "script"
+        },
+        {
+          "name": "P2b: Context curation",
+          "check": "Round 2 agents receive curated briefs under 500 words",
+          "type": "model",
+          "grader_prompt": "Review the transcript for inter-round context. Were Round 2 agent briefs curated summaries (under ~500 words each) of Round 1 findings? Answer PASS (curated), FAIL (raw dumps or excessive), or UNKNOWN."
+        },
+        {
+          "name": "Status update after Round 1",
+          "check": "Tab posts a status update summarizing Round 1 before proceeding",
+          "type": "model",
+          "grader_prompt": "Review the transcript between rounds. Did Tab post a status update after Round 1 summarizing findings and/or gaps before launching Round 2? Answer PASS (status update present), FAIL (no update, jumped straight to Round 2), or UNKNOWN."
+        },
+        {
+          "name": "Parallel execution",
+          "check": "Agents within the same round run in parallel",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Were agents within the same round dispatched in parallel (multiple Agent tool calls in one response) rather than sequentially? Answer PASS (parallel), FAIL (sequential), or UNKNOWN."
+        },
+        {
+          "name": "P3a: Synthesis file",
+          "check": "synthesis.md exists with >50 words",
+          "type": "script"
+        },
+        {
+          "name": "P3b: Synthesis delivery",
+          "check": "Tab presents synthesis in conversation in its own voice",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab deliver a substantive synthesis in its own voice? Answer PASS, FAIL, or UNKNOWN."
+        },
+        {
+          "name": "C1: Round cap",
+          "check": "No more than 4 rounds",
+          "type": "script"
+        },
+        {
+          "name": "C2: Agent output cap",
+          "check": "Each agent output file is under 1000 words",
+          "type": "script"
+        }
+      ],
+      "tags": ["stress-test", "blended"]
+    },
+    {
+      "id": "TC-09",
+      "prompt": "Analyze the impact of remote work from every angle — technical infrastructure, HR policy, legal compliance, employee wellbeing, company culture, real estate costs, and environmental effects.",
+      "context": "Send directly after summoning Tab. No prior team activity.",
+      "expected": "Analysis task. 2 rounds, 5 agents max. Consolidates 7 angles into composite roles.",
+      "assertions": [
+        {
+          "name": "P1b: Role consolidation",
+          "check": "Tab consolidates 7 angles into 5 or fewer composite roles",
+          "type": "model",
+          "grader_prompt": "Review the team plan. The prompt lists 7 angles but the agent cap is 5. Did Tab consolidate related angles into composite roles (e.g., combining HR + Legal, or Culture + Wellbeing) rather than dropping angles or exceeding the cap? Answer PASS (consolidated within cap, all angles covered), FAIL (exceeded cap or dropped angles), or UNKNOWN."
+        },
+        {
+          "name": "Coverage: All 7 angles addressed",
+          "check": "All 7 angles from the prompt appear somewhere in the outputs",
+          "type": "model",
+          "grader_prompt": "Review all agent outputs and the synthesis. Are all 7 angles from the prompt addressed: (1) technical infrastructure, (2) HR policy, (3) legal compliance, (4) employee wellbeing, (5) company culture, (6) real estate costs, (7) environmental effects? List any missing angles. Answer PASS (all 7 covered), FAIL (any missing), or UNKNOWN."
+        },
+        {
+          "name": "P2b: Context curation",
+          "check": "Inter-round context under 500 words per agent",
+          "type": "model",
+          "grader_prompt": "Review inter-round context passing. Were briefs under ~500 words per agent? Answer PASS, FAIL, or UNKNOWN."
+        },
+        {
+          "name": "Status updates",
+          "check": "Status update posted after each round",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab post a status update after each round? Answer PASS (updates after each round), FAIL (missing updates), or UNKNOWN."
+        },
+        {
+          "name": "P2a: File output structure",
+          "check": "Output files at .tab/team/<run-id>/round-N/<role>.md",
+          "type": "script"
+        },
+        {
+          "name": "P3a: Synthesis file",
+          "check": "synthesis.md exists with >50 words",
+          "type": "script"
+        },
+        {
+          "name": "P3b: Synthesis delivery",
+          "check": "Tab presents synthesis in its own voice",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab deliver a substantive synthesis in its own voice? Answer PASS, FAIL, or UNKNOWN."
+        },
+        {
+          "name": "C1: Round cap",
+          "check": "No more than 4 rounds",
+          "type": "script"
+        },
+        {
+          "name": "C2: Agent output cap",
+          "check": "Each agent output file is under 1000 words",
+          "type": "script"
+        }
+      ],
+      "tags": ["stress-test", "agent-cap"]
+    },
+    {
+      "id": "TC-10",
+      "prompt": "Research whether Python 3.13's JIT compiler actually improves performance for typical numpy-heavy data science workloads.",
+      "context": "Send directly after summoning Tab. No prior team activity.",
+      "expected": "Research task. Simple: 1 round, 1-2 agents. Narrow, focused output.",
+      "assertions": [
+        {
+          "name": "P0: Scoping appropriate",
+          "check": "Tab skips scoping — request is precise",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab skip scoping? This is a precise, narrow research question. Answer PASS (0 questions), FAIL (asked questions), or UNKNOWN."
+        },
+        {
+          "name": "P1c: Complexity scaling — small team",
+          "check": "1 round, 1-2 agents. Not over-scaled for a narrow question.",
+          "type": "model",
+          "grader_prompt": "Review the team plan. Did Tab propose a small team (1-2 agents, 1 round) appropriate for this narrow, specific question? Proposing 3+ agents or 2+ rounds would be over-scaled. Answer PASS (appropriately small), FAIL (over-scaled), or UNKNOWN."
+        },
+        {
+          "name": "P1b: Focused roles",
+          "check": "Roles are specific to the question (benchmarking, CPython internals), not generic",
+          "type": "model",
+          "grader_prompt": "Review the team plan. Are the roles specific to this question (e.g., Benchmarking Analyst, CPython Internals Specialist, Performance Engineer) rather than generic (e.g., 'Researcher')? Answer PASS (focused roles), FAIL (generic), or UNKNOWN."
+        },
+        {
+          "name": "Output quality: Stays on topic",
+          "check": "Output addresses numpy workloads specifically, doesn't drift to general Python performance",
+          "type": "model",
+          "grader_prompt": "Review the agent outputs and synthesis. Does the output focus specifically on numpy-heavy data science workloads and the JIT compiler's impact on them? Or does it drift into general Python 3.13 features or general performance advice? Answer PASS (focused on numpy + JIT), FAIL (drifted off topic), or UNKNOWN."
+        },
+        {
+          "name": "P2a: File output structure",
+          "check": "Output files at .tab/team/<run-id>/round-N/<role>.md",
+          "type": "script"
+        },
+        {
+          "name": "P3a: Synthesis file",
+          "check": "synthesis.md exists with >50 words",
+          "type": "script"
+        },
+        {
+          "name": "P3b: Synthesis delivery",
+          "check": "Tab presents synthesis in its own voice",
+          "type": "model",
+          "grader_prompt": "Review the transcript. Did Tab deliver a substantive synthesis in its own voice? Answer PASS, FAIL, or UNKNOWN."
+        },
+        {
+          "name": "C1: Round cap",
+          "check": "No more than 4 rounds",
+          "type": "script"
+        },
+        {
+          "name": "C2: Agent output cap",
+          "check": "Each agent output file is under 1000 words",
+          "type": "script"
+        }
+      ],
+      "tags": ["stress-test", "narrow-scope"]
+    }
+  ]
+}
