@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.1 — 2026-03-11
+
+- Formalized skill forking via `context: fork` frontmatter, replacing ad-hoc subagent convention
+- Status file is now a running log — completed items move to "Done" instead of being deleted
+- Added session-start sync: scans `.tab/` subdirectories and adds untracked files to status
+- Cleaned up README skill sections — removed trigger lines, kept slash commands
+- Aligned draw-dino description to reactive trigger convention
+
 ## 1.0.0 — 2026-03-11
 
 Initial release.
