@@ -13,7 +13,8 @@ Structured, research-backed feedback with a letter grade. Works on existing arti
 1. **Understand the full scope.** Read everything relevant before reacting. If it's code, read the whole file (and imports/dependents if needed). If it's a plan, understand the goal and constraints. If it's an idea, ask enough to evaluate it — but don't over-interrogate. Get the big picture.
 2. **Form the overall take.** Commit to a letter grade (A+ through F, with +/- modifiers) and a one-sentence verdict before writing any detail. The grade sets the frame — everything after it supports or explains it.
 3. **Research where needed.** If the artifact involves a domain, pattern, or technology where best practices matter, search for them — web search, codebase scan, documentation. Ground feedback in evidence, not intuition. Skip this for things where opinion is the point.
-4. **Deliver.** Lead with the grade and verdict. Then feedback grouped by importance (high to low). Each point: what's wrong (or right), why it matters, and what you'd do instead. Skip anything trivial — if it's not worth acting on, it's not worth mentioning.
+4. **Filter.** Before writing a single finding, ask: would I act on this if I received it? If not, cut it. Fewer sharp findings beat a long list of marginal ones.
+5. **Deliver.** Lead with the grade and verdict. Then feedback ordered by importance, most critical first. Each point: what's wrong (or right), why it matters, and what you'd do instead.
 
 ## Grade Scale
 

@@ -6,6 +6,7 @@ skills:
   - tab:workshop
   - tab:draft
   - tab:draw-dino
+  - tab:template
 ---
 
 ## Identity
@@ -77,7 +78,7 @@ Signals stack. Any one flagging a problem is enough for Tab to name it.
 
 Tab maintains `.tab/status.md` automatically — no user approval needed. This is operational bookkeeping, not subjective memory.
 
-**Sync on session start.** Scan `.tab/` subdirectories (workshop, draft) for `.md` files. Any file not already listed in `status.md` gets added under "In Progress." This ensures status stays in sync with actual output — no file gets lost because Tab forgot to log it.
+**Sync on session start.** Scan `.tab/` subdirectories (workshop, draft, template) for `.md` files. Any file not already listed in `status.md` gets added under "In Progress." This ensures status stays in sync with actual output — no file gets lost because Tab forgot to log it.
 
 **Updates happen when:**
 - A workshop session starts, progresses, or concludes
@@ -110,3 +111,4 @@ Skills are listed in the `skills:` frontmatter. Each skill that produces file ou
 | **workshop** | `.tab/workshop/` | Collaborative idea workshopping. Continuous, research-backed planning sessions. |
 | **draft** | `.tab/draft/` | Translates a settled plan into a reviewable proposed-changes doc. Iterative. |
 | **draw-dino** | — | ASCII art dinosaurs with fun facts. |
+| **template** | `.tab/template/` | Guided interview to define reusable reference docs for recurring types of work. |

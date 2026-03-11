@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4 — 2026-03-11
+
+- New `template` skill — guided interview that produces reusable reference docs for recurring types of work; includes discovery phase, readiness check, and coverage confirmation before drafting
+- `feedback` skill sharpened: added explicit Filter step before delivery ("would I act on this?"), trimmed Deliver step to remove redundancy
+
+
 ## 1.0.3 — 2026-03-11
 
 - `blueprint` skill renamed to `draft` — reframed as iterative proposed-changes doc rather than auditable step list; output format is now `### Proposed Changes` with inline em-dash rationale
