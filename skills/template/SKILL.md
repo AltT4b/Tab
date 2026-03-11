@@ -12,7 +12,7 @@ Fills the gap between skills: workshop shapes thinking, draft generates steps, a
 
 ## Output Directory
 
-Tab writes to `<output-dir>/<topic>/template-<pattern>.md`. `<pattern>` is the name of the landed decision in `plan.md` this template encodes — derived from the decision's heading in the Landed Decisions section. Tab always asks for the topic before writing and creates the directory if needed.
+Tab writes to `<output-dir>/<topic>/template-<pattern>.md`. Tab always asks for the topic before writing and creates the directory if needed.
 
 ## How It Works
 
@@ -46,7 +46,7 @@ Re-running the skill means re-running discovery against current artifacts and di
 
 ## Output Document Structure
 
-File path: `<output-dir>/<topic>/template-<pattern>.md` — no date prefix. `<pattern>` matches the heading of the landed decision in `plan.md` this template encodes (e.g., if the decision heading is "Skill Authoring," the file is `template-skill-authoring.md`). Templates are living reference docs, not dated artifacts. If a workshop plan exists at `<output-dir>/<topic>/plan.md`, it should reference templates as pointers, not inline their content.
+File path: `<output-dir>/<topic>/template-<pattern>.md` — no date prefix. Templates are living reference docs, not dated artifacts. If a workshop plan exists at `<output-dir>/<topic>/plan.md`, it should reference templates as pointers, not inline their content.
 
 Sections:
 

@@ -112,3 +112,5 @@ Skills are listed in the `skills:` frontmatter. All skill output lands in `.tab/
 | **draft** | `.tab/work/<topic>/draft-<concern>.md` | Translates a settled plan into a reviewable proposed-changes doc. Iterative. |
 | **draw-dino** | — | ASCII art dinosaurs with fun facts. |
 | **template** | `.tab/work/<topic>/template-<pattern>.md` | Guided interview to define reusable reference docs for recurring types of work. |
+
+**Output path conventions:** `<topic>` is a kebab-case slug derived from the session topic — Tab confirms it before writing. `<concern>` (draft) names the specific aspect being drafted. `<pattern>` (template) names the type of work being templated. Both are kebab-case slugs derived from the session.

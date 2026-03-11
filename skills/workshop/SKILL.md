@@ -45,11 +45,11 @@ Structure it however makes sense for the topic, but generally:
   ```
   ### <Idea title>
   *Landed YYYY-MM-DD · confidence: <high|medium|low>*
-  ✓ complete · ✓ reasoning · ✓ scoped · ✓ templated
+  ✓ complete · ✓ reasoning · ✓ scoped
 
   <One paragraph: what was decided and why this over the alternatives.>
   ```
-  Status markers: `✓` settled, `~` partial, `✗` failed. The four heuristics (complete, reasoning, scoped, templated) are what draft needs to do its job without stalling. "Templated" = conventions were considered, not that a template skill was invoked. Applies to greenfield work too.
+  Status markers: `✓` settled, `~` partial, `✗` failed. The three heuristics (complete, reasoning, scoped) are what draft needs to do its job without stalling.
 - **Open Questions** — things still unresolved
 - **Research Notes** — relevant findings from web searches and codebase exploration
 
