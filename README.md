@@ -40,13 +40,7 @@ Tab comes packaged with Skills. Skills activate automatically based on what you 
 
 **Slash command:** `/workshop [idea or problem]`
 
-Sustained collaborative planning. Tab researches the landscape (web search, codebase exploration), lays down a rough plan, then iterates with you in an open loop -- reacting to your feedback, researching before proposing, and updating a living document as decisions land. The session ends when you say it does, and the final doc is restructured so a cold reader could implement from it. Output goes to `.tab/work/<topic>/plan.md`.
-
-### feedback
-
-**Slash command:** `/feedback [artifact or idea]`
-
-Structured, graded (A-F) feedback on code, prose, plans, or ideas. Leads with a letter grade, skips nitpicks, groups feedback by importance.
+Sustained collaborative planning. Tab researches the landscape (web search, codebase exploration), lays down a rough plan, then iterates with you in an open loop -- reacting to your feedback, researching before proposing, and updating a living document as decisions land. The session ends when you say it does, and the final doc is restructured so a cold reader could implement from it.
 
 ### draw-dino
 
@@ -66,24 +60,18 @@ Tab greets and orients on session start. Introduces itself to new users, or pick
 
 ```
 agents/
-  tab.md                # Main agent — hub, persona, skills via frontmatter
-  code-reviewer.md      # Specialist: reviews PRs and code changes
-  implementer.md        # Specialist: implements changes in isolated worktrees
-  researcher.md         # Specialist: deep research across codebases and the web
+  tab.md                # The agent — persona, voice, rules, behaviors
 skills/
   workshop/SKILL.md     # Collaborative idea workshopping and planning
-  feedback/SKILL.md     # Structured, graded feedback
   draw-dino/SKILL.md    # ASCII art dinosaurs
 .claude-plugin/
-  plugin.json           # Plugin manifest — lists agents, auto-discovers skills
+  plugin.json           # Plugin manifest
 settings.json           # Activates Tab as the primary persona
 ```
 
-### How Agents Work
+### How It Works
 
-**`agents/tab.md`** is the main agent (the hub). Its YAML frontmatter declares identity and lists skills (`tab:feedback`, `tab:workshop`, `tab:draw-dino`). The body defines voice, rules, and behaviors.
-
-**Specialists** (`agents/code-reviewer.md`, `agents/implementer.md`, `agents/researcher.md`) are focused subagents — one task, one job. Tab delegates to them automatically based on the task. They run in forks and return results to Tab; the user never interacts with them directly. Each specialist must be listed in the `"agents"` array in `plugin.json`.
+**`agents/tab.md`** is the agent definition. Its YAML frontmatter declares identity and lists skills (`tab:workshop`, `tab:draw-dino`). The body defines voice, rules, and behaviors.
 
 **`settings.json`** at the plugin root sets `"agent": "tab:Tab"`, which tells Claude Code to load Tab as the primary persona. This is the mechanism that makes Tab "just work" after install -- no setup commands needed.
 
@@ -104,7 +92,7 @@ argument-hint: "[species]"
 - **`description`** -- doubles as the **trigger condition**. Write it as "Use when the user says X" (reactive), not "This skill does X" (descriptive). The description tells the model *when* to activate; the body tells it *what* to do.
 - **`argument-hint`** -- optional. Hints at accepted arguments.
 
-Skills that produce file output write to `.tab/work/<topic>/`.
+Skills that produce artifacts write them wherever makes sense for the project.
 
 ### Add a New Skill
 
@@ -122,7 +110,7 @@ Skills that produce file output write to `.tab/work/<topic>/`.
 
 - **Naming:** lowercase, hyphenated directories and files.
 - **Git commits:** conventional prefixes -- `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`.
-- **Output:** all skill output goes to `.tab/work/<topic>/`.
+- **Output:** skills write artifacts wherever makes sense for the project — no fixed output directory.
 - **No code:** this project has no tests, no linting, no build. If you're writing code, you're in the wrong repo.
 
 ---

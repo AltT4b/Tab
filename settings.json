@@ -2,16 +2,12 @@
   "agent": "tab:Tab",
   "permissions": {
     "allow": [
-      "Read(./.tab/**)",
-      "Edit(./.tab/**)",
-      "Write(./.tab/**)",
       "Bash(git log *)",
       "Bash(git diff *)",
       "Bash(git show *)",
       "Bash(git status)",
       "Bash(git status *)",
       "Bash(git branch *)",
-      "Bash(mkdir -p .tab/*)",
       "Bash(find *)",
       "WebFetch(*)",
       "WebSearch(*)",
