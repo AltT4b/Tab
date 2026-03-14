@@ -17,7 +17,6 @@ skills/                 ← plugin-level skills discovered automatically from th
   workshop/             ← collaborative idea workshopping and planning
   draft/                ← translates settled plans into proposed-changes docs
   feedback/             ← structured, graded feedback
-  template/             ← guided interview to define reusable reference docs
   draw-dino/            ← ASCII art dinosaurs
 .claude-plugin/
   plugin.json           ← plugin manifest for Claude Code

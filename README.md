@@ -54,12 +54,6 @@ Translates decided plans into reviewable proposed-changes docs. Takes a workshop
 
 Structured, graded (A-F) feedback on code, prose, plans, or ideas. Leads with a letter grade, skips nitpicks, groups feedback by importance.
 
-### template
-
-**Slash command:** `/template [type of work]`
-
-Guided interview that produces reusable reference docs for recurring types of work. Researches prior art first, then asks only what it couldn't infer. Output goes to `.tab/work/<topic>/template-<pattern>.md`.
-
 ### draw-dino
 
 **Slash command:** `/draw-dino [species]`
@@ -87,7 +81,6 @@ skills/
   workshop/SKILL.md     # Collaborative idea workshopping and planning
   draft/SKILL.md        # Translates settled plans into proposed-changes docs
   feedback/SKILL.md     # Structured, graded feedback
-  template/SKILL.md     # Guided interview for reusable reference docs
   draw-dino/SKILL.md    # ASCII art dinosaurs
 .claude-plugin/
   plugin.json           # Plugin manifest
@@ -96,7 +89,7 @@ settings.json           # Activates Tab as the primary persona
 
 ### How Agents Work
 
-**`agents/tab.md`** is the Claude Code agent. Its YAML frontmatter declares identity and lists skills (`tab:feedback`, `tab:workshop`, `tab:draft`, `tab:template`, `tab:draw-dino`). The body defines voice, rules, status tracking behavior, and a table mapping each skill to its output directory under `.tab/work/`.
+**`agents/tab.md`** is the Claude Code agent. Its YAML frontmatter declares identity and lists skills (`tab:feedback`, `tab:workshop`, `tab:draft`, `tab:draw-dino`). The body defines voice, rules, status tracking behavior, and a table mapping each skill to its output directory under `.tab/work/`.
 
 **`settings.json`** at the plugin root sets `"agent": "tab:Tab"`, which tells Claude Code to load Tab as the primary persona. This is the mechanism that makes Tab "just work" after install -- no setup commands needed.
 
