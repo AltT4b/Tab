@@ -4,6 +4,7 @@ description: "Review pull requests and code changes for quality, patterns, and b
 context: fork
 agent: general-purpose
 model: sonnet
+background: true
 ---
 
 You are a code review specialist. Your job is to analyze code changes and return structured findings.

@@ -75,44 +75,21 @@ permissionMode: acceptEdits  # optional — auto-accept file edits without promp
 <Instructions for the specialist. What it does, how it works, output format.>
 ```
 
-Optional: add `skills: [tab:<skill-name>]` to inject skill definitions into the specialist's context at startup. No current specialists use this.
+Optional: add `skills: [tab:<skill-name>]` to inject skill definitions into the specialist's context at startup.
 
 ### Design principles
 
-- **One specialist per task, not per domain.** `code-reviewer`, not `tab-coding`. Each specialist has a single, clear job.
-- **Descriptions are routing contracts.** Two sentences max. First: what it does. Second: when to use it. Claude routes purely on LLM reasoning over descriptions — precision prevents misrouting.
-- **No Tab persona.** Specialists don't inherit Tab's voice or personality. They can define their own tone if it serves the work, but they're not Tab.
-- **Skill scoping is an allowlist.** Skills listed in frontmatter are injected into the specialist's context at startup. Skills not listed are not loaded.
-
-### Naming
-
-The name should read as a role or job title: `code-reviewer`, `implementer`, `test-writer`, `pr-summarizer`. Lowercase, hyphenated. No rigid formula — clarity beats convention.
-
-### Description format
-
-Two sentences. First: what it does. Second: when to use it.
-
-```
-"Review pull requests for quality and bugs. Use when the user asks for a code review or shares a diff."
-"Write unit and integration tests for existing code. Use when the user asks for tests or test coverage."
-```
-
-### Overlap rule
-
-If two specialists could both plausibly handle the same user request, sharpen the descriptions. The fix is always in the descriptions, not in routing logic.
-
-### Dispatch
-
-Specialists are dispatched via the Skill tool using their name (e.g., `tab:implementer`) and a free-form brief. Each dispatch is a fresh run — not a continuation. Dispatch behavior is defined in `tab.md`; don't restate it here.
+- **One specialist per task, not per domain.** `code-reviewer`, not `tab-coding`.
+- **Descriptions are routing contracts.** Two sentences: what it does, when to use it. Claude routes on descriptions alone — precision prevents misrouting. If two specialists overlap, sharpen the descriptions.
+- **No Tab persona.** Specialists can define their own tone, but they're not Tab.
+- **Name as a role.** `code-reviewer`, `implementer`, `test-writer`. Lowercase, hyphenated.
+- Dispatch behavior is defined in `tab.md`; don't restate it here.
 
 ## Conventions
 
-- **Naming**: lowercase, hyphenated for all directories and specialist files (e.g., `draw-dino`, `code-reviewer`).
-- **Frontmatter**: SKILL.md files use YAML frontmatter with `name`, `description`, and optionally `argument-hint`. The hub agent (`tab.md`) uses `name`, `description`, and `skills` at minimum. Specialist files use `name`, `description`, `context: fork`, and `agent`.
-- **Skill triggers**: the `description` field in SKILL.md frontmatter doubles as the trigger condition. Write it as "Use when the user says X" (reactive), not "This skill does X" (descriptive).
-- **Specialist triggers**: the `description` field is a routing contract. Write it as "<What it does>. <When to use it>."
-- **Skills vs. specialists**: if the work is conversational (back-and-forth with the user), it's a skill. If it's autonomous (task in, results out), it's a specialist. Most autonomous work should be a specialist, not a forked skill.
-- **Skill output directories**: file-writing skills use their own output directories (e.g., `.tab/work/<topic>/`). Skills that execute inline (feedback, draw-dino) don't write files.
-- **Skill-relative files**: skills can reference co-located files via `${CLAUDE_SKILL_DIR}/filename` in SKILL.md. No current skills use this, but it's available for skills that need templates, rubrics, or examples alongside their definition.
+- **Frontmatter**: SKILL.md files use `name`, `description`, and optionally `argument-hint`. Specialist files use `name`, `description`, `context: fork`, and `agent`.
+- **Skill triggers**: the `description` field doubles as the trigger condition. Write it as "Use when the user says X" (reactive), not "This skill does X" (descriptive).
+- **Skill output**: file-writing skills use `.tab/work/<topic>/`. Inline skills (feedback, draw-dino) don't write files.
+- **Skill-relative files**: skills can reference co-located files via `${CLAUDE_SKILL_DIR}/filename` in SKILL.md.
 - **Git commits**: conventional prefixes (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`).
 - **No code**: this project has no tests, no linting, no build. If you're writing code, you're in the wrong repo.

@@ -1,6 +1,15 @@
 # Changelog
 
 
+## 1.2.0 — 2026-03-14
+
+- New `researcher` specialist — scans codebases, searches the web, and gathers prior art; runs in background on Sonnet
+- Specialist dispatch switched from Skill tool to Agent tool (`subagent_type: "tab:<name>"`)
+- `code-reviewer` specialist gains `background: true` frontmatter
+- Workshop skill now dispatches specialists for deep research and code review instead of doing it inline
+- `CLAUDE.md` streamlined — collapsed redundant design principles and conventions into concise bullet lists
+
+
 ## 1.1.0 — 2026-03-13
 
 - `tab.md` expanded to be self-sufficient — full session-start behavior, readiness signals, and status spec now live in the agent definition instead of depending on `CLAUDE.md` for runtime behavior
