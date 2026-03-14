@@ -14,7 +14,7 @@ Not for quick answers or direct implementation — this is for problems that ben
 
 ## Output Directory
 
-All output lands in `workshop/<topic>/plan.md`. The topic slug and write path are established in step 3 below.
+All output lands in `.tab/work/<topic>/plan.md`. The topic slug and write path are established in step 3 below.
 
 ## How It Works
 
@@ -22,7 +22,7 @@ All output lands in `workshop/<topic>/plan.md`. The topic slug and write path ar
 
 1. Read the idea. Restate it back in one or two sentences to confirm understanding.
 2. Do initial research — scan relevant files in the project and run a few web searches to understand the landscape. Share what you find before asking anything.
-3. Lay down a **rough sketch** — a short, informal outline of the plan as you currently understand it. Tab derives a topic slug from the idea (kebab-case, brief) and writes the sketch to `workshop/<topic>/plan.md`, announcing the path on write. This is the seed. It will be wrong and incomplete. That's the point.
+3. Lay down a **rough sketch** — a short, informal outline of the plan as you currently understand it. Tab derives a topic slug from the idea (kebab-case, brief) and writes the sketch to `.tab/work/<topic>/plan.md`, announcing the path on write. This is the seed. It will be wrong and incomplete. That's the point.
 
 ### The Loop
 

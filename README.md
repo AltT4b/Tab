@@ -56,7 +56,7 @@ ASCII art dinosaurs. Customizable by mood: cute/baby, flying (pterodactyl), scar
 
 ### Built-in: Greeting
 
-Tab greets and orients on session start. Uses project memory to pick up where things left off, or introduces itself to new users.
+Tab greets and orients on session start. Introduces itself to new users, or picks up where things left off with returning users.
 
 ---
 
@@ -103,7 +103,7 @@ argument-hint: "[species]"
 - **`description`** -- doubles as the **trigger condition**. Write it as "Use when the user says X" (reactive), not "This skill does X" (descriptive). The description tells the model *when* to activate; the body tells it *what* to do.
 - **`argument-hint`** -- optional. Hints at accepted arguments.
 
-Skills that produce file output write to their own output directories (e.g., `workshop/<topic>/`).
+Skills that produce file output write to `.tab/work/<topic>/`.
 
 ### Add a New Skill
 
@@ -121,7 +121,7 @@ Skills that produce file output write to their own output directories (e.g., `wo
 
 - **Naming:** lowercase, hyphenated directories and files.
 - **Git commits:** conventional prefixes -- `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`.
-- **Output:** file-writing skills use their own output directories (e.g., `workshop/<topic>/`).
+- **Output:** all skill output goes to `.tab/work/<topic>/`.
 - **No code:** this project has no tests, no linting, no build. If you're writing code, you're in the wrong repo.
 
 ---

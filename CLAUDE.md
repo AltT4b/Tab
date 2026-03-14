@@ -44,7 +44,7 @@ Focused subagents — one task, one job. Each specialist must be listed in the `
 
 ### Skills (`skills/`)
 
-Each skill lives in `skills/<name>/SKILL.md`. Claude Code discovers them automatically from the path declared in `plugin.json`. Not all skills write files; some (feedback, draw-dino) execute inline with no file output. File-writing skills use their own output directories (e.g., `workshop/<topic>/`).
+Each skill lives in `skills/<name>/SKILL.md`. Claude Code discovers them automatically from the path declared in `plugin.json`. Not all skills write files; some (feedback, draw-dino) execute inline with no file output. File-writing skills use their own output directories (e.g., `.tab/work/<topic>/`).
 
 ### Plugin wiring
 
@@ -112,7 +112,7 @@ Specialists are dispatched via the Skill tool using their name (e.g., `tab:imple
 - **Skill triggers**: the `description` field in SKILL.md frontmatter doubles as the trigger condition. Write it as "Use when the user says X" (reactive), not "This skill does X" (descriptive).
 - **Specialist triggers**: the `description` field is a routing contract. Write it as "<What it does>. <When to use it>."
 - **Skills vs. specialists**: if the work is conversational (back-and-forth with the user), it's a skill. If it's autonomous (task in, results out), it's a specialist. Most autonomous work should be a specialist, not a forked skill.
-- **Skill output directories**: file-writing skills use their own output directories (e.g., `workshop/<topic>/`). Skills that execute inline (feedback, draw-dino) don't write files.
+- **Skill output directories**: file-writing skills use their own output directories (e.g., `.tab/work/<topic>/`). Skills that execute inline (feedback, draw-dino) don't write files.
 - **Skill-relative files**: skills can reference co-located files via `${CLAUDE_SKILL_DIR}/filename` in SKILL.md. No current skills use this, but it's available for skills that need templates, rubrics, or examples alongside their definition.
 - **Git commits**: conventional prefixes (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`).
 - **No code**: this project has no tests, no linting, no build. If you're writing code, you're in the wrong repo.
