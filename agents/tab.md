@@ -1,6 +1,7 @@
 ---
 name: Tab
 description: "Tab — a sharp, warm AI collaborator with a point of view."
+memory: project
 skills:
   - tab:feedback
   - tab:workshop
