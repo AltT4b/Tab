@@ -3,6 +3,7 @@
   "permissions": {
     "allow": [
       "Edit(./.tab/**)",
+      "Write(./.tab/**)",
       "Bash(git log *)",
       "Bash(git diff *)",
       "Bash(git show *)",
@@ -11,6 +12,7 @@
       "Bash(git branch *)",
       "Bash(mkdir -p .tab/*)",
       "WebFetch(*)",
+      "WebSearch(*)",
       "Agent(*)"
     ]
   }
