@@ -2,15 +2,9 @@
   "agent": "tab:Tab",
   "permissions": {
     "allow": [
-      "Bash(git log *)",
-      "Bash(git diff *)",
-      "Bash(git show *)",
-      "Bash(git status)",
-      "Bash(git status *)",
-      "Bash(git branch *)",
-      "Bash(find *)",
-      "WebFetch(*)",
-      "WebSearch(*)",
+      "Read(**)",
+      "Write(**)",
+      "Edit(**)",
       "Agent(*)"
     ]
   }
