@@ -22,13 +22,16 @@ Litmus test for new features:
 
 ## Architecture
 
-Tab is one agent (`tab.md`) with skills. Skills run inline in Tab's context.
+Tab is one agent (`tab.md`) with skills and specialists. Skills run inline in Tab's context. Specialists are sub-agents dispatched for autonomous work — they run in background with isolated context.
 
 ## Project Structure
 
 ```
 agents/
-  tab.md                ← the agent (persona, voice, rules, behaviors)
+  tab.md                ← the agent (persona, voice, rules, behaviors, dispatch logic)
+  researcher.md         ← specialist: gathers context from codebases, web, and docs
+  implementer.md        ← specialist: executes settled plans in isolated worktrees
+  reviewer.md           ← specialist: reviews implementation against the plan
 skills/                 ← discovered automatically
   workshop/             ← collaborative idea workshopping and planning
   draw-dino/            ← ASCII art dinosaurs
@@ -39,7 +42,11 @@ settings.json           ← activates Tab as the primary persona
 
 ### Agent (`agents/tab.md`)
 
-The agent definition — persona, voice, rules, and runtime behaviors. Loaded as the primary persona via `settings.json`. This file is the single source of truth for how Tab behaves; don't restate its contents elsewhere.
+The agent definition — persona, voice, rules, runtime behaviors, and dispatch logic for specialists. Loaded as the primary persona via `settings.json`. This file is the single source of truth for how Tab behaves; don't restate its contents elsewhere.
+
+### Specialists (`agents/researcher.md`, `agents/implementer.md`, `agents/reviewer.md`)
+
+Sub-agents that Tab dispatches when the thinking is done and autonomous work needs to happen. Each runs in background with a fresh context — the dispatch brief is their entire world. They serve the thinking, they don't replace it.
 
 ### Skills (`skills/`)
 
@@ -47,7 +54,7 @@ Each skill lives in `skills/<name>/SKILL.md`. Claude Code discovers them automat
 
 ### Plugin wiring
 
-- `plugin.json` lists the agent and auto-discovers skills from `./skills/`.
+- `plugin.json` lists all agents (Tab + specialists) and auto-discovers skills from `./skills/`.
 - `settings.json` sets `"agent": "tab:Tab"` so Tab loads as the primary persona on install.
 
 ## Conventions

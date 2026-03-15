@@ -8,7 +8,10 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/AltT4b/Tab",
   "agents": [
-    "./agents/tab.md"
+    "./agents/tab.md",
+    "./agents/researcher.md",
+    "./agents/implementer.md",
+    "./agents/reviewer.md"
   ],
   "skills": "./skills/"
 }

@@ -8,9 +8,7 @@ Thumbs.db
 *~
 .vscode/
 .idea/
+docs/
 
 # Claude Code
 .claude/
-
-# Tab
-.tab/

@@ -23,12 +23,24 @@ Tab:  [responds in character, orients you on what's happening]
 You:  Let's workshop a notification system
 Tab:  [researches the landscape, lays out a rough plan, iterates with you until it's solid]
 
-You:  What's in flight?
-Tab:  [checks status, tells you what's active and what's next]
+You:  Send it to the implementer
+Tab:  [dispatches the plan to a specialist in an isolated worktree, reviews the output when it's done]
 
 You:  Draw me a scary dinosaur
 Tab:  [ASCII art T-Rex with a fun dino fact]
 ```
+
+---
+
+## Specialists
+
+Tab dispatches specialist sub-agents for autonomous work. They run in the background with isolated context — Tab does the thinking, specialists do the doing.
+
+- **Researcher** — gathers context from codebases, web, and docs. Dispatched when Tab needs information it doesn't have.
+- **Implementer** — executes a settled plan in an isolated git worktree. Only dispatched after design questions are resolved and you confirm.
+- **Reviewer** — reviews implementation against the plan that produced it. Runs automatically after the implementer finishes.
+
+You can dispatch them explicitly ("have the researcher look into X") or Tab will suggest dispatch when the work is ready for it.
 
 ---
 
@@ -60,7 +72,10 @@ Tab greets and orients on session start. Introduces itself to new users, or pick
 
 ```
 agents/
-  tab.md                # The agent — persona, voice, rules, behaviors
+  tab.md                # The agent — persona, voice, rules, behaviors, dispatch logic
+  researcher.md         # Specialist: gathers context from codebases, web, and docs
+  implementer.md        # Specialist: executes settled plans in isolated worktrees
+  reviewer.md           # Specialist: reviews implementation against the plan
 skills/
   workshop/SKILL.md     # Collaborative idea workshopping and planning
   draw-dino/SKILL.md    # ASCII art dinosaurs
@@ -71,7 +86,9 @@ settings.json           # Activates Tab as the primary persona
 
 ### How It Works
 
-**`agents/tab.md`** is the agent definition. Its YAML frontmatter declares identity and lists skills (`tab:workshop`, `tab:draw-dino`). The body defines voice, rules, and behaviors.
+**`agents/tab.md`** is the agent definition. Its YAML frontmatter declares identity and lists skills (`tab:workshop`, `tab:draw-dino`). The body defines voice, rules, behaviors, and dispatch logic for specialists.
+
+**Specialist agents** (`researcher.md`, `implementer.md`, `reviewer.md`) are sub-agents Tab dispatches for autonomous work. Each runs in background with a fresh context — the dispatch brief is their entire world. They're registered in `plugin.json` and available as `subagent_type: "tab:<Name>"`.
 
 **`settings.json`** at the plugin root sets `"agent": "tab:Tab"`, which tells Claude Code to load Tab as the primary persona. This is the mechanism that makes Tab "just work" after install -- no setup commands needed.
 
