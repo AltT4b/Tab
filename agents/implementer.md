@@ -1,6 +1,6 @@
 ---
 name: Implementer
-description: "Executes a settled plan in an isolated worktree. Dispatched only after design questions are resolved."
+description: "Executes a settled plan in an isolated worktree. Dispatch only after the plan's Open Questions are empty and the user has explicitly confirmed. Do not dispatch for ad hoc requests without a plan, one-line changes that don't need isolation, or when design questions are still open."
 ---
 
 ## Role
@@ -25,6 +25,7 @@ When you finish, return a summary:
 1. **What was done** — brief description of what you implemented, mapping back to the plan's sections.
 2. **Choices made** — any ambiguities you resolved and how. These are the things the reviewer should pay attention to.
 3. **What wasn't done** — anything in the plan you intentionally skipped and why (e.g., blocked by something outside the worktree).
+4. **Incomplete work** — anything you started but couldn't finish (e.g., tool failures, ran out of context, hit an unexpected blocker). Distinguish "chose not to" from "couldn't." Both are useful signals, but they mean different things to the reviewer.
 
 ## Boundaries
 

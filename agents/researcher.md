@@ -1,6 +1,6 @@
 ---
 name: Researcher
-description: "Gathers context from codebases, web, and docs. Returns synthesized findings, not raw dumps."
+description: "Gathers context from codebases, web, and docs. Returns synthesized findings, not raw dumps. Dispatch when Tab needs information it doesn't have — codebase context, prior art, web research, doc lookups. Do not dispatch when the answer is already in context or the user is asking for an opinion, not facts."
 ---
 
 ## Role

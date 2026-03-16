@@ -1,20 +1,12 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code when working with code in this repository.
-
-## What This Is
-
-Tab is a personal AI assistant defined entirely in markdown. No compiled code, no runtime, no dependencies, no build system. All behavior is defined through text files that an LLM reads and interprets.
-
-Tab ships as a Claude Code plugin.
+This file provides guidance to Claude Code when working in this repository.
 
 ## The Principle
 
-**Tab is a thinking partner.** It helps people think through problems, sharpen ideas, pressure-test plans, and make better decisions. It's not a task runner, not a code generator, not a personal assistant.
+**Tab is a thinking partner.** It helps people think through problems, sharpen ideas, pressure-test plans, and make better decisions. Specialists handle execution, but only downstream of thinking — never instead of it.
 
-The core job: **help the user make their ideas better.**
-
-Litmus test for new features:
+Litmus test for changes:
 
 - "Does this help the user think better?" — belongs.
 - "Does this help the user do tasks faster?" — only if it's downstream of thinking.
@@ -22,48 +14,42 @@ Litmus test for new features:
 
 ## Architecture
 
-Tab is one agent (`tab.md`) with skills and specialists. Skills run inline in Tab's context. Specialists are sub-agents dispatched for autonomous work — they run in background with isolated context.
-
-## Project Structure
+Tab is one agent (`tab.md`) with skills and specialists. Skills run inline in Tab's context. Specialists are sub-agents dispatched for autonomous work — they run in background with isolated context. `tab.md` is the single source of truth for how Tab behaves; don't restate its contents elsewhere.
 
 ```
 agents/
   tab.md                ← the agent (persona, voice, rules, behaviors, dispatch logic)
-  researcher.md         ← specialist: gathers context from codebases, web, and docs
-  implementer.md        ← specialist: executes settled plans in isolated worktrees
-  reviewer.md           ← specialist: reviews implementation against the plan
-skills/                 ← discovered automatically
-  workshop/             ← collaborative idea workshopping and planning
-  draw-dino/            ← ASCII art dinosaurs
+  researcher.md         ← specialist: context gathering
+  implementer.md        ← specialist: plan execution in isolated worktrees
+  reviewer.md           ← specialist: implementation review against plan
+skills/                 ← auto-discovered from path in plugin.json
+  workshop/             ← collaborative planning
+  draw-dino/            ← ASCII art dinosaurs (easter egg)
+docs/
+  recommended-settings.json  ← full recommended .claude/settings.json template
 .claude-plugin/
   plugin.json           ← plugin manifest
-settings.json           ← activates Tab as the primary persona
+settings.json           ← sets Tab as primary persona on install
 ```
 
-### Agent (`agents/tab.md`)
+### Plugin Wiring
 
-The agent definition — persona, voice, rules, runtime behaviors, and dispatch logic for specialists. Loaded as the primary persona via `settings.json`. This file is the single source of truth for how Tab behaves; don't restate its contents elsewhere.
+- `plugin.json` registers all agents and auto-discovers skills from `./skills/`.
+- `settings.json` sets `"agent": "tab:Tab"` so Tab loads as the primary persona. Only supports the `agent` key — permissions are configured in the user's project-level `.claude/settings.json`.
 
-Frontmatter fields: `name` (agent identity), `description` (one-line summary), `memory` (scope for persistent memory — `project` means memories are scoped to the project directory and shared via version control).
+### Agent Frontmatter
 
-### Specialists (`agents/researcher.md`, `agents/implementer.md`, `agents/reviewer.md`)
+Agent `.md` files use YAML frontmatter: `name` (identity), `description` (one-line summary + trigger conditions), `memory` (scope — `project` means shared via version control).
 
-Sub-agents that Tab dispatches when the thinking is done and autonomous work needs to happen. Each runs in background with a fresh context — the dispatch brief is their entire world. They serve the thinking, they don't replace it.
+### Skill Frontmatter
 
-### Skills (`skills/`)
-
-Each skill lives in `skills/<name>/SKILL.md`. Claude Code discovers them automatically from the path declared in `plugin.json`. Some skills produce artifacts; others (draw-dino) execute inline with no file output.
-
-### Plugin wiring
-
-- `plugin.json` lists all agents (Tab + specialists) and auto-discovers skills from `./skills/`.
-- `settings.json` sets `"agent": "tab:Tab"` so Tab loads as the primary persona on install.
+SKILL.md files use: `name` (lowercase, hyphenated, matches directory), `description` (trigger condition), and optionally `argument-hint`.
 
 ## Conventions
 
-- **Frontmatter**: SKILL.md files use `name`, `description`, and optionally `argument-hint`.
-- **Skill triggers**: the `description` field doubles as the trigger condition. A brief semantic frame ("Collaborative planning for non-trivial decisions") followed by reactive conditions ("Use when the user is exploring...") is more effective than either alone. Lead with what the skill is, then specify when to fire.
-- **Skill output**: skills that produce artifacts write them wherever makes sense for the project. Inline skills (draw-dino) don't write files.
+- **Trigger descriptions**: the `description` field in both agent and skill frontmatter doubles as the trigger condition. Lead with a semantic frame ("Collaborative planning for non-trivial decisions"), follow with reactive conditions ("Use when the user is exploring..."). This convention applies to specialists too, not just skills.
 - **Skill-relative files**: skills can reference co-located files via `${CLAUDE_SKILL_DIR}/filename` in SKILL.md.
-- **Git commits**: conventional prefixes (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`).
+- **Skill output**: skills that produce artifacts write them wherever makes sense for the project. Inline skills don't write files.
+- **Git commits**: conventional prefixes — `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`.
+- **Dash style**: use em dashes (`—`) throughout, not double hyphens (`--`).
 - **No code**: this project has no tests, no linting, no build. If you're writing code, you're in the wrong repo.

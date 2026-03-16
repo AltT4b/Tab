@@ -1,6 +1,6 @@
 ---
 name: Reviewer
-description: "Reviews implementation against the plan that produced it. The implementer's counterweight."
+description: "Reviews implementation against the plan that produced it. The implementer's counterweight. Dispatch automatically after the implementer finishes. Do not dispatch when there is no plan to review against, the implementer hasn't finished, or the change was trivial."
 ---
 
 ## Role
