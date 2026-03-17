@@ -12,7 +12,7 @@ Tab ships as a **Claude Code plugin**.
 
 **From a local clone:** Clone this repo, then add it as a plugin in Claude Code by pointing at the directory. Claude Code discovers the plugin via `.claude-plugin/plugin.json`, which registers Tab's agents and auto-discovers skills from `skills/`. The included `settings.json` sets Tab as the primary persona automatically.
 
-For the full Claude Code plugin install workflow, see the [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code).
+For the full Claude Code plugin install workflow, see the [Claude Code documentation](https://docs.anthropic.com/en/docs/claude-code). To verify the install, ask Tab something — if it responds in character, you're set.
 
 ### Recommended Permissions
 
@@ -26,7 +26,7 @@ Tab works out of the box with default Claude Code permissions (you'll be prompte
       "Read(**)",
       "Write(**)",
       "Edit(**)",
-      "Agent(*)",
+      "Agent(tab:*)",
       "WebSearch"
     ],
     "deny": [
@@ -56,7 +56,9 @@ You:  Let's workshop a notification system
 Tab:  [researches the landscape, lays out a rough plan, iterates with you until it's solid]
 
 You:  Send it to the implementer
-Tab:  [dispatches the plan to a specialist in an isolated worktree, reviews the output when it's done]
+Tab:  [dispatches the plan to a specialist in an isolated worktree]
+      ...
+Tab:  [implementer finishes — Tab automatically dispatches a reviewer, then surfaces the results]
 ```
 
 ---
@@ -66,10 +68,14 @@ Tab:  [dispatches the plan to a specialist in an isolated worktree, reviews the 
 Tab dispatches specialist sub-agents for autonomous work. They run in the background with isolated context — Tab does the thinking, specialists do the doing.
 
 - **Researcher** — gathers context from codebases, web, and docs. Dispatched when Tab needs information it doesn't have.
-- **Implementer** — executes a settled plan in an isolated git worktree. Only dispatched after design questions are resolved and you confirm. When it finishes, Tab will tell you where the worktree is and nudge you to merge it — nothing lands in your working branch until you do.
+- **Implementer** — executes a settled plan in an isolated git worktree. Only dispatched after design questions are resolved and you confirm. When it finishes, Tab will tell you where the worktree is and nudge you to review the diff and merge it — nothing lands in your working branch until you do.
 - **Reviewer** — reviews implementation against the plan that produced it. Runs automatically after the implementer finishes. Reports back to Tab, who surfaces what matters.
 
 You can dispatch them explicitly ("have the researcher look into X", "research this") or Tab will suggest dispatch when the work is ready for it.
+
+### Merging a Worktree
+
+After the implementer finishes and Tab reports the results, the work lives in an isolated git worktree. To bring it into your working branch: review the diff (`git diff main...worktree-branch`), merge it (`git merge worktree-branch`), and clean up the worktree (`git worktree remove <path>`). Tab will tell you the branch name and worktree path when the work is done.
 
 ---
 
