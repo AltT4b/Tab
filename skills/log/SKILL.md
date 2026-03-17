@@ -9,8 +9,9 @@ Log deferred work to `docs/maintenance/` so the team has a shared record of what
 ## How to log
 
 1. **Tell the user first.** Before writing anything, say what you're logging and why — e.g., "I'll log that auth token rotation issue to `docs/maintenance/` so it doesn't get lost."
-2. **Write one file per item** to `docs/maintenance/`, named descriptively with lowercase kebab-case (e.g., `auth-token-rotation.md`).
-3. **File format:**
+2. **Check for duplicates.** Before writing, check by filename whether a file for this item already exists in `docs/maintenance/`. If so, update it rather than creating a duplicate.
+3. **Write one file per item** to `docs/maintenance/`, named descriptively with lowercase kebab-case (e.g., `auth-token-rotation.md`).
+4. **File format:**
 
 ```markdown
 ---
