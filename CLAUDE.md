@@ -45,7 +45,7 @@ Agent `.md` files use YAML frontmatter:
 - `name` — identity
 - `description` — one-line summary + trigger conditions (doubles as the dispatch trigger for specialists)
 - `memory` — scope; `project` means shared via version control (tab.md only)
-- `model` — `sonnet` or `opus`; omit to use the user's default (tab.md only)
+- `model` — `sonnet` or `opus`; omit to use the user's default
 - `background: true` — runs as a background sub-agent (all specialists; omit for the primary persona)
 - `isolation: worktree` — runs in an isolated git worktree (implementer only)
 
