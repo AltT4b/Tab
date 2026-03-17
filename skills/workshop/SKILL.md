@@ -31,6 +31,9 @@ Choices that have been made and the reasoning behind them.
 ## Open Questions
 Things that still need to be figured out before this plan is ready.
 - [ ] ...
+
+## Deferred
+Questions or decisions consciously punted to implementation — acknowledged, not forgotten.
 ```
 
 ## The Loop
@@ -46,6 +49,6 @@ Each pass through the loop:
 
 ## Closing
 
-The workshop is done when **Open Questions is empty** — every item has been resolved, answered, or consciously deferred to implementation.
+The workshop is done when **Open Questions is empty** — every item has been resolved, answered, or moved to Deferred.
 
-When that happens, say so clearly: the plan is ready, the workshop is complete. Let the user know they can reopen the plan and add new questions any time to kick off another session.
+When that happens, say so clearly: the plan is ready, the workshop is complete. If anything landed in Deferred, name it — the implementer will encounter those decisions and should know they're expected. Let the user know they can reopen the plan and add new questions any time to kick off another session.

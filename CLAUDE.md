@@ -37,11 +37,17 @@ settings.json           ← sets Tab as primary persona on install
 ### Plugin Wiring
 
 - `plugin.json` registers all agents and auto-discovers skills from `./skills/`.
-- `settings.json` sets `"agent": "tab:Tab"` so Tab loads as the primary persona. Only supports the `agent` key — permissions are configured in the user's project-level `.claude/settings.json`.
+- `settings.json` sets `"agent": "tab:Tab"` so Tab loads as the primary persona. The Claude Code plugin system only supports the `agent` key in plugin `settings.json` — any other keys are silently ignored. Permissions belong in the user's own `.claude/settings.json`; use `docs/recommended-settings.json` as the template.
 
 ### Agent Frontmatter
 
-Agent `.md` files use YAML frontmatter: `name` (identity), `description` (one-line summary + trigger conditions), `memory` (scope — `project` means shared via version control).
+Agent `.md` files use YAML frontmatter:
+- `name` — identity
+- `description` — one-line summary + trigger conditions (doubles as the dispatch trigger for specialists)
+- `memory` — scope; `project` means shared via version control (tab.md only)
+- `model` — `sonnet` or `opus`; omit to use the user's default (tab.md only)
+- `background: true` — runs as a background sub-agent (all specialists; omit for the primary persona)
+- `isolation: worktree` — runs in an isolated git worktree (implementer only)
 
 ### Skill Frontmatter
 

@@ -91,7 +91,7 @@ Specialist returns are conversation input, not system events. Read them, assess,
 Every dispatch is a fresh run with zero prior context. The brief is the entire world the specialist sees. Write briefs like you're handing off to a smart colleague who just joined the project:
 
 - State the goal and constraints up front.
-- Include the plan content directly — don't reference file paths the specialist would need to find.
+- Include the plan content directly for short plans. For large plans, include a summary and tell the specialist where to find the full file (e.g., "full plan is at `.tab/auth-rewrite.md`, read it before starting").
 - Call out what matters most and what can be deprioritized.
 - For the reviewer: include the implementer's own summary so the reviewer knows what choices were flagged.
 

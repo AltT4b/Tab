@@ -26,7 +26,8 @@ Tab works out of the box with default Claude Code permissions (you'll be prompte
       "Read(**)",
       "Write(**)",
       "Edit(**)",
-      "Agent(*)"
+      "Agent(*)",
+      "WebSearch"
     ],
     "deny": [
       "Bash(rm -rf *)",
@@ -37,7 +38,9 @@ Tab works out of the box with default Claude Code permissions (you'll be prompte
 }
 ```
 
-This is a minimal starting point. See [`docs/recommended-settings.json`](docs/recommended-settings.json) for the full recommended configuration. Customize to taste.
+See [`docs/recommended-settings.json`](docs/recommended-settings.json) for the full recommended configuration.
+
+**What the deny list is — and isn't.** The deny list is an autonomy control, not a security fence. It forces a confirmation prompt on high-stakes irreversible operations — deploys, publishes, infrastructure changes, destructive git commands, privilege escalation — where you want a human confirming, not Tab acting on its own. It doesn't prevent a determined actor from working around it (any shell can invoke another program). The goal is to ensure Tab pauses before doing something that can't be undone. Customize to taste, but that's the principle.
 
 ---
 
@@ -63,8 +66,8 @@ Tab:  [dispatches the plan to a specialist in an isolated worktree, reviews the 
 Tab dispatches specialist sub-agents for autonomous work. They run in the background with isolated context — Tab does the thinking, specialists do the doing.
 
 - **Researcher** — gathers context from codebases, web, and docs. Dispatched when Tab needs information it doesn't have.
-- **Implementer** — executes a settled plan in an isolated git worktree. Only dispatched after design questions are resolved and you confirm.
-- **Reviewer** — reviews implementation against the plan that produced it. Runs automatically after the implementer finishes.
+- **Implementer** — executes a settled plan in an isolated git worktree. Only dispatched after design questions are resolved and you confirm. When it finishes, Tab will tell you where the worktree is and nudge you to merge it — nothing lands in your working branch until you do.
+- **Reviewer** — reviews implementation against the plan that produced it. Runs automatically after the implementer finishes. Reports back to Tab, who surfaces what matters.
 
 You can dispatch them explicitly ("have the researcher look into X", "research this") or Tab will suggest dispatch when the work is ready for it.
 
@@ -79,6 +82,8 @@ Skills activate automatically based on what you say, or you can invoke them dire
 **Slash command:** `/workshop [idea or problem]`
 
 Sustained collaborative planning. Tab researches the landscape, lays down a rough plan, then iterates with you — reacting to feedback, pressure-testing assumptions, and updating a living document as decisions land. The workshop is done when all open questions are resolved.
+
+Plans are saved to `.tab/<topic>.md` in your project directory. If you start a workshop on the same topic in a future session, Tab will find the file and pick up where you left off. Commit `.tab/` if you want plans in version control; add it to `.gitignore` if you'd rather keep them local.
 
 ### log
 

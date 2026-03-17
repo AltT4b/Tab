@@ -58,15 +58,12 @@
     "deny": [
       "Bash(rm -rf *)",
       "Bash(dd *)",
+      "Bash(git reset --hard *)",
+      "Bash(git checkout -- *)",
+
       "Bash(sudo *)",
       "Bash(su *)",
-      "Bash(ssh *)",
-      "Bash(scp *)",
-      "Bash(sftp *)",
-      "Bash(nc *)",
-      "Bash(netcat *)",
-      "Bash(ncat *)",
-      "Bash(socat *)",
+
       "Bash(git push *)",
       "Bash(git remote add *)",
       "Bash(git remote set-url *)",
@@ -76,6 +73,7 @@
       "Bash(twine upload *)",
       "Bash(pip upload *)",
       "Bash(docker push *)",
+
       "Bash(kubectl *)",
       "Bash(helm *)",
       "Bash(terraform apply *)",
@@ -89,9 +87,11 @@
       "Bash(heroku *)",
       "Bash(fly *)",
       "Bash(railway *)",
+
       "Bash(launchctl *)",
       "Bash(systemctl *)",
       "Bash(crontab *)",
+
       "Bash(security find-generic-password *)",
       "Bash(security find-internet-password *)"
     ]
