@@ -1,0 +1,27 @@
+{
+  "name": "tab-marketplace",
+  "owner": {
+    "name": "AltTab",
+    "email": "alttab.agents@gmail.com"
+  },
+  "metadata": {
+    "description": "AltTab's curated Claude Code plugins marketplace",
+    "version": "0.0.1"
+  },
+  "plugins": [
+    {
+      "name": "tab",
+      "source": "./plugins/tab",
+      "description": "Tab, a thinking partner defined entirely in markdown. No compiled code, no dependencies — just text files that shape how Claude talks, thinks, and works with you.",
+      "version": "0.0.3",
+      "strict": true
+    },
+    {
+      "name": "tab-for-projects",
+      "source": "./plugins/tab-for-projects",
+      "description": "Project workflow tracking — agents and skills for the Tab for Projects MCP. Conversational project management that captures decisions and context.",
+      "version": "0.0.1",
+      "strict": true
+    }
+  ]
+}

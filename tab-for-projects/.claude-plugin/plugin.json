@@ -1,0 +1,14 @@
+{
+  "name": "tab-for-projects",
+  "description": "Project workflow tracking — agents for the Tab for Projects MCP.",
+  "version": "0.0.1",
+  "author": {
+    "name": "4lt7ab"
+  },
+  "license": "Apache-2.0",
+  "repository": "https://github.com/4lt7ab/tab-marketplace",
+  "agents": [
+    "./agents/projects.md",
+    "./agents/task-planner.md"
+  ]
+}

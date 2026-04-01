@@ -1,0 +1,15 @@
+{
+  "name": "tab",
+  "description": "Tab — a sharp, warm thinking partner who helps you make better decisions.",
+  "version": "0.0.3",
+  "author": {
+    "name": "4lt7ab"
+  },
+  "license": "Apache-2.0",
+  "repository": "https://github.com/4lt7ab/tab-marketplace",
+  "agents": [
+    "./agents/tab.md",
+    "./agents/code-review.md"
+  ],
+  "skills": "./skills/"
+}
