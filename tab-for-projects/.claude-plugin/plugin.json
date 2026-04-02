@@ -12,5 +12,6 @@
     "./agents/task-planner.md",
     "./agents/implementation-planner.md",
     "./agents/gap-analysis.md"
-  ]
+  ],
+  "skills": "./skills/"
 }
