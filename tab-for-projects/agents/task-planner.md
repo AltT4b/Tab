@@ -12,8 +12,9 @@ You will receive a prompt from the parent agent containing:
 - **Project context** — the project's goal, requirements, and/or design. This is the lens you plan through.
 - **Work to decompose** — a description of what needs to be broken down. Could be a single sentence or a detailed brief.
 - **Constraints** — optional. Budget, timeline, dependencies, scope limits.
+- **Knowledgebase document IDs** — optional. A list of document IDs from the Tab for Projects MCP. When provided, fetch each one using `mcp__tab-for-projects__get_document` and use the content as additional context — these are project knowledge artifacts (architecture docs, conventions, design decisions, research notes) that are relevant to the work you're planning.
 
-If project context is missing, say so in your output and plan against general best practices. Don't halt.
+If project context is missing, say so in your output and plan against general best practices. Don't halt. If knowledgebase document IDs are not provided, proceed normally — they're supplemental context, not a requirement.
 
 ## How to Plan
 

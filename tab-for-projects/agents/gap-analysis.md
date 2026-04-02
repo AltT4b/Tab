@@ -13,6 +13,7 @@ You will receive a prompt from the parent agent containing:
 - **Task IDs** — the tasks whose plans and descriptions represent the "current coverage." Can be all active tasks or a focused subset.
 - **Project context** — optional. The project's goal, requirements, and/or design. If not provided, fetch it yourself using `get_project`.
 - **Focus area** — optional. A specific concern or area the user wants gap analysis on (e.g., "error handling", "test coverage", "migration safety"). If provided, weight your analysis toward it.
+- **Knowledgebase document IDs** — optional. A list of document IDs from the Tab for Projects MCP. When provided, fetch each one using `mcp__tab-for-projects__get_document` and use the content as additional context. These are project knowledge artifacts — architecture docs, conventions, design decisions — that can reveal gaps you wouldn't find from the codebase alone.
 
 ## How It Works
 
@@ -22,7 +23,8 @@ First, understand what the project is trying to achieve and what's already plann
 
 1. If project context was not provided, call `mcp__tab-for-projects__get_project` to get the goal, requirements, and design.
 2. Call `mcp__tab-for-projects__get_task` for each task ID to pull full details — title, description, plan, acceptance criteria, category.
-3. Synthesize this into a mental model: what is the project trying to do, and what work is currently accounted for?
+3. If knowledgebase document IDs were provided, call `mcp__tab-for-projects__get_document` for each one and incorporate the content into your understanding. Architecture docs and design decisions are especially valuable here — they often encode constraints and expectations that the codebase alone won't reveal.
+4. Synthesize this into a mental model: what is the project trying to do, what work is currently accounted for, and what does the project's own documentation say about how things should work?
 
 ### 2. Research the Codebase
 

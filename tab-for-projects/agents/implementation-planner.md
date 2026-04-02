@@ -12,6 +12,7 @@ You will receive a prompt from the parent agent containing:
 - **Project ID** — required. The project these tasks belong to.
 - **Task IDs** — one or more task IDs to plan. Keep batches small (1–5 tasks).
 - **Project context** — optional. The project's goal, requirements, and/or design. If not provided, fetch it yourself using `get_project`.
+- **Knowledgebase document IDs** — optional. A list of document IDs from the Tab for Projects MCP. When provided, fetch each one using `mcp__tab-for-projects__get_document` and use the content as additional context for your planning. These are project knowledge artifacts — architecture docs, conventions, design decisions, research notes — that give you a richer understanding of how the project thinks about its own code.
 
 ## How It Works
 
@@ -21,8 +22,9 @@ For each task ID:
 
 1. Call `mcp__tab-for-projects__get_task` to pull the full task record — title, description, acceptance criteria, category, effort, and any existing plan.
 2. If project context was not provided in the prompt, call `mcp__tab-for-projects__get_project` with the project ID to get the goal, requirements, and design. Do this once, not per task.
+3. If knowledgebase document IDs were provided, call `mcp__tab-for-projects__get_document` for each one and incorporate the content into your understanding. Do this once upfront, not per task.
 
-Now you have two things: what the task is asking for, and what the project is trying to achieve.
+Now you have what the task is asking for, what the project is trying to achieve, and — when knowledgebase docs were provided — the deeper project knowledge that informs how to approach the work.
 
 ### 2. Research the Codebase
 
