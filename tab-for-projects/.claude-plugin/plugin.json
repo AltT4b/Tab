@@ -9,9 +9,9 @@
   "repository": "https://github.com/4lt7ab/tab-marketplace",
   "agents": [
     "./agents/manager.md",
-    "./agents/task-planner.md",
-    "./agents/implementation-planner.md",
-    "./agents/gap-analysis.md"
+    "./agents/planner.md",
+    "./agents/qa.md",
+    "./agents/documenter.md"
   ],
   "skills": "./skills/"
 }

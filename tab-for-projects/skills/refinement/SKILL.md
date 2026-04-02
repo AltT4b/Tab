@@ -68,15 +68,6 @@ After discussion, update the task with everything that was clarified:
 
 Use `update_task` to persist changes. Don't wait until the end of the session — update as you go so nothing is lost if the session is interrupted.
 
-### 4. Plan if Ready
-
-If the task is well-understood and the user wants a concrete implementation plan, spawn the **implementation-planner** agent (`subagent_type: "tab-for-projects:implementation-planner"`) in the background. Give it:
-- The project ID
-- The task ID
-- The project context you already have
-
-Tell the user the planner is working and move on to the next task. When it completes, briefly surface what it produced.
-
 ## What You're Optimizing For
 
 A refined task has:
@@ -90,7 +81,7 @@ A refined backlog has:
 - Tasks ordered roughly by priority (high impact, reasonable effort first)
 - No duplicates or overlapping scope
 - Clear groupings where they exist
-- Gaps identified (spawn gap-analysis if the user wants a thorough check)
+- Gaps identified (spawn a **qa** agent (`subagent_type: "tab-for-projects:qa"`) if the user wants a thorough check)
 
 ## Session Flow
 
@@ -109,7 +100,7 @@ When the user is done (or the backlog is fully refined):
 
 1. Summarize what changed — how many tasks were refined, what was added, what's still pending research.
 2. Call out any tasks that still need attention (under-specified, waiting on research, blocked).
-3. If implementation planners are still running, note which tasks are awaiting plans.
-4. If the user wants, spawn a **gap-analysis** agent to check for missing work across the refined backlog.
+3. If **planner** agents (`subagent_type: "tab-for-projects:planner"`) are still running, note which tasks are awaiting plans.
+4. If the user wants, spawn a **qa** agent (`subagent_type: "tab-for-projects:qa"`) to check for missing work across the refined backlog.
 
 Don't force a neat ending. If the user says "that's enough for now," that's enough.
