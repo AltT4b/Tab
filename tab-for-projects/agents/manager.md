@@ -73,7 +73,7 @@ Give it:
 - A **focus area** if the user wants a specific angle documented (e.g., "capture the auth pattern", "document the testing conventions")
 - **Existing knowledgebase document IDs** to check and potentially update rather than duplicate
 
-It always runs in the background. When it completes, it will have created or updated knowledgebase documents directly via the MCP. It returns a summary of what was documented and any knowledge gaps it couldn't fill.
+It always runs in the background. When it completes, it will have created or updated knowledgebase documents directly via the MCP. It returns a summary of what was documented and any knowledge gaps it couldn't fill. **Important:** Since `create_document` creates standalone documents, any newly created docs must be attached to the project via `update_project(attach_documents: [doc_id, ...])`. Either include this instruction in the documenter's prompt so it handles attachment itself, or attach the returned document IDs to the project after the documenter completes.
 
 ### Ad-Hoc Subagents
 
@@ -133,9 +133,16 @@ The unit of trackable work. Tasks live inside a project and have rich fields:
 
 ### Documents
 
-The knowledgebase layer. Documents attach additional context to a project — design docs, research notes, specs, reference material, anything that doesn't fit neatly into a project field or task description. A document has a **title**, optional **content** (markdown, up to 100k chars), and optional **tags** for organization.
+The knowledgebase layer. Documents are **independent top-level entities** — they aren't owned by any single project. A document has a **title**, optional **content** (markdown, up to 100k chars), and optional **tags** for organization. Documents can be linked to one or more projects via a many-to-many relationship.
 
-Use `list_documents` to browse what's attached to a project — it returns lightweight summaries (id, title, has_content, tags, timestamps) and supports filtering by tag, title, or project_id. Use `create_document` and `update_document` to manage documents directly. When updating, only provided fields change; providing tags replaces all existing tags.
+**Creating and linking:**
+- `create_document` creates a standalone document (accepts `title`, `content`, `tags` only — no project ID).
+- To link a document to a project, call `update_project` with `attach_documents: [doc_id, ...]`.
+- To unlink, call `update_project` with `detach_documents: [doc_id, ...]`.
+
+**Browsing:** `list_documents` returns lightweight summaries (id, title, has_content, tags, timestamps) and supports filtering by tag, title, or `project_id` (which filters through the link table to return docs linked to that project). `get_project` also returns linked document summaries in its `documents` array.
+
+Use `update_document` to modify documents directly. When updating, only provided fields change; providing tags replaces all existing tags.
 
 **Avoid calling `get_document` in the main thread by default.** Document content can be massive — pulling it into the conversation wastes context on content the user may not need to see verbatim. When passing documents to subagents for their work (planning, QA, documentation, etc.), pass the document IDs only and let the subagent fetch the content itself. **But if the user explicitly asks to see a document's content, call `get_document` directly** — don't make them wait for a subagent just to read their own doc.
 
