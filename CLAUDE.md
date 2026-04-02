@@ -1,3 +1,51 @@
-# tab
+# Tab
 
-An agent library for helping integrate with tab-focused MCPs
+Claude Code plugin marketplace containing two plugins: **tab** (a standalone personality/thinking-partner agent) and **tab-for-projects** (project management agents that talk to the Tab for Projects MCP). Published via `.claude-plugin/marketplace.json`.
+
+## Repository Structure
+
+```
+.claude-plugin/marketplace.json   # Marketplace manifest — lists both plugins
+tab/                              # "tab" plugin package
+  .claude-plugin/plugin.json      #   Plugin metadata (agents, skills, version)
+  settings.json                   #   Default agent: tab:Tab
+  agents/tab.md                   #   Tab personality agent
+  skills/listen/SKILL.md          #   /listen — deliberate listening mode
+  skills/draw-dino/SKILL.md       #   /draw-dino skill
+tab-for-projects/                 # "tab-for-projects" plugin package
+  .claude-plugin/plugin.json      #   Plugin metadata (agents, skills, version)
+  settings.json                   #   Default agent: tab-for-projects:manager
+  agents/manager.md               #   Project manager agent
+  agents/planner.md               #   Planning agent
+  agents/qa.md                    #   QA agent
+  agents/documenter.md            #   Documentation agent
+  skills/refinement/SKILL.md      #   /refinement — backlog refinement ceremony
+```
+
+## Package Architecture
+
+- **tab** is standalone. One agent (`Tab`) with a rich personality system (profiles, settings 0-100%). No MCP dependency.
+- **tab-for-projects** extends the ecosystem with four specialized agents and the `/refinement` skill. All agents interact with the Tab for Projects MCP for project/task/document CRUD.
+- Each package is independently installable. `settings.json` at each package root sets the default agent via `{"agent": "<plugin>:<agent>"}`.
+
+## Conventions
+
+**Agents** are markdown files with YAML frontmatter (`name`, `description`). The body is the system prompt. Registered in `plugin.json` under `"agents"` as relative paths.
+
+**Skills** live in `skills/<skill-name>/SKILL.md`. Frontmatter fields: `name`, `description`, `argument-hint`. The body defines behavior, trigger rules, and output format. Registered in `plugin.json` via `"skills": "./skills/"` (directory reference).
+
+**Plugin metadata** lives in `<package>/.claude-plugin/plugin.json` with fields: `name`, `description`, `version`, `author`, `license`, `agents` (array of paths), `skills` (directory path).
+
+**Marketplace manifest** at `.claude-plugin/marketplace.json` lists all plugins with `name`, `source`, `description`, `version`, `strict`.
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `.claude-plugin/marketplace.json` | Marketplace plugin registry |
+| `tab/.claude-plugin/plugin.json` | Tab plugin manifest |
+| `tab-for-projects/.claude-plugin/plugin.json` | Tab for Projects plugin manifest |
+| `tab/agents/tab.md` | Tab agent — personality, profiles, settings |
+| `tab-for-projects/agents/manager.md` | Project manager agent (default for tab-for-projects) |
+| `tab/settings.json` | Tab default agent config |
+| `tab-for-projects/settings.json` | Tab for Projects default agent config |
