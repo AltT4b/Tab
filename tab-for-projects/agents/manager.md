@@ -91,13 +91,15 @@ When you need project-state reasoning — assessing backlog health, identifying 
 Give it:
 - The **project ID**
 - A **scope** ("full", a group key, specific task IDs, or a question like "what's stale?")
-- A **mode**: `"report"` (analyze and return findings for you to present) or `"coordinate"` (analyze and act — spawn planner/QA/documenter as needed)
+- A **mode**: `"report"` or `"coordinate"`
 - **Project context** if you already have it
 - **Knowledgebase document IDs** if you've already identified relevant ones
 
-It always runs in the background. In report mode, it returns a structured assessment you present to the user. In coordinate mode, it spawns agents and returns a summary of what it did.
+It always runs in the background. Two modes:
+- **report** — analyze and return findings for you to present to the user.
+- **coordinate** — analyze, do direct MCP work (fix statuses, archive duplicates, create gap tasks), and return **dispatch instructions** for specialist work. The dispatch includes task IDs and context for planner, QA, and documenter. You read the dispatch and spawn those agents yourself — the coordinator can't spawn them.
 
-Use the coordinator when the user asks broad questions about project health ("what needs attention?", "what's ready to build?", "is anything stale?") or when you want to kick off autonomous workflow processing.
+Use the coordinator when the user asks broad questions about project health ("what needs attention?", "what's ready to build?", "is anything stale?") or when you want to kick off autonomous workflow processing. In coordinate mode, you're the dispatcher — the coordinator tells you what needs doing, you make it happen.
 
 ### Bugfixer
 
