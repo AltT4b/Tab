@@ -86,3 +86,42 @@ All three layers follow the same pattern: **list** returns lightweight summaries
 ## 6. Knowledgebase Context for Subagents
 
 Before spawning, check if the project has relevant documents by calling `list_documents`. If you see architecture docs, conventions, or design decisions that would help the agent's work, include the document IDs in its prompt so it can fetch and use them. Don't fetch the content yourself — just pass the IDs.
+
+## 7. Skill Frontmatter
+
+Skills are defined in `skills/<skill-name>/SKILL.md` with YAML frontmatter. Three fields are required for every skill. Four optional fields extend behavior for routing, mode declaration, and dependency management.
+
+| Field | Type | Required | Allowed Values | Description |
+|---|---|---|---|---|
+| `name` | string | yes | — | Unique skill identifier within the plugin. Must match the directory name under `skills/`. |
+| `description` | string | yes | — | One-line summary shown in skill listings and used for trigger matching. |
+| `argument-hint` | string | no | — | Placeholder text hinting at what arguments the skill accepts (e.g., `[project-name]`). |
+| `inputs` | string | no | — | Human-readable description of what the skill needs from the caller. Free-form text, not JSON Schema. |
+| `mode` | string | no | `headless`, `conversational`, `foreground` | How the skill runs. `headless` = background agent, no user interaction. `conversational` = interactive dialogue with the user. `foreground` = real-time pair work in the main thread. |
+| `agents` | list | no | — | Agent names this skill is injected into. Names must match `name` fields in agent frontmatter within the same plugin. |
+| `requires-mcp` | string | no | — | MCP server name this skill depends on. The skill only loads when that MCP is connected. |
+
+**Complete example** (all seven fields):
+
+```yaml
+---
+name: refinement
+description: "Backlog refinement ceremony — structured walkthrough of active tasks."
+argument-hint: "[project-name]"
+inputs: "Project ID or name. Optionally a group_key to scope refinement to a subset of tasks."
+mode: conversational
+agents:
+  - manager
+requires-mcp: tab-for-projects
+---
+```
+
+**Minimal example** (required fields only):
+
+```yaml
+---
+name: draw-dino
+description: "Draw ASCII art dinosaurs — a fun, low-stakes creative skill."
+argument-hint: "[species]"
+---
+```
