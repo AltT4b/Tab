@@ -34,9 +34,9 @@ The user is opting out of the conversation loop. They want the system to assess 
 5. **Tell the user what's running.** Brief status: "Running autopilot — coordinator is assessing the project. I'll dispatch the team once it reports back."
 
 6. **Phase 2: Dispatch.** When the coordinator completes, read its dispatch instructions and spawn agents in parallel:
-   - **Planner** (`subagent_type: "tab-for-projects:planner"`) — for tasks the coordinator flagged as needing plans or decomposition. Pass the specific task IDs and any context the coordinator provided about what needs planning.
-   - **QA** (`subagent_type: "tab-for-projects:qa"`) — for completed tasks the coordinator flagged as needing validation. Pass task IDs and any focus areas.
-   - **Documenter** (`subagent_type: "tab-for-projects:documenter"`) — for completed work the coordinator flagged as needing knowledge capture. Pass task IDs and existing document IDs to avoid duplication.
+   - **Planner** (`subagent_type: "tab-for-projects:planner"`) — for tasks the coordinator flagged as needing plans or decomposition. The planner executes the /plan protocol — codebase research, implementation plans, acceptance criteria. Pass the specific task IDs and any context the coordinator provided about what needs planning.
+   - **QA** (`subagent_type: "tab-for-projects:qa"`) — for completed tasks the coordinator flagged as needing validation. The QA agent executes the /validate protocol against acceptance criteria and code. Pass task IDs and any focus areas.
+   - **Documenter** (`subagent_type: "tab-for-projects:documenter"`) — for completed work the coordinator flagged as needing knowledge capture. The documenter executes the /document protocol to capture knowledge. Pass task IDs and existing document IDs to avoid duplication.
 
    Only spawn agents that have work to do. If the coordinator found nothing for QA, don't spawn QA. All spawned agents run in the background, in parallel.
 
@@ -56,7 +56,7 @@ The user is opting out of the conversation loop. They want the system to assess 
 
    **Check for file conflicts within each wave.** Read the "Files to touch" sections of task plans. Tasks touching the same files within a wave must either be given to the same implementer agent or sequenced into sub-waves. Tasks touching disjoint files run in parallel.
 
-   **Spawn implementer agents.** For each parallelizable unit within a wave, spawn `subagent_type: "tab-for-projects:implementer"` with `run_in_background: true` and `isolation: "worktree"`. Each implementer runs in its own git worktree on an isolated branch — this prevents parallel agents from stepping on each other's files. Pass:
+   **Spawn implementer agents.** For each parallelizable unit within a wave, spawn `subagent_type: "tab-for-projects:implementer"` with `run_in_background: true` and `isolation: "worktree"`. Each implementer executes the /implement protocol in its own git worktree — this prevents parallel agents from stepping on each other's files. Pass:
    - Project ID
    - Task IDs for the unit
    - Project context (goal, requirements, design)
@@ -96,6 +96,6 @@ The user is opting out of the conversation loop. They want the system to assess 
 
 Autopilot is a **permission structure**. Without it, the manager asks before it acts — that's its nature as a thinking partner. Autopilot explicitly says: "I trust the system to make good calls. Go."
 
-The multi-phase design makes the manager a team lead, not a delegator. Phase 1 sends the coordinator as an analyst — it reads the full project state, does what it can directly (status fixes, gap tasks, duplicate cleanup), and returns structured dispatch instructions for specialist work. Phase 2 has the manager spawn planner, QA, and documenter in parallel with the specific scoped work from the coordinator's findings. Phase 3 sends implementer agents to execute plans in dependency-ordered waves — each implementer runs in an isolated git worktree so parallel agents never conflict, with an ad-hoc merge step between waves to integrate branches back into main. Phase 4 runs QA on the freshly implemented work to catch issues before the user sees them. The coordinator doesn't need to hold the spawn button; the manager does that based on precise instructions about what needs doing and why.
+The multi-phase design makes the manager a team lead, not a delegator. Phase 1 sends the coordinator as an analyst — it reads the full project state, does what it can directly (status fixes, gap tasks, duplicate cleanup), and returns structured dispatch instructions for specialist work. Phase 2 has the manager spawn planner (/plan), QA (/validate), and documenter (/document) in parallel with the specific scoped work from the coordinator's findings. Phase 3 sends implementer agents to execute plans in dependency-ordered waves — each implementer runs in an isolated git worktree so parallel agents never conflict, with an ad-hoc merge step between waves to integrate branches back into main. Phase 4 runs QA on the freshly implemented work to catch issues before the user sees them. The coordinator doesn't need to hold the spawn button; the manager does that based on precise instructions about what needs doing and why.
 
 The user should be able to type `/autopilot`, walk away, and come back to a project that's been triaged, planned, implemented, validated, and documented — with a clear summary of everything that happened.
