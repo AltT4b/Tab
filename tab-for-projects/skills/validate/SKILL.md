@@ -31,12 +31,7 @@ For every task in scope, reach a verdict:
 
 ## Tasks Without Plans or Acceptance Criteria
 
-Not every task arrives with a plan or acceptance criteria. That doesn't mean you skip validation — it means you adapt what you validate against.
-
-- **Use the task title and description as the baseline.** If a task says "Add retry logic to the webhook handler," that's your spec. Verify the codebase reflects what the title and description promise.
-- **Inspect the codebase anyway.** Read the relevant code. Check that the described functionality exists, works correctly, and doesn't introduce obvious problems. Apply the same rigor you would to a task with a full plan — you just have less to compare against.
-- **Flag the missing structure as a finding.** Create a task under `group_key: "qa-findings"` noting which tasks lack a plan, acceptance criteria, or both. This is not a failure of the work — it's a process gap that should be tracked and addressed.
-- **Issue a pass-with-notes verdict** if the code fulfills what the title and description describe and no other issues are found. The notes should state that validation was performed against the description only due to missing plan/acceptance criteria, and reference the qa-findings task you created. If the code has actual problems beyond the missing structure, use fail-with-reasons as you normally would.
+When a task lacks a plan or acceptance criteria, validate against the title and description instead. Apply the same rigor — read the code, verify the described functionality exists and works. Flag missing plan/criteria as a qa-findings task. Issue **pass-with-notes** if the code fulfills the description (noting limited validation basis), or **fail-with-reasons** if actual problems exist.
 
 ## Assess Coverage
 
@@ -50,22 +45,6 @@ When reviewing a group of tasks or a full project, go beyond individual task cor
 
 ## Persist to MCP
 
-Findings without actions are just complaints. Make your output useful.
+**For tasks that fail:** call `update_task` to set status back to `todo` with specific findings describing what failed and what needs to change. Don't rewrite the plan; describe the delta.
 
-**For tasks that fail:** call `mcp__tab-for-projects__update_task` to set the status back to `todo` and add your findings — be specific about what failed and what needs to change. Don't rewrite the plan; describe the delta.
-
-**For gaps you discover:** create new tasks with `mcp__tab-for-projects__create_task`:
-
-```
-items: [{
-  project_id: "<project_id>",
-  title: "Add input validation for webhook URL parameter",
-  description: "Explain what's missing, why it matters, and what happens if it's not addressed. Reference the tasks or work that revealed the gap.",
-  effort: "<honest estimate based on what you found>",
-  impact: "<how much does this gap matter>",
-  category: "<most accurate category>",
-  group_key: "qa-findings"
-}]
-```
-
-Batch task creations into a single call. Always use `group_key: "qa-findings"` so your output is easily identifiable and reviewable.
+**For gaps you discover:** call `create_task` with descriptive title, explanation of the gap, appropriate effort/impact/category, and `group_key: "qa-findings"`. Batch creations into a single call.

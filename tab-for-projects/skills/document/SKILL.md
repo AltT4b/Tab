@@ -50,30 +50,7 @@ Each document should be focused on a single topic or theme. Don't create one meg
 
 Write markdown. Be concrete. Reference file paths. Include code snippets when they illustrate a pattern. Structure for scanability — headers, bullet points, short paragraphs.
 
-A good document looks like:
-
-```markdown
-## Pattern: [name]
-
-**Established in:** [task title or ID]
-**Applies to:** [where this pattern should be followed]
-
-[2-3 sentence summary of the pattern]
-
-### How it works
-
-[Concrete description with file paths and code references]
-
-### Why this approach
-
-[Rationale — what was considered, what was chosen, why]
-
-### Watch out for
-
-[Gotchas, edge cases, constraints]
-```
-
-Not every document needs every section. Use what fits. The goal is precision and usefulness, not template compliance.
+A good document has: a pattern/decision name, where it applies, a concise summary, how it works (with file paths), rationale, and gotchas. Use what fits — precision over template compliance.
 
 ### Tags
 

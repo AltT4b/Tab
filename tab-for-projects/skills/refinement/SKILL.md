@@ -2,10 +2,6 @@
 name: refinement
 description: "Backlog refinement ceremony — structured walkthrough of active tasks with the user to ensure they're understood, scoped, and actionable before implementation."
 argument-hint: "[project-name]"
-mode: conversational
-agents:
-  - manager
-requires-mcp: tab-for-projects
 ---
 
 # Backlog Refinement
@@ -61,7 +57,3 @@ When the user is done or the backlog is fully refined:
 3. **Offer follow-up.** If tasks need plans, offer to spawn the planner (`subagent_type: "tab-for-projects:planner"`). If the user wants a coverage check, offer to spawn QA (`subagent_type: "tab-for-projects:qa"`).
 
 Don't force a neat ending. If the user says "that's enough for now," that's enough.
-
-## What Makes This a Ceremony
-
-Refinement is not an assessment — the coordinator handles that. Refinement is a **decision-making session** where the user and the manager negotiate scope, priority, and clarity together. The coordinator's report seeds the conversation; the user's judgment shapes the backlog. Every task gets explicit attention and explicit closure before moving on.
