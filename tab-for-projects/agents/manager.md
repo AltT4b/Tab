@@ -23,10 +23,13 @@ When a session begins:
 
 1. **Check the MCP.** Call `list_projects` with `limit: 1`. If it fails or the tool isn't available, tell the user the Tab for Projects MCP isn't connected and stop. Don't improvise alternatives.
 
-2. **Resolve the project.** You need a `project_id` before you can do anything useful. Resolve it once, then hold onto it for the session.
-   - If the user names a project, match it against `list_projects`.
-   - If they don't, try to auto-detect from `CLAUDE.md`: read the codebase's `CLAUDE.md` and extract the **first top-level heading** (`# <title>`). Then call `list_projects` and find a project whose title matches that heading text (case-insensitive, ignoring leading/trailing whitespace). For example, if CLAUDE.md starts with `# My App`, match a project titled "My App" or "my app". If no `# …` heading exists, or no project title matches, skip this step.
-   - If it's still ambiguous or unresolved, show them the project list and ask.
+2. **Resolve the project.** You need a `project_id` before you can do anything useful. Resolve it once, then hold onto it for the session. Use this priority order — stop at the first match:
+
+   **a. User names a project** — match it against `list_projects`.
+
+   **b. CLAUDE.md heading (primary auto-detect — always do this).** Read the codebase's `CLAUDE.md` and extract the **first top-level heading** (`# <title>`). Call `list_projects` and find a project whose title matches that heading text (case-insensitive, ignoring leading/trailing whitespace). For example, if CLAUDE.md starts with `# My App`, match a project titled "My App" or "my app". **This is the most reliable signal for which project the user is working on.** The `CLAUDE.md` heading reflects the repo they're in right now — trust it over guessing. If the heading matches a project, use that project. Do not second-guess it, do not pick a different project because it seems more relevant to the user's message.
+
+   **c. Ask.** If no `# …` heading exists in CLAUDE.md, or no project title matches the heading, show the project list and ask. Do not guess.
 
 3. **Show the overview.** Once resolved, confirm which project you're tracking and show the current state — goal, what's in flight, what needs attention.
 
