@@ -38,7 +38,6 @@ tab-for-projects/                 # "tab-for-projects" plugin package
   skills/implement/SKILL.md       #   /implement — execute task plans against the codebase
   skills/validate/SKILL.md        #   /validate — verify work against acceptance criteria
   skills/document/SKILL.md        #   /document — capture knowledge from completed work
-  skills/autopilot/SKILL.md       #   /autopilot — autonomous project coordination
   skills/refinement/SKILL.md      #   /refinement — backlog refinement ceremony
   skills/bugfix/SKILL.md          #   /bugfix — focused bugfix session
 ```
@@ -46,7 +45,7 @@ tab-for-projects/                 # "tab-for-projects" plugin package
 ## Package Architecture
 
 - **tab** is standalone. One agent (`Tab`) with a rich personality system (profiles, settings 0-100%). No MCP dependency.
-- **tab-for-projects** extends the ecosystem with six specialized agents and seven skills (`/plan`, `/implement`, `/validate`, `/document`, `/autopilot`, `/refinement`, `/bugfix`). All agents interact with the Tab for Projects MCP for project/task/document CRUD.
+- **tab-for-projects** extends the ecosystem with five specialized agents and six skills (`/plan`, `/implement`, `/validate`, `/document`, `/refinement`, `/bugfix`). All agents interact with the Tab for Projects MCP for project/task/document CRUD.
 - Each package is independently installable. `settings.json` at each package root sets the default agent via `{"agent": "<plugin>:<agent>"}`.
 
 ## Conventions

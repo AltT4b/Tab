@@ -166,25 +166,3 @@ A focused bugfix session. The manager sets up project context and hands off to t
 
 ---
 
-## autopilot
-
-**Package:** tab-for-projects
-**Invocation:** `/autopilot [project-name]`
-
-Autonomous project coordination. The system assesses the project, identifies what needs doing, and does it -- without asking for permission at each step. The user can type `/autopilot`, walk away, and come back to a project that has been triaged, planned, implemented, validated, and documented.
-
-### How it works
-
-1. **Resolve the project** and load full context (goal, requirements, design, knowledgebase documents).
-2. **Phase 1 -- Assessment.** Spawn the coordinator in coordinate mode with full project scope. The coordinator reads the entire project state, takes direct MCP actions (fixing statuses, archiving duplicates, creating tasks for gaps), and returns structured dispatch instructions identifying which tasks need planning, QA, documentation, and implementation.
-3. **Phase 2 -- Dispatch.** Based on the coordinator's dispatch instructions, spawn planner, QA, and documenter agents in parallel -- each with the specific task IDs and context from the coordinator's findings. Only agents with work to do are spawned.
-4. **Phase 3 -- Implementation.** After Phase 2 completes, identify tasks ready for implementation (from the coordinator's `implement` dispatch array and newly-planned tasks). Group them into dependency-ordered waves, respecting file conflicts. Spawn implementer agents in parallel within each wave (capped at 3--5 concurrent agents). Wait for each wave to complete before starting the next.
-5. **Phase 4 -- Post-implementation QA.** Validate the newly implemented work by spawning QA on all tasks that implementers completed. Failures are reported but not automatically retried -- the autopilot is autonomous but bounded.
-6. **Results.** Present a full summary: what the coordinator assessed and acted on, what the planner produced, what QA found (both pre-existing and post-implementation), what the documenter captured, what was implemented (successes, failures, skips), and items that need the user's judgment.
-
-### Design principles
-
-- Autopilot is a permission structure. Without it, the manager asks before acting. Autopilot says: "Go."
-- The multi-phase design makes the manager a team lead: the coordinator is the analyst, the planner/QA/documenter/implementer are the specialists. The coordinator does not spawn agents itself -- it returns instructions, and the manager dispatches.
-- Implementation runs in waves to respect dependencies and avoid file conflicts between concurrent implementers.
-- No retry loops. If implementation or QA fails, it is reported and left for the user to address.

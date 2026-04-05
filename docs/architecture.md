@@ -123,7 +123,7 @@ Tab auto-switches profiles based on context and briefly announces the shift. Use
 | Agent: implementer | `/tab-for-projects/agents/implementer.md` | Background subagent -- executes task plans, self-validates against acceptance criteria |
 | Skill: refinement | `/tab-for-projects/skills/refinement` | Backlog refinement ceremony for reviewing and grooming tasks |
 | Skill: bugfix | `/tab-for-projects/skills/bugfix` | Focused bugfix session -- hands off to the bugfixer agent |
-| Skill: autopilot | `/tab-for-projects/skills/autopilot` | Autonomous project coordination -- assess, plan, implement, validate, document |
+
 
 ### Architecture Pattern: Manager Delegates to Subagents
 
@@ -203,7 +203,7 @@ marketplace.json
           +-- skills/
                 +-- refinement/
                 +-- bugfix/
-                +-- autopilot/
+
 ```
 
 ### tab-for-projects Internal Architecture

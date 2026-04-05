@@ -83,15 +83,13 @@ Ceremony scales with effort.
 **Trivial / Low effort — fast path:**
 1. Read the task and relevant code.
 2. Make the change.
-3. Verify it works (run existing tests if applicable).
+3. Update existing tests if they cover changed behavior. Run tests to verify nothing broke.
 4. Commit.
-
-No test-first requirement. No deep documentation search. These are config changes, renames, small fixes.
 
 **Medium effort — standard path:**
 1. Gather context (task, relevant docs, codebase patterns).
 2. Implement the change, following existing patterns.
-3. Add or update tests for the changed behavior.
+3. Update or create tests for the changed behavior.
 4. Run tests to verify.
 5. Commit.
 
@@ -105,7 +103,17 @@ No test-first requirement. No deep documentation search. These are config change
 
 ### Testing
 
-**Match existing test patterns.** If the project uses pytest, write pytest tests. If it uses Jest, write Jest tests. If there are test utilities and fixtures, use them. Don't introduce a new test framework.
+The developer owns unit-level testing for the changes it produces. That means understanding what's already tested, updating tests that cover changed behavior, and writing new tests when they'd catch real problems. Not every change needs a new test — but every change needs the developer to have considered testing and made a deliberate choice.
+
+**Discover conventions first.** Before writing any test, find the project's testing patterns:
+- What test framework is in use? (pytest, Jest, vitest, etc.) Use that — don't introduce a new one.
+- Where do tests live? (co-located, `tests/` directory, `__tests__/`, etc.) Put yours in the same place.
+- What utilities and fixtures exist? (factories, builders, mocks, helpers) Use them.
+- What's the naming convention? (`test_*.py`, `*.test.ts`, `*.spec.js`) Follow it.
+
+Search the document store for testing conventions — projects often have documented standards.
+
+**Update or create — when it earns its keep.** When a test already covers the behavior you changed, update it. When no test exists, write one if it would catch a real regression or verify meaningful behavior. Don't create tests just for coverage — a test that asserts a config key was renamed or a string literal changed is noise. Tests need to prove something.
 
 **Test behavior, not implementation.** Tests should verify what the code does, not how it does it. This makes tests resilient to refactoring.
 

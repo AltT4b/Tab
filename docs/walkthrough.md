@@ -303,7 +303,7 @@ The seven agents each play a distinct role:
 | **Planner** | Researches the codebase and turns intent into structured tasks with plans and acceptance criteria. | When work needs to be decomposed or planned |
 | **QA** | Validates work against plans and acceptance criteria. Creates actionable findings. | When work needs to be reviewed |
 | **Documenter** | Captures decisions, patterns, and gotchas into the project knowledgebase. | When knowledge should be preserved |
-| **Coordinator** | Reads full project state and produces assessments or dispatch instructions for specialist agents. | When the project needs a health check or `/autopilot` runs |
+| **Coordinator** | Reads full project state and produces assessments or dispatch instructions for specialist agents. | When the project needs a health check |
 | **Bugfixer** | Pair-programs with the user to hunt and fix bugs in real time. Runs in the **foreground**. | When the user invokes `/bugfix` |
 | **Implementer** | Executes task plans faithfully, self-validates against acceptance criteria. | When planned tasks are ready to be built |
 
@@ -313,8 +313,6 @@ The knowledge loop is the key insight: documents written by the documenter feed 
 
 ### Alternative Workflows
 
-The walkthrough above follows the manual, step-by-step flow. Two skills offer alternative paths:
-
-**`/autopilot [project-name]`** -- automates the entire cycle. The coordinator assesses the project first (identifying what needs planning, QA, documentation, and implementation), then the manager dispatches planner, QA, documenter, and implementer agents in parallel based on the coordinator's findings. Implementation runs in dependency-ordered waves, followed by a post-implementation QA pass. You can type `/autopilot`, walk away, and come back to a project that has been triaged, planned, implemented, validated, and documented -- with a clear summary of everything that happened.
+The walkthrough above follows the manual, step-by-step flow. One skill offers an alternative path:
 
 **`/bugfix [project-name]`** -- starts a hands-on bug-hunting session. Instead of the plan-implement-validate cycle, the bugfixer agent takes over the conversation in the foreground and pair-programs with you in real time. It finds bugs, fixes them immediately, verifies with tests, and tracks everything in the MCP. This is the path to take when you want to hunt bugs collaboratively rather than work through a structured backlog.

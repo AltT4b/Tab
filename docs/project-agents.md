@@ -251,7 +251,6 @@ The coordinator operates in two modes. In **report mode**, it analyzes the proje
 The manager spawns the coordinator (`subagent_type: "tab-for-projects:coordinator"`) when:
 
 - The project needs an overall health assessment (backlog quality, knowledgebase coverage, goal alignment).
-- The `/autopilot` skill is invoked — the coordinator runs first in coordinate mode to assess and triage before other agents are dispatched.
 - The manager needs to understand what work is ready, stale, or missing before making recommendations to the user.
 
 It always runs in the background.
@@ -346,7 +345,6 @@ The implementer does not write plans. If a task has no plan, it flags it and ski
 The manager spawns the implementer (`subagent_type: "tab-for-projects:implementer"`) when:
 
 - Tasks have implementation plans and acceptance criteria and are ready to be built.
-- The `/autopilot` skill reaches its implementation phase — the coordinator identifies ready tasks and the manager dispatches implementer agents in dependency-ordered waves.
 
 It always runs in the background.
 
@@ -409,6 +407,6 @@ A typical lifecycle from idea to documented work:
 
 ### Alternative Paths
 
-**Coordinator-driven assessment.** The manager can spawn the coordinator at any point to assess project health, identify stale or missing work, and produce dispatch instructions for other agents. The `/autopilot` skill uses this as its first phase — the coordinator assesses the full project in coordinate mode, takes direct MCP actions, and returns structured dispatch instructions that the manager uses to spawn planner, QA, documenter, and implementer agents in parallel.
+**Coordinator-driven assessment.** The manager can spawn the coordinator at any point to assess project health, identify stale or missing work, and produce dispatch instructions for other agents. The coordinator assesses the full project in coordinate mode, takes direct MCP actions, and returns structured dispatch instructions that the manager uses to spawn planner, QA, documenter, and implementer agents in parallel.
 
 **Bugfix sessions.** When the user wants to hunt bugs rather than follow the plan-implement-validate cycle, the `/bugfix` skill spawns the bugfixer in the foreground. The bugfixer pair-programs with the user directly — finding, fixing, and verifying bugs in real time. This is an alternative path that bypasses the normal delegation pattern: the bugfixer talks to the user, not the manager.

@@ -7,8 +7,10 @@
   },
   "license": "Apache-2.0",
   "agents": [
+    "./agents/manager.md",
     "./agents/architect.md",
     "./agents/analyst.md",
+    "./agents/planner.md",
     "./agents/developer.md"
   ],
   "skills": "./skills/"
