@@ -9,7 +9,6 @@
   "agents": [
     "./agents/manager.md",
     "./agents/architect.md",
-    "./agents/analyst.md",
     "./agents/planner.md",
     "./agents/developer.md"
   ],
