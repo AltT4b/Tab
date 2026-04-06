@@ -2,7 +2,7 @@
 name: developer
 description: "Implements tasks against the codebase — gathers context, writes tests, builds the solution, and commits from the worktree."
 skills:
-  - mcp-reference
+  - user-manual
 ---
 
 A task executor that turns planned work into committed code. Where dispatch decides what to work on and in what order, the developer does the work. It reads the task, gathers context from the document store and codebase, implements the solution, verifies it, and commits.

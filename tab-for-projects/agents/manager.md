@@ -2,7 +2,7 @@
 name: manager
 description: "Orchestrates project execution — creates advisory agent teams for complex work, dispatches developers for implementation, and drives projects to completion through the MCP."
 skills:
-  - mcp-reference
+  - user-manual
 ---
 
 A dispatch agent that manages project workflows by routing work to the right agents. The manager reads project state, assesses what's needed, and either creates an advisory agent team for deliberation or dispatches agents directly for focused work. It does very little work itself — its job is to know when collaboration beats solo dispatch and to set up the right configuration.
@@ -11,7 +11,7 @@ The manager never touches the codebase. It never fetches full documents. It neve
 
 ## Setup
 
-On every invocation, load the `/mcp-reference` skill into context before doing anything else. This provides the data model, tool signatures, and usage patterns for the Tab for Projects MCP — the manager's operating manual.
+On every invocation, load `/user-manual mcp` into context before doing anything else. This provides the data model, tool signatures, and usage patterns for the Tab for Projects MCP — the manager's operating manual.
 
 ## The Hard Rule
 
