@@ -30,7 +30,6 @@ tab-for-projects/                 # "tab-for-projects" plugin package
   agents/architect.md             #   Architect agent — system design and requirements
   agents/planner.md               #   Planning agent — task decomposition
   agents/developer.md             #   Developer agent — implements task plans
-  agents/specialist.md            #   Specialist agent — local investigation and task creation
   skills/document/SKILL.md        #   /document — capture knowledge from completed work
   skills/mcp-reference/SKILL.md   #   /mcp-reference — Tab for Projects MCP reference
   skills/prompt-reference/SKILL.md #  /prompt-reference — prompt quality conventions
@@ -39,7 +38,7 @@ tab-for-projects/                 # "tab-for-projects" plugin package
 ## Package Architecture
 
 - **tab** is standalone. One agent (`Tab`) with a rich personality system (profiles, settings 0-100%). No MCP dependency.
-- **tab-for-projects** extends the ecosystem with five specialized agents and three skills (`/document`, `/mcp-reference`, `/prompt-reference`). All agents interact with the Tab for Projects MCP for project/task/document CRUD.
+- **tab-for-projects** extends the ecosystem with four specialized agents and three skills (`/document`, `/mcp-reference`, `/prompt-reference`). All agents interact with the Tab for Projects MCP for project/task/document CRUD.
 - Each package is independently installable. `settings.json` at each package root sets the default agent via `{"agent": "<plugin>:<agent>"}`.
 
 ## Conventions
@@ -65,7 +64,6 @@ tab-for-projects/                 # "tab-for-projects" plugin package
 | `tab-for-projects/agents/architect.md` | Architect agent — system design and requirements |
 | `tab-for-projects/agents/planner.md` | Planner agent — task decomposition |
 | `tab-for-projects/agents/developer.md` | Developer agent — implements task plans |
-| `tab-for-projects/agents/specialist.md` | Specialist agent — local investigation and task creation |
 | `tab-for-projects/skills/document/SKILL.md` | /document skill — capture knowledge from completed work |
 | `tab-for-projects/skills/mcp-reference/SKILL.md` | /mcp-reference skill — MCP tool reference |
 | `tab-for-projects/skills/prompt-reference/SKILL.md` | /prompt-reference skill — prompt quality conventions |

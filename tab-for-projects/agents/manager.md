@@ -121,31 +121,6 @@ After committing, merge your worktree branch into the parent branch
 Update the task's implementation field and status when done.
 ```
 
-### Specialist
-
-**When to dispatch:** The project has tactical, code-level problems — broken wiring, integration gaps, cascading renames, missing registrations, small refactors. The issue is local, not system-wide. The specialist investigates and creates developer-ready tasks.
-
-**What it needs:** The project ID and an investigation brief describing the symptom or area to explore. The specialist reads code deeply, traces connections, and diagnoses what's not wired up correctly.
-
-**What it produces:** Tasks in the MCP with precise descriptions, plans, and acceptance criteria — each scoped tightly enough for a developer agent to execute without further investigation.
-
-**What it does NOT do:** Write code, create documents, make strategic design decisions. For system-level design questions, dispatch the designer instead.
-
-**Dispatch brief:**
-```
-You are the specialist for project [name] (ID: [id]).
-
-Investigation: [symptom or area to explore — specific integration gap, broken behavior, or code smell]
-
-Project goal: [goal field]
-Relevant documents: [list of document IDs and titles]
-
-Investigate [area]. Explore the codebase, trace the issue through the code,
-and create developer-ready tasks for each fix needed. Each task should have
-a description, plan, and acceptance criteria precise enough for a developer
-to execute without further investigation.
-```
-
 ## Workflow
 
 ### Phase 1: Assess
