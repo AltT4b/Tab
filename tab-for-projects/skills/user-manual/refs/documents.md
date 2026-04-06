@@ -133,7 +133,7 @@ When passing a reference to another agent, include three things:
 
 Example:
 
-> Architecture decision documented in `01ABC123`. Key points: chose event-driven sync over polling for lower latency and simpler error handling. Planner — this affects task decomposition because the sync service needs an event bus dependency. Tech lead — verify the current codebase doesn't already have a polling implementation that needs migration.
+> Architecture decision documented in `01ABC123`. Key points: chose event-driven sync over polling for lower latency and simpler error handling. This affects task decomposition because the sync service needs an event bus dependency. Verify the current codebase doesn't already have a polling implementation that needs migration.
 
 ### What NOT to Do
 
