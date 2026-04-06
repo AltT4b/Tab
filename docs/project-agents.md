@@ -66,7 +66,7 @@ On start, the manager loads project state and routes existing work:
 | Task category | Route to |
 |---------------|----------|
 | `design` | Advisory team or Designer solo |
-| `docs` | Tech Lead solo (with `/document` skill if post-implementation capture) |
+| `docs` | Tech Lead solo |
 | `feature`, `bugfix`, `refactor`, `chore`, `test`, `infra` | Developer (worktree subagent) |
 | Complex scope needing decomposition | Advisory team (Designer + Tech Lead + Planner) |
 
@@ -79,7 +79,7 @@ Create an agent team when work benefits from simultaneous perspectives:
 | **Big refactor** | Designer + Tech Lead + Planner | Designer proposes new structure, tech lead grounds it in codebase reality, planner creates tasks referencing both |
 | **Feature request** (post-requirements) | Designer + Tech Lead + Planner | Designer writes decisions, tech lead verifies against codebase, planner decomposes into tasks |
 | **Documentation audit** | Tech Lead solo or Designer + Tech Lead | Tech lead reads codebase and updates/flags docs; designer reviews if design decisions need revisiting |
-| **Post-implementation capture** | Tech Lead solo (with `/document` skill) | Reads completed tasks and code, extracts knowledge |
+| **Post-implementation capture** | Tech Lead solo | Reads completed tasks and code, extracts knowledge |
 
 ### When NOT to Use Agent Teams
 
@@ -199,7 +199,7 @@ Each agent writes in a clear domain. The `/document-reference` skill teaches the
 | Requirements documents | **Designer** | `/document-reference` |
 | Codebase pattern records, convention docs | **Tech Lead** | `/document-reference` |
 | Drift corrections to existing docs | **Tech Lead** | `/document-reference` |
-| Post-implementation knowledge capture | **Tech Lead** (dispatched with `/document`) | `/document` |
+| Post-implementation knowledge capture | **Tech Lead** | `/document-reference` |
 | KB curation (dedup, tags, supersession) | **Tech Lead** | `/document-reference` |
 
 ---
@@ -218,7 +218,7 @@ A typical lifecycle from idea to documented work:
 
 5. **Manager dispatches developers.** For each ready task in the graph, the manager spawns a developer subagent in a worktree. Developers gather context from the linked documents, implement, test, and commit.
 
-6. **Post-implementation capture.** After developers complete significant work, the manager dispatches the tech lead with the `/document` skill. The tech lead reads the completed code, compares it to the task plan, and writes or updates documents about what was actually built.
+6. **Post-implementation capture.** After developers complete significant work, the manager dispatches the tech lead. The tech lead reads the completed code, compares it to the task plan, and writes or updates documents about what was actually built.
 
 7. **Knowledge feeds future work.** The documents written in step 6 are available to all agents on the next cycle — making advisory deliberation and developer context-gathering richer and more grounded.
 
@@ -235,15 +235,14 @@ For straightforward work that does not need deliberation:
 
 ## Post-Implementation Knowledge Capture
 
-There is no dedicated knowledge-writing agent. Instead, the `/document` skill provides the procedure and an advisory agent provides the judgment.
+There is no dedicated knowledge-writing agent. The tech lead handles post-implementation capture as part of its core role — it's codebase-rooted, backward-looking, and already maintains documentation accuracy.
 
 The typical flow:
 
 1. Developer completes tasks.
 2. Manager identifies that knowledge should be captured from the completed work.
-3. Manager dispatches the **tech lead** with the `/document` skill. The tech lead is the natural fit — it's codebase-rooted, backward-looking, and already maintains documentation accuracy.
-4. The tech lead reads the completed code, compares it to the task plan, and writes or updates documents about what was actually implemented.
+3. Manager dispatches the **tech lead**. The tech lead reads the completed code, compares it to the task plan, and writes or updates documents about what was actually implemented.
 
-Alternatively, the manager can dispatch the **designer** with `/document` if the completed work involved design decisions worth preserving as ADRs.
+Alternatively, the manager can dispatch the **designer** if the completed work involved design decisions worth preserving as ADRs.
 
 KB curation — deduplication, tagging consistency, supersession chains, orphan detection — is handled by the tech lead as part of its ongoing documentation maintenance role. The manager can dispatch the tech lead specifically for a curation pass.

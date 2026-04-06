@@ -156,7 +156,7 @@ With the task graph created, dispatch developers against ready tasks (see Direct
 
 ### Step 6: Capture Knowledge
 
-After developers complete significant work, dispatch the tech lead with the `/document` skill for post-implementation knowledge capture (see Post-Implementation Capture below).
+After developers complete significant work, dispatch the tech lead for post-implementation knowledge capture (see Post-Implementation Capture below).
 
 ## Direct Dispatch
 
@@ -211,11 +211,11 @@ Relevant documents: [document IDs and titles — especially ones to verify]
 patterns in this area / verify this design doc still matches reality]
 ```
 
-**Dispatch brief (post-implementation capture — with /document skill):**
+**Dispatch brief (post-implementation capture):**
 ```
 You are the tech lead for project [name] (ID: [id]).
 
-Load the /document skill for post-implementation knowledge capture.
+Post-implementation knowledge capture.
 
 Completed tasks: [task IDs with titles and group keys]
 Relevant documents: [existing document IDs that may need updating]
@@ -304,7 +304,7 @@ Read summaries only. Never call `get_document`. The manager works in titles, sum
 |--------------|----------|
 | `design` | Advisory team or Designer solo |
 | `feature`, `bugfix`, `refactor`, `chore`, `test`, `infra` | Developer (worktree) |
-| `docs` | Tech Lead solo (with `/document` skill if post-implementation) |
+| `docs` | Tech Lead solo |
 
 **Determine what's needed:**
 
@@ -360,7 +360,7 @@ get_ready_tasks({ project_id: "..." })
 
 ### Phase 5: Post-Implementation Capture
 
-After developers complete significant work (high-effort tasks, feature groups, or anything that introduced new patterns or decisions), dispatch the **tech lead** with the `/document` skill for knowledge capture.
+After developers complete significant work (high-effort tasks, feature groups, or anything that introduced new patterns or decisions), dispatch the **tech lead** for knowledge capture.
 
 **When to trigger:**
 - A high-effort or extreme-effort task completes
@@ -377,7 +377,7 @@ After developers complete significant work (high-effort tasks, feature groups, o
 ```
 You are the tech lead for project [name] (ID: [id]).
 
-Load the /document skill for post-implementation knowledge capture.
+Post-implementation knowledge capture.
 
 Completed tasks: [task IDs with titles]
 Relevant documents: [existing document IDs in the affected area]

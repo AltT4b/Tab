@@ -188,7 +188,7 @@ The task's status is updated to `done` and the `implementation` field records wh
 
 ## Step 6 -- Knowledge Capture
 
-Once the work is complete, you ask the manager to capture what was learned. The manager dispatches the **tech lead** with the `/document` skill.
+Once the work is complete, you ask the manager to capture what was learned. The manager dispatches the **tech lead** for knowledge capture.
 
 > **You:** The webhook core is done. Let's capture what we learned.
 >
@@ -196,7 +196,7 @@ Once the work is complete, you ask the manager to capture what was learned. The 
 
 **Behind the scenes:**
 
-The manager dispatches the tech lead (`tab-for-projects:tech-lead`) with the `/document` skill loaded. It passes:
+The manager dispatches the tech lead (`tab-for-projects:tech-lead`) for knowledge capture. It passes:
 
 - The **project ID**.
 - The **task IDs** of completed work to document.
@@ -240,7 +240,7 @@ Here is the full loop:
 
 5. **Implementation.** The manager dispatched developers against ready tasks. Each developer gathered context from the task plan and linked KB documents, implemented the solution, tested, and committed from a worktree.
 
-6. **Knowledge capture.** The manager dispatched the tech lead with the `/document` skill. The tech lead read completed tasks and the codebase, extracted decisions, patterns, and gotchas, and wrote them into the project's knowledgebase -- making future advisory runs smarter.
+6. **Knowledge capture.** The manager dispatched the tech lead for post-implementation capture. The tech lead read completed tasks and the codebase, extracted decisions, patterns, and gotchas, and wrote them into the project's knowledgebase -- making future advisory runs smarter.
 
 The five agents are organized into three layers:
 

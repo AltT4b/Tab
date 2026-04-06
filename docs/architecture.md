@@ -119,7 +119,6 @@ Tab auto-switches profiles based on context and briefly announces the shift. Use
 | Agent: developer | `/tab-for-projects/agents/developer.md` | Execution -- implements tasks, commits from worktrees |
 | Skill: mcp-reference | `/tab-for-projects/skills/mcp-reference` | Reference for the Tab for Projects MCP data model and tools |
 | Skill: document-reference | `/tab-for-projects/skills/document-reference` | Reference for document types, create-vs-update discipline, tagging |
-| Skill: document | `/tab-for-projects/skills/document` | Post-implementation knowledge capture procedure |
 | Skill: prompt-reference | `/tab-for-projects/skills/prompt-reference` | Prompt quality conventions and reference |
 | Skill: agentic-reference | `/tab-for-projects/skills/agentic-reference` | Conventions for writing Claude Code agents and skills |
 
@@ -154,7 +153,7 @@ The tab-for-projects agents are organized into three layers: orchestration, advi
 
 **Designer** (`tab-for-projects:designer`): Advisory layer, future-leaning. Provides architectural judgment -- elicits requirements, evaluates alternatives, proposes architecture decisions. Writes design docs, ADRs, architecture overviews, and requirements docs. Passes document IDs to teammates. Loads `/document-reference` for document discipline.
 
-**Tech Lead** (`tab-for-projects:tech-lead`): Advisory layer, past-leaning. Provides codebase judgment -- reads code to understand actual patterns, verifies KB docs against codebase reality, flags drift and staleness. Writes and updates codebase pattern records, convention docs, and drift corrections. Handles post-implementation knowledge capture (dispatched with `/document` skill) and KB curation. Loads `/document-reference` for document discipline.
+**Tech Lead** (`tab-for-projects:tech-lead`): Advisory layer, past-leaning. Provides codebase judgment -- reads code to understand actual patterns, verifies KB docs against codebase reality, flags drift and staleness. Writes and updates codebase pattern records, convention docs, and drift corrections. Handles post-implementation knowledge capture and KB curation. Loads `/document-reference` for document discipline.
 
 **Planner** (`tab-for-projects:planner`): Advisory layer, task-focused. Reads designer and tech lead documents, explores the codebase, and decomposes scope into dependency-ordered task graphs. Writes tasks with descriptions, plans, acceptance criteria, effort estimates, and dependency edges. Tasks reference advisory documents so developers get the full context chain.
 
@@ -277,7 +276,7 @@ A typical workflow from user request to completed, documented work:
 3. **Manager assembles the advisory brain trust.** For complex work, the manager creates an agent team with the designer, tech lead, and planner (or a subset). For simpler work, it dispatches a single advisory agent directly.
 4. **Advisory agents deliberate.** The designer writes design docs and ADRs. The tech lead reads the codebase and writes/updates pattern and convention docs. The planner reads their documents and creates dependency-ordered tasks. All communication uses document IDs as the interface.
 5. **Manager dispatches developers** against ready tasks in worktrees. Developers gather context from the task plan and linked KB documents, implement, test, and commit.
-6. **Manager dispatches the tech lead** with the `/document` skill for post-implementation knowledge capture. The tech lead reads completed code, compares it to the task plan, and writes/updates documents about what was actually implemented.
+6. **Manager dispatches the tech lead** for post-implementation knowledge capture. The tech lead reads completed code, compares it to the task plan, and writes/updates documents about what was actually implemented.
 
 ```
 User --> Manager --> MCP (projects, tasks, documents)

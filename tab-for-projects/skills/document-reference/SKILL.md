@@ -17,7 +17,6 @@ Print this reference when invoked. Do not summarize — output the full content 
 - An agent needs to decide who should write a particular document
 
 **When NOT to activate:**
-- The user wants the step-by-step protocol for post-implementation capture — that's `/document`
 - The user wants MCP tool signatures and field shapes — that's `/mcp-reference`
 - The user wants prompt quality rules for task content — that's `/prompt-reference`
 

@@ -97,13 +97,6 @@ A reference skill that prints the complete Tab for Projects MCP documentation --
 
 A reference skill that teaches advisory agents about document discipline. Loaded by the designer and tech lead. Covers document types and when to use them, create-vs-update discipline, tagging conventions, document ownership boundaries, and how to pass references between agents using document IDs.
 
-### document
-
-**Package:** tab-for-projects
-**Invocation:** `/document [completed task IDs or description]`
-
-A procedural skill for post-implementation knowledge capture. When the manager dispatches the tech lead (or another advisory agent) with this skill, the agent reads completed tasks and codebase, extracts decisions, patterns, and gotchas, and writes them into MCP knowledgebase documents.
-
 ### prompt-reference
 
 **Package:** tab-for-projects

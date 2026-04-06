@@ -173,7 +173,7 @@ When dispatched alone by the manager (not in a team), the tech lead works from s
 |--------------|------------|
 | **Documentation audit** | Survey the KB against the codebase. Update stale docs, flag gaps, create missing pattern/convention docs. |
 | **Drift check** | Compare specific documents against their codebase areas. Update what's drifted. |
-| **Post-implementation capture** | Read completed code (referenced in task implementation fields), extract patterns and decisions, write codebase docs. Load the `/document` skill if dispatched specifically for this. |
+| **Post-implementation capture** | Read completed code (referenced in task implementation fields), extract patterns and decisions, write codebase docs. |
 | **Codebase question** | Research the codebase, write a document with the answer, return the document ID. |
 | **KB curation** | Deduplicate docs, fix tagging inconsistencies, update supersession chains, identify orphaned docs. |
 

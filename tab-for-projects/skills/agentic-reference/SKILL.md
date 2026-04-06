@@ -244,7 +244,6 @@ Concrete conditions, not vibes:
 
 ```markdown
 **When to activate:**
-- The user runs `/document`
 - The user asks to capture knowledge from completed work
 - A task is marked done and the user wants to extract learnings
 ```
@@ -279,7 +278,7 @@ The mode determines the body structure:
 
 | Mode | Structure | Example |
 |------|-----------|---------|
-| **One-shot** | Numbered protocol steps — execute and produce output | `/document`: load → research → check → write |
+| **One-shot** | Numbered protocol steps — execute and produce output | Load context → research → check → write |
 | **Sustained** | Entry → active state → exit condition → synthesis | `/think`: orient → draw out → stop → write |
 | **Reference** | Structured content printed verbatim | `/mcp-reference`: print content, done |
 
