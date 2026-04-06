@@ -10,7 +10,8 @@
     "./agents/manager.md",
     "./agents/designer.md",
     "./agents/planner.md",
-    "./agents/developer.md"
+    "./agents/developer.md",
+    "./agents/team-lead.md"
   ],
   "skills": "./skills/"
 }
