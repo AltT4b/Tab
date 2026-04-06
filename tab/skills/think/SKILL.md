@@ -1,6 +1,6 @@
 ---
-name: brainstorm
-description: "Conversational idea capture — interview the user about an idea and write a structured IDEA.md that gives a fresh LLM session everything it needs to start building. Only triggers when the user types /brainstorm."
+name: think
+description: "Conversational idea capture — interview the user about an idea and write a structured IDEA.md that gives a fresh LLM session everything it needs to start building. Use when the user invokes /think."
 argument-hint: "[optional seed idea]"
 ---
 
@@ -8,21 +8,21 @@ argument-hint: "[optional seed idea]"
 
 A conversational skill that helps the user take a raw idea — maybe just a sentence, maybe a half-formed vision — and turn it into a structured handoff document. The output is `.local/IDEA.md`, written so that a completely fresh LLM session can read it and start working without needing any of the original conversation.
 
-This skill activates **only** when the user runs `/brainstorm`. It's designed for empty codebases — the starting point of something new.
+This skill activates **only** when the user runs `/think`. It's designed for empty codebases — the starting point of something new.
 
-## The Interview
+## Phase 1: Orient
 
-The goal is to draw the idea out of the user, not to interrogate them. Think of it as a conversation between two people at a whiteboard — one has the idea, the other is helping them get it down clearly enough that someone else could pick it up tomorrow.
+Draw the idea out of the user, don't interrogate them. Think of it as a conversation between two people at a whiteboard — one has the idea, the other is helping them get it down clearly enough that someone else could pick it up tomorrow.
 
 You're filling four sections: **Goal**, **Requirements**, **Design**, and **Open Questions**. But you're not walking through them like a form. You're having a conversation that naturally covers this ground.
 
-### Starting
+**If the user passed a seed** (`/think a CLI tool that turns markdown into slide decks`):
+Start from there. Reflect back what you understood and ask the first thing that would help you understand what they actually want to build.
 
-If the user passed a seed (`/brainstorm a CLI tool that turns markdown into slide decks`), start from there. Reflect back what you understood and ask the first thing that would help you understand what they actually want to build.
+**If the user typed `/think` with no argument:**
+Ask what's on their mind. One question. Keep it open.
 
-If they just typed `/brainstorm` with no argument, ask what's on their mind. One question. Keep it open.
-
-### Drawing It Out
+## Phase 2: Draw It Out
 
 Follow the energy. If they're excited about the design, explore the design. If they keep coming back to a specific use case, dig into that — it's probably the real requirement. Don't force a linear path through Goal → Requirements → Design.
 
@@ -40,7 +40,7 @@ Ask follow-up questions when something is vague or when you sense there's more b
 
 You'll feel it — the idea has shape, the key decisions are made or explicitly deferred, and you're starting to circle. When you think you have enough, say so: summarize what you've got and ask if they want to add anything before you write it up.
 
-## Writing IDEA.md
+## Phase 3: Write IDEA.md
 
 ### Before Writing
 
@@ -94,3 +94,10 @@ The entire point of this document is that someone (or some LLM) reads it cold an
 ### After Writing
 
 Tell the user where the file is and that it's ready for a fresh session to pick up. Keep it brief — they just spent time on the idea, they don't need a ceremony.
+
+## Principles
+
+- **Conversation, not interrogation.** The user has the idea. You're helping them get it down clearly. Follow their energy, not a checklist.
+- **The document is the product.** Everything in the conversation serves the handoff document. If it wouldn't help a fresh reader build the thing, it doesn't need to be captured.
+- **Proportional depth.** A simple idea gets a short document and a short conversation. Don't manufacture complexity to fill sections.
+- **Decisions and non-decisions are equally valuable.** Capturing what the user explicitly left open saves the implementer from guessing whether an omission was intentional.

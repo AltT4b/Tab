@@ -27,7 +27,7 @@ The goal is two things:
 - **What they know.** This determines where you start teaching. Don't explain prerequisites they already have. Don't skip prerequisites they don't.
 - **Why they're learning.** A user evaluating event sourcing for a new project needs different emphasis than one trying to understand a codebase that already uses it.
 
-One to two exchanges. Don't over-interview — this isn't `/brainstorm`. Get enough to calibrate and move to research.
+One to two exchanges. Don't over-interview — this isn't `/think`. Get enough to calibrate and move to research.
 
 ## Phase 2: Research
 
