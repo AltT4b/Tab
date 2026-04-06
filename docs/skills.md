@@ -81,35 +81,27 @@ After the synthesis, Tab returns to normal mode. The listening context stays ava
 
 ## tab-for-projects Skills
 
-The tab-for-projects plugin provides reference and procedural skills used by the advisory and execution agents.
+The tab-for-projects plugin provides one unified reference skill used by all advisory and execution agents.
 
-### mcp-reference
-
-**Package:** tab-for-projects
-**Invocation:** `/mcp-reference`
-
-A reference skill that prints the complete Tab for Projects MCP documentation -- data model, tools, fields, and usage patterns. Loaded by all tab-for-projects agents to understand how to interact with the MCP.
-
-### document-reference
+### user-manual
 
 **Package:** tab-for-projects
-**Invocation:** `/document-reference`
+**Invocation:** `/user-manual <mcp | documents | prompts | agents>`
 
-A reference skill that teaches advisory agents about document discipline. Loaded by the designer and tech lead. Covers document types and when to use them, create-vs-update discipline, tagging conventions, document ownership boundaries, and how to pass references between agents using document IDs.
+A router skill that loads reference content on demand. When invoked with a keyword, it reads the matching reference file from its `refs/` subdirectory and prints the full content. When invoked without a keyword, it prints a lookup table so the caller can choose.
 
-### prompt-reference
+The router replaces four former standalone skills (`/mcp-reference`, `/document-reference`, `/prompt-reference`, `/agentic-reference`) with a single entry point. All agents preload the router (~40 lines), and load specific references on demand rather than injecting all reference content at startup.
 
-**Package:** tab-for-projects
-**Invocation:** `/prompt-reference`
+**Reference modules:**
 
-A reference skill for prompt quality conventions. Loaded by the planner to ensure tasks are written with clear descriptions, actionable plans, and testable acceptance criteria.
+| Keyword | File | What it covers |
+|---------|------|----------------|
+| `mcp` | `refs/mcp.md` | MCP data model, tool signatures, usage patterns |
+| `documents` | `refs/documents.md` | Document types, create-vs-update discipline, tagging, ownership |
+| `prompts` | `refs/prompts.md` | Prompt quality rules, clarity checklist |
+| `agents` | `refs/agents.md` | Agent/skill file anatomy, roles, workflows, constraints |
 
-### agentic-reference
-
-**Package:** tab-for-projects
-**Invocation:** `/agentic-reference`
-
-A reference skill for structural patterns and conventions when writing Claude Code agents and skills. Covers roles, workflows, constraints, triggers, and composition.
+Each keyword also accepts aliases from the old skill names (e.g., `mcp-reference`, `document-reference`, `prompt-reference`, `agentic-reference`).
 
 ---
 

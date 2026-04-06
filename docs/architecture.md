@@ -117,10 +117,7 @@ Tab auto-switches profiles based on context and briefly announces the shift. Use
 | Agent: tech-lead | `/tab-for-projects/agents/tech-lead.md` | Advisory -- backward-looking codebase docs, patterns, conventions |
 | Agent: planner | `/tab-for-projects/agents/planner.md` | Advisory -- decomposes work into dependency-ordered task graphs |
 | Agent: developer | `/tab-for-projects/agents/developer.md` | Execution -- implements tasks, commits from worktrees |
-| Skill: mcp-reference | `/tab-for-projects/skills/mcp-reference` | Reference for the Tab for Projects MCP data model and tools |
-| Skill: document-reference | `/tab-for-projects/skills/document-reference` | Reference for document types, create-vs-update discipline, tagging |
-| Skill: prompt-reference | `/tab-for-projects/skills/prompt-reference` | Prompt quality conventions and reference |
-| Skill: agentic-reference | `/tab-for-projects/skills/agentic-reference` | Conventions for writing Claude Code agents and skills |
+| Skill: user-manual | `/tab-for-projects/skills/user-manual` | Unified reference router — MCP tools, document discipline, prompt quality, agent/skill authoring |
 
 
 ### Architecture Pattern: Three-Layer Model
@@ -151,9 +148,9 @@ The tab-for-projects agents are organized into three layers: orchestration, advi
 
 **Manager** (`tab-for-projects:manager`): The orchestration layer. Talks to the user and the MCP. Delegates work to advisory agents (individually or as agent teams for complex deliberation) and dispatches developers for implementation. Does not touch the codebase directly.
 
-**Designer** (`tab-for-projects:designer`): Advisory layer, future-leaning. Provides architectural judgment -- elicits requirements, evaluates alternatives, proposes architecture decisions. Writes design docs, ADRs, architecture overviews, and requirements docs. Passes document IDs to teammates. Loads `/document-reference` for document discipline.
+**Designer** (`tab-for-projects:designer`): Advisory layer, future-leaning. Provides architectural judgment -- elicits requirements, evaluates alternatives, proposes architecture decisions. Writes design docs, ADRs, architecture overviews, and requirements docs. Passes document IDs to teammates. Loads `/user-manual documents` for document discipline.
 
-**Tech Lead** (`tab-for-projects:tech-lead`): Advisory layer, past-leaning. Provides codebase judgment -- reads code to understand actual patterns, verifies KB docs against codebase reality, flags drift and staleness. Writes and updates codebase pattern records, convention docs, and drift corrections. Handles post-implementation knowledge capture and KB curation. Loads `/document-reference` for document discipline.
+**Tech Lead** (`tab-for-projects:tech-lead`): Advisory layer, past-leaning. Provides codebase judgment -- reads code to understand actual patterns, verifies KB docs against codebase reality, flags drift and staleness. Writes and updates codebase pattern records, convention docs, and drift corrections. Handles post-implementation knowledge capture and KB curation. Loads `/user-manual documents` for document discipline.
 
 **Planner** (`tab-for-projects:planner`): Advisory layer, task-focused. Reads designer and tech lead documents, explores the codebase, and decomposes scope into dependency-ordered task graphs. Writes tasks with descriptions, plans, acceptance criteria, effort estimates, and dependency edges. Tasks reference advisory documents so developers get the full context chain.
 
@@ -210,11 +207,13 @@ marketplace.json
           |     +-- planner.md     (advisory layer — task plans)
           |     +-- developer.md   (execution layer)
           +-- skills/
-                +-- mcp-reference/
-                +-- document-reference/
-                +-- document/
-                +-- prompt-reference/
-                +-- agentic-reference/
+                +-- user-manual/
+                      +-- SKILL.md     (router — keyword lookup)
+                      +-- refs/
+                            +-- mcp.md
+                            +-- documents.md
+                            +-- prompts.md
+                            +-- agents.md
 
 ```
 
@@ -288,7 +287,7 @@ User --> Manager --> MCP (projects, tasks, documents)
                                        |
                                        v
                               Tech Lead captures knowledge
-                              from completed work via /document
+                              from completed work
                                        |
                                        v
                               Future advisory runs read these

@@ -33,11 +33,11 @@ All persistent state lives in the MCP. Communication between advisory agents use
 
 | Layer | Agent | Writes | Loaded Skills |
 |-------|-------|--------|---------------|
-| **Orchestration** | Manager | Workflow state only | `mcp-reference` |
-| **Advisory** | Designer | Design docs, ADRs, architecture overviews, requirements docs | `mcp-reference`, `document-reference` |
-| **Advisory** | Tech Lead | Codebase pattern records, convention docs, drift corrections | `mcp-reference`, `document-reference` |
-| **Advisory** | Planner | Tasks with descriptions, plans, acceptance criteria, dependencies | `mcp-reference`, `prompt-reference` |
-| **Execution** | Developer | Code (commits from worktrees) | `mcp-reference` |
+| **Orchestration** | Manager | Workflow state only | `user-manual` |
+| **Advisory** | Designer | Design docs, ADRs, architecture overviews, requirements docs | `user-manual` |
+| **Advisory** | Tech Lead | Codebase pattern records, convention docs, drift corrections | `user-manual` |
+| **Advisory** | Planner | Tasks with descriptions, plans, acceptance criteria, dependencies | `user-manual` |
+| **Execution** | Developer | Code (commits from worktrees) | `user-manual` |
 
 ---
 
@@ -191,16 +191,16 @@ The developer does not decide what to build — the task tells it. It does not d
 
 ## Document Ownership
 
-Each agent writes in a clear domain. The `/document-reference` skill teaches the designer and tech lead a shared vocabulary and discipline — they write different things but follow the same rules about when to create, when to update, how to tag, and how to pass references.
+Each agent writes in a clear domain. The `/user-manual documents` reference teaches the designer and tech lead a shared vocabulary and discipline — they write different things but follow the same rules about when to create, when to update, how to tag, and how to pass references.
 
-| Document type | Written by | Skill |
-|---------------|------------|-------|
-| ADRs, design docs, architecture overviews | **Designer** | `/document-reference` |
-| Requirements documents | **Designer** | `/document-reference` |
-| Codebase pattern records, convention docs | **Tech Lead** | `/document-reference` |
-| Drift corrections to existing docs | **Tech Lead** | `/document-reference` |
-| Post-implementation knowledge capture | **Tech Lead** | `/document-reference` |
-| KB curation (dedup, tags, supersession) | **Tech Lead** | `/document-reference` |
+| Document type | Written by | Reference |
+|---------------|------------|-----------|
+| ADRs, design docs, architecture overviews | **Designer** | `/user-manual documents` |
+| Requirements documents | **Designer** | `/user-manual documents` |
+| Codebase pattern records, convention docs | **Tech Lead** | `/user-manual documents` |
+| Drift corrections to existing docs | **Tech Lead** | `/user-manual documents` |
+| Post-implementation knowledge capture | **Tech Lead** | `/user-manual documents` |
+| KB curation (dedup, tags, supersession) | **Tech Lead** | `/user-manual documents` |
 
 ---
 
