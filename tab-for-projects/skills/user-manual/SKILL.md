@@ -1,7 +1,6 @@
 ---
 name: user-manual
 description: "Quickstart guide to tab-for-projects — what it is, how the agents work together, and how to make the most of it."
-argument-hint: ""
 ---
 
 # Tab for Projects — User Manual
