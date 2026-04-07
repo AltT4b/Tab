@@ -32,12 +32,12 @@ After installation, confirm the Tab agent is active:
 ## Installing the tab-for-projects plugin
 
 The `tab-for-projects` plugin provides:
-- **Agents** — `manager` (orchestration), `tech-lead`, `planner` (advisory), `developer` (execution). The manager is the primary interface; the others are dispatched as needed.
-- **Skills** — `user-manual` (unified reference router with modules for MCP tools, document discipline, prompt quality, and agent/skill authoring).
+- **Agent** — `developer` (codebase owner, implementation, analysis, in-code docs).
+- **Skills** — project management and KB curation are handled inline by skills. `user-manual` provides a unified reference router with modules for MCP tools, document discipline, prompt quality, and agent/skill authoring.
 
 ### Additional prerequisite
 
-The Tab for Projects MCP server must be connected before the plugin can do anything useful. The manager agent checks this on startup by calling `list_projects` with `limit: 1`. If the MCP is not available, it will tell you and stop — it does not improvise alternatives.
+The Tab for Projects MCP server must be connected before the plugin can do anything useful. The developer agent checks MCP connectivity on startup by calling `list_projects` with `limit: 1`. If the MCP is not available, it will tell you and stop -- it does not improvise alternatives.
 
 ### Steps
 
@@ -45,12 +45,12 @@ The Tab for Projects MCP server must be connected before the plugin can do anyth
 
 2. Add the plugin from the AltTab marketplace, same as above. The marketplace manifest registers `tab-for-projects` alongside `tab`.
 
-3. Once installed, the plugin sets `tab-for-projects:manager` as the default agent (configured in `tab-for-projects/settings.json`).
+3. Once installed, the plugin sets `tab-for-projects:developer` as the default agent (configured in `tab-for-projects/settings.json`).
 
 ### Verification
 
-1. Start a new Claude Code session with the `tab-for-projects:manager` agent active.
-2. The manager agent will call `list_projects` on startup. If you see a project list (or an empty list with no errors), the MCP connection is working.
+1. Start a new Claude Code session with the `tab-for-projects:developer` agent active.
+2. The developer agent will call `list_projects` on startup. If you see a project list (or an empty list with no errors), the MCP connection is working.
 3. Try asking the agent to list projects or create a test project. If it responds with structured project data from the MCP, everything is connected.
 
 ## Configuration
@@ -62,7 +62,7 @@ Each plugin declares a default agent in its `settings.json`:
 | Plugin | File | Default agent |
 |--------|------|---------------|
 | `tab` | `tab/settings.json` | `tab:Tab` |
-| `tab-for-projects` | `tab-for-projects/settings.json` | `tab-for-projects:manager` |
+| `tab-for-projects` | `tab-for-projects/settings.json` | `tab-for-projects:developer` |
 
 The `agent` field uses the format `plugin-name:agent-name`. To switch which agent loads by default, update the `agent` value in the relevant `settings.json`.
 
@@ -82,7 +82,7 @@ Both plugins are defined entirely in text files — no compiled code, no depende
 
 ### MCP not connected (tab-for-projects)
 
-**Symptom:** The manager agent says "the Tab for Projects MCP isn't connected" on startup, or `list_projects` fails.
+**Symptom:** The developer agent says "the Tab for Projects MCP isn't connected" on startup, or `list_projects` fails.
 
 **What to check:**
 - Verify the MCP server process is running.
@@ -103,7 +103,7 @@ Both plugins are defined entirely in text files — no compiled code, no depende
 
 ### Wrong agent loading
 
-**Symptom:** You expected one agent but got another (e.g., Tab instead of the project manager).
+**Symptom:** You expected one agent but got another (e.g., Tab instead of the developer).
 
 **What to check:**
 - Each plugin has its own `settings.json` with an `agent` field. Verify the correct plugin is active and its `settings.json` points to the agent you want.

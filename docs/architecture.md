@@ -7,8 +7,6 @@
 > - `/tab-for-projects/.claude-plugin/plugin.json` -- tab-for-projects plugin manifest
 > - `/tab/settings.json` -- tab default agent setting
 > - `/tab/agents/tab.md` -- Tab agent definition
-> - `/tab-for-projects/agents/project-manager.md` -- project-manager agent
-> - `/tab-for-projects/agents/tech-lead.md` -- tech-lead agent (KB owner)
 > - `/tab-for-projects/agents/developer.md` -- developer agent (codebase owner)
 
 This repository is a Claude Code plugin marketplace containing two plugins: **tab** and **tab-for-projects**. Both are defined entirely in markdown and JSON -- no compiled code, no runtime dependencies.
@@ -110,8 +108,6 @@ Tab auto-switches profiles based on context and briefly announces the shift. Use
 
 | Component | Path | Role |
 |-----------|------|------|
-| Agent: project-manager | `/tab-for-projects/agents/project-manager.md` | Project health -- diagnoses projects, fixes task shape, progress signals |
-| Agent: tech-lead | `/tab-for-projects/agents/tech-lead.md` | KB owner -- documentation via subagents, task decomposition |
 | Agent: developer | `/tab-for-projects/agents/developer.md` | Codebase owner -- implementation, analysis, in-code docs |
 | Skill: kickoff | `/tab-for-projects/skills/kickoff` | Take an idea and stand up a fully-formed project |
 | Skill: plan | `/tab-for-projects/skills/plan` | Design and decompose a feature into tasks |
@@ -122,16 +118,9 @@ Tab auto-switches profiles based on context and briefly announces the shift. Use
 | Skill: review | `/tab-for-projects/skills/review` | Retrospective -- did we build what we planned? |
 | Skill: user-manual | `/tab-for-projects/skills/user-manual` | Quickstart guide to using the plugin |
 
+### Architecture
 
-### Agent Roles
-
-Each agent owns a distinct domain. Skills orchestrate agents as needed -- there is no dedicated orchestration agent.
-
-**Project Manager** (`project-manager`): Owns project health. Dispatched to diagnose projects, fix task shape and project fields, and report progress signals. Does not touch the codebase or KB documents directly.
-
-**Tech Lead** (`tech-lead`): Owns the knowledgebase. Reads code to understand actual patterns, writes and curates KB documents (design docs, ADRs, conventions, codebase patterns). Also decomposes work into dependency-ordered task graphs with descriptions, plans, acceptance criteria, and effort estimates.
-
-**Developer** (`developer`): Owns the codebase. Receives tasks with plans, gathers context from KB documents and the codebase, implements the solution, maintains in-code documentation (CLAUDE.md files), verifies with tests, and commits from worktrees.
+The plugin has one agent (developer) and multiple skills. Skills handle project management, planning, KB curation, and other workflow concerns inline -- there are no separate orchestration or advisory agents. The developer agent owns the codebase: it receives tasks with plans, gathers context from KB documents and the codebase, implements the solution, maintains in-code documentation (CLAUDE.md files), verifies with tests, and commits from worktrees.
 
 ### The Three MCP Data Layers
 
@@ -141,7 +130,7 @@ The Tab for Projects MCP organizes data into three layers, each with list/get/cr
 
 **Tasks** -- the unit of trackable work. Tasks live inside a project and carry rich fields: title, description, plan, implementation, acceptance_criteria, effort (trivial through extreme), impact (trivial through extreme), category (feature, bugfix, refactor, etc.), group_key (flat grouping label), and status (todo, in_progress, done, archived).
 
-**Documents** -- the knowledgebase layer. Documents are independent top-level entities with a title, content (markdown, up to 100k characters), and tags. They are linked to projects via a many-to-many relationship managed through `update_project` (attach_documents / detach_documents). Documents are designed for agent consumption: architecture decisions, established patterns, gotchas, and integration notes that make future advisory runs more effective. The tech lead writes all KB documents — design docs, ADRs, codebase patterns, and conventions.
+**Documents** -- the knowledgebase layer. Documents are independent top-level entities with a title, content (markdown, up to 100k characters), and tags. They are linked to projects via a many-to-many relationship managed through `update_project` (attach_documents / detach_documents). Documents are designed for agent consumption: architecture decisions, established patterns, gotchas, and integration notes that make future runs more effective. Skills handle KB document creation and curation inline.
 
 ---
 
@@ -177,8 +166,6 @@ marketplace.json
           |
           +-- plugin.json          (name, agents, skills)
           +-- agents/
-          |     +-- project-manager.md  (project health)
-          |     +-- tech-lead.md        (KB owner)
           |     +-- developer.md        (codebase owner)
           +-- skills/
                 +-- kickoff/       (new project ceremony)
@@ -194,7 +181,7 @@ marketplace.json
 
 ### tab-for-projects Internal Architecture
 
-Skills orchestrate agents against the MCP. Each skill defines which agents it dispatches and in what order.
+Skills handle project management, planning, KB curation, and workflow concerns inline. The developer agent is dispatched for codebase work.
 
 ```
 +-------------------+
@@ -206,23 +193,23 @@ Skills orchestrate agents against the MCP. Each skill defines which agents it di
 +--------+----------+       +---------------------------+
 |   Skill (runner)  |<----->|   Tab for Projects MCP    |
 |                   |       |                           |
-| dispatches agents |       |  +-------+ +------+ +---+ |
-| per skill spec    |       |  |Project| | Task | |Doc| |
-+--+-----+-----+---+       |  +-------+ +------+ +---+ |
-   |     |     |            +---------------------------+
-   v     v     v
-+----------+ +-----------+ +-----------+
-| Project  | | Tech Lead | | Developer |
-| Manager  | |           | |           |
-|          | | - Read    | | - Read    |
-| - Diag-  | |   code    | |   code    |
-|   nose   | | - Write   | | - Implement|
-|   project| |   KB docs | | - Test    |
-| - Fix    | | - Write   | | - Commit  |
-|   tasks  | |   tasks   | | - CLAUDE  |
-| - Report | | - Curate  | |   .md     |
-|   health | |   KB      | |           |
-+----------+ +-----------+ +-----------+
+| handles project   |       |  +-------+ +------+ +---+ |
+| mgmt inline,      |       |  |Project| | Task | |Doc| |
+| dispatches dev    |       |  +-------+ +------+ +---+ |
++--------+----------+       +---------------------------+
+         |
+         v
+   +-----------+
+   | Developer |
+   |           |
+   | - Read    |
+   |   code    |
+   | - Implement|
+   | - Test    |
+   | - Commit  |
+   | - CLAUDE  |
+   |   .md     |
+   +-----------+
 ```
 
 ---
@@ -231,21 +218,21 @@ Skills orchestrate agents against the MCP. Each skill defines which agents it di
 
 A typical workflow from user request to completed, documented work:
 
-1. **User invokes a skill** (e.g., `/kickoff`, `/build`, `/plan`). The skill defines which agents are dispatched.
-2. **Project manager diagnoses project health** -- checks task shape, project fields, progress signals.
-3. **Tech lead reads the codebase and writes KB documents** (design docs, ADRs, codebase patterns, conventions). For planning work, decomposes scope into dependency-ordered task graphs.
+1. **User invokes a skill** (e.g., `/kickoff`, `/build`, `/plan`). The skill handles project management, planning, and KB concerns inline.
+2. **Skill manages project health** -- checks task shape, project fields, progress signals.
+3. **Skill reads the codebase and writes KB documents** (design docs, ADRs, codebase patterns, conventions). For planning work, decomposes scope into dependency-ordered task graphs.
 4. **Developer implements ready tasks** in worktrees. Gathers context from the task plan and linked KB documents, implements, tests, and commits.
-5. **Tech lead captures knowledge** from completed work -- reads implemented code, compares to the plan, and updates KB documents.
+5. **Skill captures knowledge** from completed work -- reads implemented code, compares to the plan, and updates KB documents.
 
 ```
 User --> Skill --> MCP (projects, tasks, documents)
            |
-           +--> Project Manager --> diagnoses project, fixes task shape
-           +--> Tech Lead       --> writes KB docs, decomposes tasks
-           +--> Developer       --> implements tasks, commits
+           +--> manages project health, task shape (inline)
+           +--> writes KB docs, decomposes tasks (inline)
+           +--> Developer --> implements tasks, commits
                                        |
                                        v
-                              Tech Lead captures knowledge
+                              Skill captures knowledge
                               from completed work
                                        |
                                        v
@@ -253,4 +240,4 @@ User --> Skill --> MCP (projects, tasks, documents)
                               as context
 ```
 
-The knowledge loop is the key architectural insight: the tech lead captures what was learned after implementation, and future runs consume that knowledge to produce better designs, more accurate codebase docs, and more grounded task plans.
+The knowledge loop is the key architectural insight: skills capture what was learned after implementation, and future runs consume that knowledge to produce better designs, more accurate codebase docs, and more grounded task plans.

@@ -6,7 +6,7 @@ argument-hint: "<feature description> for <project ID or title>"
 
 # Plan — Feature Decomposition
 
-The strategy play. Takes a feature idea within an existing project, has the Tech Lead design it and decompose it into tasks, then runs the Project Manager as a quality gate on the result. Use this when you know what you want to build next but need it broken into implementable pieces with full context.
+The strategy play. Takes a feature idea within an existing project, designs it grounded in the project's existing architecture and conventions, decomposes it into implementable tasks, then health-checks everything before presenting the result. Use this when you know what you want to build next but need it broken into implementable pieces with full context.
 
 ## Trigger
 
@@ -28,48 +28,49 @@ The strategy play. Takes a feature idea within an existing project, has the Tech
 
 ## Sequence
 
-1. **Load project context.** Before dispatching agents, Tab gathers:
-   - Project goal, requirements, and design (from `get_project`)
-   - Existing KB documents (from `list_documents`) — architecture, conventions, prior design docs
-   - Current task landscape (from `list_tasks`) — what already exists, what's in progress, what's done
+1. **Load project context.** Gather everything needed to design with full awareness:
+   - `get_project` — goal, requirements, design
+   - `list_documents` — architecture, conventions, prior design docs. Read any that are directly relevant to the feature being planned (especially architecture and conventions docs) via `get_document`
+   - `list_tasks` — current task landscape: what already exists, what's in progress, what's done
 
-   This context ensures the Tech Lead designs with full awareness of what's already there.
+2. **Write a design document.** Create via `create_document`:
+   - **Title:** Type-prefixed (e.g., "Design: OAuth2 Authentication")
+   - **Summary:** ≤500 characters capturing what this design covers
+   - **Content:** The full design covering:
+     - **Approach** — how the feature fits into the existing architecture, which patterns and conventions it follows, where it lives in the codebase
+     - **Trade-offs** — alternatives considered and why this approach wins
+     - **Key decisions** — choices that shape implementation (data model, API surface, integration points, error handling strategy)
+   - Attach to the project via `update_project` (attach_documents)
 
-2. **Dispatch Tech Lead** (first pass — design doc) with:
-   - `project_id`: the resolved project ID
-   - `dispatch_type`: `write`
-   - `scope`: the feature to design
-   - `context`: the feature description from the user, plus project goal/requirements/design and relevant existing KB document summaries
+   Ground everything in what the project already has. Reference existing architecture docs and conventions by name. The design should feel like a natural extension of the project, not a greenfield proposal.
 
-   The Tech Lead writes a design document grounding the feature in the project's existing architecture and conventions. This doc captures the *how* — approach, trade-offs, key decisions.
+3. **Decompose into tasks.** Create each task via `create_task`:
+   - **Description** — answers "what and why": what the task produces and why it matters for the feature
+   - **Plan** — answers "where and how": which files, which patterns, which existing code to follow. Reference the design doc so the developer has full context
+   - **Acceptance criteria** — testable conditions. A developer should be able to read these and know exactly when the task is done
+   - **Effort** — calibrated on the scale: trivial (one file touch) → low → medium → high (cross-cutting) → extreme
+   - **Impact** — how much of the feature this task unlocks
+   - **Dependencies** — real ordering constraints only: task B literally cannot start until task A is done. No soft preferences, no circular chains
+   - **Group key** — logical grouping for related tasks (e.g., "auth-backend", "auth-frontend")
 
-3. **Read the Tech Lead's report.** Confirm the design doc was created. Note the document ID for reference.
+   Each task should be implementable by a developer with no additional context beyond the task itself and KB documents. If a task requires reading another task to make sense, it needs a better description.
 
-4. **Dispatch Tech Lead** (second pass — task decomposition) with:
-   - `project_id`: the resolved project ID
-   - `dispatch_type`: `write`
-   - `scope`: "task decomposition for [feature]"
-   - `context`: the design document just created (reference by ID), the feature description, existing task landscape (so the TL doesn't duplicate existing tasks), and the instruction to decompose into implementation tasks with: descriptions, plans, acceptance criteria, effort/impact estimates, dependency ordering, and group keys
+   KB discipline: search existing documents before creating. Target 10 documents per project, hard limit 13.
 
-   The Tech Lead doesn't create tasks directly — it produces a decomposition in its report that the orchestrator routes to the PM.
+4. **Health-check the tasks.** Review every task just created and fix problems inline via `update_task`:
+   - **Descriptions** — clear enough to start work without asking questions?
+   - **Acceptance criteria** — actually testable, not vague aspirations?
+   - **Dependencies** — acyclic? Use `get_dependency_graph` to verify. No circular chains
+   - **Effort calibration** — consistent across tasks? A "low" in one group shouldn't be a "medium" in another
+   - **Completeness** — does the full set of tasks cover the entire feature? Any gaps?
 
-5. **Dispatch Project Manager** with:
-   - `project_id`: the resolved project ID
-   - `focus`: `task-shape`
-
-   Provide the Tech Lead's decomposition as context. The PM creates the tasks, wires dependencies, assigns group keys, and calibrates effort/impact. Then it health-checks everything it just created — descriptions complete, acceptance criteria testable, dependencies acyclic, estimates reasonable.
-
-6. **Read the PM's health report.** Extract:
-   - Tasks created (IDs, titles, effort, group)
-   - Dependency graph
-   - Any health issues found and fixed
-   - Anything needing human decision
+   Fix anything found. Don't flag it for later — fix it now.
 
 ## Output
 
 Present the plan:
 
-**Design summary** — What the Tech Lead designed. Approach, key decisions, trade-offs. Reference the design doc by title for the user to review in full.
+**Design summary** — Approach, key decisions, trade-offs. Reference the design doc by title for the user to review in full.
 
 **Task breakdown** — Table of tasks created, with titles, effort, impact, and group. Ordered by dependency (what can start first).
 
@@ -77,10 +78,10 @@ Present the plan:
 
 **Scope estimate** — Total effort across all tasks. Ballpark of how much work this represents.
 
-**Open items** — Anything the PM flagged for human decision, or design questions the TL couldn't resolve.
+**Open items** — Design questions that couldn't be resolved, or anything needing human decision.
 
 ## Edge Cases
 
-- **Feature overlaps with existing tasks:** The Tech Lead should note overlaps in its decomposition. The PM should avoid creating duplicates. If significant overlap exists, surface it — the user may want to revise existing tasks rather than create new ones.
-- **Project has no goal or requirements:** The PM will flag this in its health report. Without clear project-level context, task decomposition may be vague. Suggest the user flesh out the project first or use `/kickoff` to restructure.
-- **Decomposition produces too many tasks:** If the Tech Lead produces 15+ tasks for a single feature, that may signal the feature is actually multiple features. Surface this observation and suggest splitting.
+- **Feature overlaps with existing tasks:** Note overlaps during decomposition. Avoid creating duplicates. If significant overlap exists, surface it — the user may want to revise existing tasks rather than create new ones.
+- **Project has no goal or requirements:** Without clear project-level context, task decomposition may be vague. Suggest the user flesh out the project first or use `/kickoff` to restructure.
+- **Decomposition produces too many tasks:** If decomposition yields 15+ tasks for a single feature, that may signal the feature is actually multiple features. Surface this observation and suggest splitting.

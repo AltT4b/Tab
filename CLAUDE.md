@@ -1,6 +1,6 @@
 # Tab
 
-Claude Code plugin marketplace containing two plugins: **tab** (a standalone personality/thinking-partner agent) and **tab-for-projects** (project management agents that talk to the Tab for Projects MCP). Published via `.claude-plugin/marketplace.json`.
+Claude Code plugin marketplace containing two plugins: **tab** (a standalone personality/thinking-partner agent) and **tab-for-projects** (a developer agent and project management skills that talk to the Tab for Projects MCP). Published via `.claude-plugin/marketplace.json`.
 
 ## Repository Structure
 
@@ -27,16 +27,14 @@ tab/                              # "tab" plugin package
   skills/think/SKILL.md           #   /think — conversational idea capture
 tab-for-projects/                 # "tab-for-projects" plugin package
   .claude-plugin/plugin.json      #   Plugin metadata (agents, skills, version)
-  agents/project-manager.md       #   Project manager agent — project health, task shape, progress
   agents/developer.md             #   Developer agent — codebase owner, implementation, analysis, in-code docs
-  agents/tech-lead.md             #   Tech-lead agent — KB owner, documentation via subagents, task decomposition
   skills/user-manual/SKILL.md          #   /user-manual — quickstart guide to using the plugin
 ```
 
 ## Package Architecture
 
 - **tab** is standalone. One agent (`Tab`) with a rich personality system (profiles, settings 0-100%). No MCP dependency.
-- **tab-for-projects** extends the ecosystem with three agents (project-manager, tech-lead, developer) and one skill (`/user-manual` — quickstart guide for users). All agents interact with the Tab for Projects MCP for project/task/document CRUD.
+- **tab-for-projects** extends the ecosystem with one agent (developer) and skills that handle project and KB management inline. The developer agent and skills interact with the Tab for Projects MCP for project/task/document CRUD.
 - Each package is independently installable. A `settings.json` at a package root can set the default agent via `{"agent": "<plugin>:<agent>"}`.
 
 ## Conventions
@@ -64,8 +62,6 @@ No other frontmatter fields should be added. Information about which agents run 
 | `tab/.claude-plugin/plugin.json` | Tab plugin manifest |
 | `tab-for-projects/.claude-plugin/plugin.json` | Tab for Projects plugin manifest |
 | `tab/agents/tab.md` | Tab agent — personality, profiles, settings |
-| `tab-for-projects/agents/project-manager.md` | Project manager — project health, task shape, progress signals |
 | `tab-for-projects/agents/developer.md` | Developer agent — codebase owner, implementation, analysis, in-code docs |
-| `tab-for-projects/agents/tech-lead.md` | Tech-lead agent — KB owner, documentation via subagents, task decomposition |
 | `tab/settings.json` | Tab default agent config |
 | `docs/` | Project documentation (architecture, setup, skills, agents, walkthrough) |

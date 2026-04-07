@@ -81,7 +81,7 @@ After the synthesis, Tab returns to normal mode. The listening context stays ava
 
 ## tab-for-projects Skills
 
-The tab-for-projects plugin provides one unified reference skill used by all advisory and execution agents.
+The tab-for-projects plugin provides one unified reference skill used by the developer agent.
 
 ### user-manual
 
