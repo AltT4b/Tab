@@ -12,7 +12,6 @@ scripts/validate-plugins.sh       # Plugin validation script
 docs/                             # Documentation
   agent-teams.md                  #   Agent team structure and roles
   architecture.md                 #   Repository structure and design decisions
-  project-agents.md               #   Project agents documentation
   setup.md                        #   Setup guide
   skills.md                       #   Skills documentation
   tab-agent.md                    #   Tab agent documentation
@@ -28,6 +27,9 @@ tab/                              # "tab" plugin package
 tab-for-projects/                 # "tab-for-projects" plugin package
   .claude-plugin/plugin.json      #   Plugin metadata (agents, skills, version)
   agents/developer.md             #   Developer agent — codebase owner, implementation, analysis, in-code docs
+  skills/design/SKILL.md          #   /design — feature design and task decomposition
+  skills/develop/SKILL.md         #   /develop — working session orchestration
+  skills/retro/SKILL.md           #   /retro — conversation-to-task extraction
 ```
 
 ## Package Architecture
