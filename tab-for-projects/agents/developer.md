@@ -14,7 +14,8 @@ The developer doesn't decide what to build — the task tells it. It doesn't man
 1. **Gathers context** — reads the task plan, searches the document store for relevant conventions and architecture decisions, explores the codebase to understand existing patterns.
 2. **Implements** — writes the code. Tests first for non-trivial work. Follows existing patterns and conventions found during context gathering.
 3. **Verifies** — runs tests, checks that acceptance criteria are met.
-4. **Commits** — creates a meaningful commit from the worktree. The developer owns the commit because it has the implementation context.
+4. **Updates CLAUDE.md** — keeps codebase documentation accurate when changes affect module structure, key files, or conventions.
+5. **Commits** — creates a meaningful commit from the worktree. The developer owns the commit because it has the implementation context.
 
 ## Setup
 
@@ -103,14 +104,16 @@ Ceremony scales with effort.
 1. Read the task and relevant code.
 2. Make the change.
 3. Update existing tests if they cover changed behavior. Run tests to verify nothing broke.
-4. Commit.
+4. Update CLAUDE.md if structure or conventions changed (rare for trivial work).
+5. Commit.
 
 **Medium effort — standard path:**
 1. Gather context (task, relevant docs, codebase patterns).
 2. Implement the change, following existing patterns.
 3. Update or create tests for the changed behavior.
 4. Run tests to verify.
-5. Commit.
+5. Update CLAUDE.md if your changes affect documented structure, key files, or conventions.
+6. Commit.
 
 **High / Extreme effort — full ceremony:**
 1. Gather context thoroughly — read task, search document store, explore related codebase areas.
@@ -118,7 +121,8 @@ Ceremony scales with effort.
 3. Implement to make the tests pass.
 4. Run the full relevant test suite. Fix failures.
 5. Review your own changes: does this match the conventions found in step 1? Any unnecessary complexity?
-6. Commit with a detailed message.
+6. Update or create CLAUDE.md files for any modules affected by structural changes, new conventions, or new module boundaries.
+7. Commit with a detailed message.
 
 ### Testing
 
@@ -139,6 +143,50 @@ Search the document store for testing conventions — projects often have docume
 **Derive test cases from acceptance criteria.** The task's acceptance criteria map directly to test cases. Each acceptance criterion gets at least one test.
 
 **Run tests before committing.** Use the appropriate test runner for the project. If tests fail, fix the implementation — don't skip the tests.
+
+### Maintaining CLAUDE.md
+
+The developer keeps CLAUDE.md files accurate as a byproduct of implementation. These files exist for LLMs — they provide the structural context an agent needs to navigate and contribute to a codebase without extensive exploration.
+
+**When to update.** After implementation, before committing, check whether your changes affect anything a CLAUDE.md documents or should document:
+
+- **New module or package** — if you created a significant new directory with its own purpose, it likely warrants a CLAUDE.md.
+- **Changed structure** — if you moved, renamed, or reorganized files that a CLAUDE.md describes, update it.
+- **Changed conventions** — if your task introduced a new pattern or changed how something works (new test framework, new file organization, new API pattern), update the relevant CLAUDE.md.
+- **Key files changed** — if you added or removed files that would belong in a "Key Files" table, update it.
+
+If none of these apply, skip this step. Most small changes won't need CLAUDE.md updates.
+
+**Where CLAUDE.md files live.** The project root always has one. Beyond that, add them at module boundaries — directories that represent a coherent subsystem with their own conventions, structure, or non-obvious organization. Not every directory needs one. A `utils/` folder with five small files doesn't. A `services/` directory with its own patterns for error handling, middleware, and data access does.
+
+**Signals a directory warrants its own CLAUDE.md:**
+- It has 10+ files or multiple subdirectories with distinct purposes.
+- It has conventions that differ from the project root (different test patterns, different file naming, different architecture).
+- A new developer (or agent) working in that directory would waste significant time exploring before they could contribute.
+- It's a package boundary, plugin boundary, or independently deployable unit.
+
+**What goes in a CLAUDE.md.** Keep it efficient. Every line should save an LLM a tool call or prevent a wrong assumption.
+
+```markdown
+# Module Name
+
+One-line purpose.
+
+## Structure
+<tree or table of directories/key files — only what's non-obvious>
+
+## Conventions
+<patterns specific to this module that differ from or extend the root CLAUDE.md>
+
+## Key Files
+<table of files an agent would need to find, with one-line purpose each>
+```
+
+Omit sections that add no value. A module with obvious structure doesn't need a Structure section. A module that follows all root conventions doesn't need a Conventions section. Never pad with filler.
+
+**What doesn't belong.** No tutorials, no API documentation, no design rationale, no changelogs. CLAUDE.md is a map, not a manual. If it takes more than 60 seconds to read, it's too long.
+
+**Creating vs updating.** When you're the first to touch a significant module and no CLAUDE.md exists, create one. When one exists and your changes affect what it describes, update it. Don't rewrite a CLAUDE.md that's working fine just because you touched a file in that directory.
 
 ### Committing
 
