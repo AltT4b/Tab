@@ -1,6 +1,6 @@
 ---
 name: review
-description: "Retrospective — did we build what we planned? Is the KB accurate?"
+description: "Retrospective — did we build what we planned? Is the KB accurate? Use when the user wants to review progress, check quality, or run a retrospective, or invokes /review."
 argument-hint: "<project ID or title>"
 mode: headless
 agents:

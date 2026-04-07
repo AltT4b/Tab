@@ -1,6 +1,6 @@
 ---
 name: build
-description: "Multi-task execution loop — implements ready tasks, reacts to blockers, captures knowledge."
+description: "Multi-task execution loop — implements ready tasks, reacts to blockers, captures knowledge. Use when the user wants to build, implement tasks, or invokes /build."
 argument-hint: "<task ID, or project ID to pick from ready tasks>"
 mode: headless
 agents:

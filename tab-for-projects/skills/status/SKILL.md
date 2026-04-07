@@ -1,6 +1,6 @@
 ---
 name: status
-description: "Quick project health brief — what's ready, blocked, stale, and progressing."
+description: "Quick project health brief — what's ready, blocked, stale, and progressing. Use when the user asks about project status, progress, or what to work on next, or invokes /status."
 argument-hint: "<project ID or title>"
 mode: headless
 agents:
