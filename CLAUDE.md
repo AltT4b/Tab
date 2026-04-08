@@ -9,13 +9,6 @@ Claude Code plugin marketplace containing two plugins: **tab** (a standalone per
 README.md                         # Project README
 LICENSE                           # Apache-2.0 license
 scripts/validate-plugins.sh       # Plugin validation script
-docs/                             # Documentation
-  agent-teams.md                  #   Agent team structure and roles
-  architecture.md                 #   Repository structure and design decisions
-  setup.md                        #   Setup guide
-  skills.md                       #   Skills documentation
-  tab-agent.md                    #   Tab agent documentation
-  walkthrough.md                  #   Walkthrough guide
 tab/                              # "tab" plugin package
   .claude-plugin/plugin.json      #   Plugin metadata (agents, skills, version)
   settings.json                   #   Default agent: tab:Tab
@@ -65,4 +58,3 @@ No other frontmatter fields should be added. Information about which agents run 
 | `tab/agents/tab.md` | Tab agent — personality, profiles, settings |
 | `tab-for-projects/agents/developer.md` | Developer agent — codebase owner, implementation, analysis, in-code docs |
 | `tab/settings.json` | Tab default agent config |
-| `docs/` | Project documentation (architecture, setup, skills, agents, walkthrough) |

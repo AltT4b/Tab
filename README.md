@@ -33,17 +33,6 @@ The marketplace configuration at `.claude-plugin/marketplace.json` defines both 
 | [tab](./tab) | 0.0.3 | A sharp, warm thinking partner who helps you make better decisions |
 | [tab-for-projects](./tab-for-projects) | 0.2.0 | Project workflow tracking -- skills and agents for the Tab for Projects MCP |
 
-## Documentation
-
-| Document | Description |
-| --- | --- |
-| [CLAUDE.md](./CLAUDE.md) | Agent context and project conventions |
-| [docs/architecture.md](./docs/architecture.md) | Repository structure and design decisions |
-| [docs/tab-agent.md](./docs/tab-agent.md) | Tab personality package documentation |
-| [docs/skills.md](./docs/skills.md) | Skills documentation |
-| [docs/setup.md](./docs/setup.md) | Setup guide |
-| [docs/walkthrough.md](./docs/walkthrough.md) | Walkthrough guide |
-
 ## Trademark
 
 Tab™ is a trademark of Jacob Fjermestad (4lt7ab), used to identify the Tab AI persona, agent, and associated personality definition files. This trademark applies specifically to the use of "Tab" as the name of an AI assistant, AI agent, AI persona, or AI-powered software product.
