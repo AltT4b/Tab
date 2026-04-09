@@ -22,6 +22,7 @@ tab-for-projects/                 # "tab-for-projects" plugin package
   agents/developer.md             #   Developer agent — codebase owner, implementation, analysis, in-code docs
   skills/design/SKILL.md          #   /design — feature design and task decomposition
   skills/develop/SKILL.md         #   /develop — working session orchestration
+  skills/docs/SKILL.md            #   /docs — generic knowledgebase document authoring
   skills/retro/SKILL.md           #   /retro — conversation-to-task extraction
 ```
 
