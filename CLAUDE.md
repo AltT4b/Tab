@@ -58,6 +58,12 @@ Run `bash scripts/validate-plugins.sh` from the repo root after any structural c
 
 If you add or remove a skill/agent, update the Repository Structure tree above and run the validator. It will fail if the tree is out of date.
 
+## Versioning
+
+Bump the version in both `plugin.json` and `marketplace.json` as part of any commit that changes a plugin's behavior — new skills, agent prompt changes, bug fixes. The validator enforces that versions stay in sync across the two files, so always update both together.
+
+Use semver: patch for fixes and minor prompt tweaks, minor for new skills or meaningful behavior changes, major for breaking changes. When in doubt, bump minor.
+
 ## Key Files
 
 | File | Purpose |
