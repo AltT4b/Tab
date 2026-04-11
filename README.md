@@ -8,7 +8,7 @@ Tab is a Claude Code plugin repository containing two packages:
 
 - **tab** -- a sharp, warm thinking partner personality. It changes how Claude shows up: more direct, more collaborative, more opinionated when it matters. The entire persona is defined in markdown files (agents and skills) with zero runtime dependencies.
 
-- **tab-for-projects** -- project workflow tracking through one agent (developer) and three skills (design, develop, retro) that integrate with the Tab for Projects MCP server for capturing decisions, tracking tasks, and managing project context.
+- **tab-for-projects** -- project workflow tools that integrate with the Tab for Projects MCP server for pair-programming, capturing decisions, and managing project context.
 
 Both packages are distributed as Claude Code plugins through AltTab's marketplace.
 

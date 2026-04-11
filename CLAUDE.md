@@ -14,16 +14,15 @@ tab/                              # "tab" plugin package
   settings.json                   #   Default agent: tab:Tab
   agents/tab.md                   #   Tab personality agent
   skills/draw-dino/SKILL.md       #   /draw-dino skill
+  skills/hey-tab/SKILL.md         #   /hey-tab — setup instructions for MCPs
   skills/listen/SKILL.md          #   /listen — deliberate listening mode
   skills/teach/SKILL.md           #   /teach — teaching and explanation mode
   skills/think/SKILL.md           #   /think — conversational idea capture
 tab-for-projects/                 # "tab-for-projects" plugin package
   .claude-plugin/plugin.json      #   Plugin metadata (agents, skills, version)
   agents/developer.md             #   Developer agent — codebase owner, implementation, analysis, in-code docs
-  skills/design/SKILL.md          #   /design — feature design and task decomposition
-  skills/develop/SKILL.md         #   /develop — working session orchestration
+  skills/dev/SKILL.md             #   /dev — pair-programming and implementation
   skills/docs/SKILL.md            #   /docs — generic knowledgebase document authoring
-  skills/retro/SKILL.md           #   /retro — conversation-to-task extraction
 ```
 
 ## Package Architecture
@@ -47,6 +46,17 @@ No other frontmatter fields should be added. Information about which agents run 
 **Plugin metadata** lives in `<package>/.claude-plugin/plugin.json` with fields: `name`, `description`, `version`, `author`, `license`, `agents` (array of paths), `skills` (directory path).
 
 **Marketplace manifest** at `.claude-plugin/marketplace.json` lists all plugins with `name`, `source`, `description`, `version`, `strict`.
+
+## Validation
+
+Run `bash scripts/validate-plugins.sh` from the repo root after any structural change — adding/removing skills, agents, or updating plugin metadata. It checks:
+
+- Agent and skill paths resolve correctly
+- Frontmatter is valid
+- Versions are in sync between marketplace and plugin.json
+- CLAUDE.md structure tree matches what's actually on disk
+
+If you add or remove a skill/agent, update the Repository Structure tree above and run the validator. It will fail if the tree is out of date.
 
 ## Key Files
 
