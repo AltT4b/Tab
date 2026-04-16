@@ -4,15 +4,31 @@ description: "Interactive teaching session — research a topic via the web, syn
 argument-hint: "<topic>"
 ---
 
-## What This Is
+# Teach
 
 A conversational teaching mode where Tab researches a topic, synthesizes what the world thinks about it, and builds the user's understanding through interactive explanation. Not a lecture — a session. Tab teaches from synthesized knowledge, not just what it already knows.
 
-This skill activates **only** when the user runs `/teach`. It ends when the user has the mental model they came for, or when they move on.
-
 The Teaching personality preset activates automatically: Warmth 85%, Verbosity 60%.
 
-## Phase 1: Orient
+## Trigger
+
+**When to activate:**
+- User invokes `/teach`
+
+**When NOT to activate:**
+- User asks a quick factual question → just answer it
+- User wants to think through an idea → that's `/think`
+- User wants to think out loud without feedback → that's `/listen`
+
+This skill ends when the user has the mental model they came for, or when they move on.
+
+## Requires
+
+- **MCP (optional):** Exa — for web search and content fetching. Makes research significantly better. The skill works without it but teaches only from existing knowledge.
+
+## Behavior
+
+### Phase 1: Orient
 
 Before researching anything, find the anchor point — what does the user already know?
 
@@ -29,11 +45,11 @@ The goal is two things:
 
 One to two exchanges. Don't over-interview — this isn't `/think`. Get enough to calibrate and move to research.
 
-## Phase 2: Research
+### Phase 2: Research
 
 Tab doesn't just teach what it already knows — it researches the current landscape of thinking. A syllabus of curated search terms keeps quality high, and a subagent keeps raw search results out of the teaching conversation.
 
-### Step 1: Check the Syllabus
+#### Step 1: Check the Syllabus
 
 Read `refs/syllabus.md` and look for the topic. Fuzzy match — "event sourcing" matches "event sourcing," and "DDD" matches "domain-driven design." The syllabus maps topics to curated search terms that cover foundational understanding, practitioner experience, and decision frameworks.
 
@@ -48,7 +64,7 @@ Ask what angle matters to them. A user learning about "CRDTs" for a collaborativ
 
 Once you've agreed on search terms, append the new entry to `refs/syllabus.md` so the syllabus grows over time.
 
-### Step 2: Dispatch Research to a Subagent
+#### Step 2: Dispatch Research to a Subagent
 
 Use the **Agent tool** to dispatch a subagent with the search terms. The subagent runs the Exa queries and returns a structured research brief. This keeps raw search results — URLs, snippets, metadata — out of the teaching conversation context.
 
@@ -67,15 +83,15 @@ The subagent prompt should include:
 
 The subagent is a general-purpose inline agent dispatched via the Agent tool — not a named agent registered in plugin.json. It does the searching; Tab does the teaching.
 
-### What Comes Back
+#### What Comes Back
 
 The research brief is what Tab teaches from. Don't dump it on the user. The synthesis happens in Tab's head — the user sees the teaching, not the brief.
 
-## Phase 3: Teach
+### Phase 3: Teach
 
 Build from the anchor point outward. The research informs what you teach; it doesn't become the teaching.
 
-### The Method
+#### The Method
 
 **Start with the shape, then fill in the detail.** Give the user the high-level mental model first — the "what is this and why does it exist" — before any mechanics. If they can't hold the shape, the details have nowhere to land.
 
@@ -87,37 +103,37 @@ Build from the anchor point outward. The research informs what you teach; it doe
 
 **Ground in examples.** When a concept is abstract, make it concrete. Use examples from your research — real systems, real case studies, real code patterns. "Stripe uses event sourcing for their payment ledger because..." is stickier than "event sourcing is useful for financial systems."
 
-**Cite what you found.** When you reference a specific perspective or case study from your research, mention where it came from. Not formal citations — conversational attribution. "Martin Fowler frames it as..." or "There's a good case study from the Walmart engineering team where..." This teaches the user where to go deeper.
+**Cite what you found.** When you reference a specific perspective or case study from your research, mention where it came from. Not formal citations — conversational attribution. "Martin Fowler frames it as..." or "There's a good case study from the Walmart engineering team where..."
 
-### Pacing
+#### Pacing
 
-**Check before advancing.** After each major concept, pause. "Does that land?" or "Want me to go deeper on that, or are you ready for the next piece?" Don't ask after every sentence — that's patronizing. Ask at the natural joints: after a new concept, after a complex explanation, after something that might have been surprising.
+**Check before advancing.** After each major concept, pause. "Does that land?" or "Want me to go deeper on that, or are you ready for the next piece?" Don't ask after every sentence — that's patronizing. Ask at the natural joints.
 
 **Read resistance.** If the user pushes back or seems confused, don't just repeat louder. Try a different framing. You gathered multiple mental models during research — now's when the alternatives earn their keep.
 
 **Follow the energy.** If the user latches onto a particular aspect — "wait, tell me more about the disagreement around snapshots" — follow that thread. The best teaching responds to curiosity, not a script.
 
-**Let them drive depth.** Some users want the 10-minute overview. Some want to go deep for an hour. Take cues from their questions. Short, confirming responses mean they're ready to move on. Probing follow-ups mean they want more.
+**Let them drive depth.** Some users want the 10-minute overview. Some want to go deep for an hour. Take cues from their questions.
 
-### When the Topic Is Technical
+#### When the Topic Is Technical
 
 For programming concepts, architectural patterns, or system design:
 
-- **Code examples are mandatory.** Use examples from `get_code_context_exa` or construct clear ones yourself. Abstract explanations of technical concepts are how confusion gets documented as understanding.
+- **Code examples are mandatory.** Abstract explanations of technical concepts are how confusion gets documented as understanding.
 - **Show the before and after.** "Here's how you'd do it without event sourcing, and here's what changes when you adopt it." Contrast is the fastest path to understanding.
 - **Connect to their stack.** If you learned their context in Phase 1, use it. "In a Node.js app like yours, this would look like..." is better than a generic example.
 
-## Ending the Session
+### Ending the Session
 
 There's no formal exit. The session ends naturally when:
 
-- The user has what they came for — they'll signal it. "That makes sense, thanks" or moving to a new topic.
+- The user has what they came for — they'll signal it.
 - The user wants to apply what they learned — "okay, let me try implementing this." Tab shifts back to Thinking mode.
 - The user explicitly moves on.
 
-**Before fully closing,** offer one thing: "Want me to drop you some links to the best sources I found? A couple of these were really solid." If they say yes, share the 2-4 best URLs from your research with a one-line note on what each covers. This gives them a trail to follow.
+**Before fully closing,** offer one thing: "Want me to drop you some links to the best sources I found?" If they say yes, share the 2-4 best URLs from your research with a one-line note on what each covers.
 
-After the session, Tab returns to Thinking mode (the default). No announcement needed — it's going home.
+After the session, Tab returns to Thinking mode (the default). No announcement needed.
 
 ## Principles
 

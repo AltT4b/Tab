@@ -23,13 +23,13 @@ Write knowledgebase documents that are **project-agnostic by design**. The user 
 
 - **MCP:** tab-for-projects — for creating, searching, and updating KB documents.
 
-## The Core Imperative
+## Behavior
+
+### The Core Imperative
 
 **Documentation produced by this skill is NEVER specific to the current codebase.** Every document must be useful to someone who has never seen this repo. If a document references a specific file path, class name, or project-specific convention, it has failed.
 
 The codebase is a lens, not the subject. Read it to understand *how* a pattern works in practice, then write about the pattern itself.
-
-## How You Work
 
 ### 1. Understand the Topic
 
@@ -94,11 +94,13 @@ After writing, review with the user:
 - Are there project-specific details that leaked in?
 - Is the scope right — not too broad (encyclopedia entry) or too narrow (commit message)?
 
-## Document Formats
+## Output
+
+### Document Formats
 
 Use the format that fits the content. Don't force a template where it doesn't belong.
 
-### Convention Document
+#### Convention Document
 
 For established patterns, naming rules, code style norms, or structural decisions that should be followed consistently.
 
@@ -126,7 +128,7 @@ For established patterns, naming rules, code style norms, or structural decision
 
 Tags: `conventions`, plus a domain or concern tag.
 
-### Guide
+#### Guide
 
 For how-to knowledge — walkthroughs, workflows, setup procedures, or techniques.
 
@@ -150,7 +152,7 @@ For how-to knowledge — walkthroughs, workflows, setup procedures, or technique
 
 Tags: `guide`, plus a domain or concern tag.
 
-### Architecture Pattern
+#### Architecture Pattern
 
 For structural decisions, component relationships, and system design approaches.
 
@@ -178,7 +180,7 @@ For structural decisions, component relationships, and system design approaches.
 
 Tags: `architecture`, plus relevant domain or concern tags.
 
-### Decision Record
+#### Decision Record
 
 For recording the reasoning behind a choice that applies broadly — not project-specific decisions, but general technical positions.
 
@@ -195,7 +197,7 @@ For recording the reasoning behind a choice that applies broadly — not project
 
 Tags: `decision`, plus relevant domain or concern tags.
 
-### Reference Document
+#### Reference Document
 
 For lookup material — API patterns, configuration shapes, enum definitions, or taxonomy tables.
 
@@ -211,7 +213,7 @@ For lookup material — API patterns, configuration shapes, enum definitions, or
 
 Tags: `reference`, plus relevant domain or concern tags.
 
-### Troubleshooting Guide
+#### Troubleshooting Guide
 
 For recurring problems, non-obvious failure modes, or diagnostic procedures.
 
@@ -228,11 +230,11 @@ For recurring problems, non-obvious failure modes, or diagnostic procedures.
 
 Tags: `troubleshooting`, plus relevant domain or concern tags.
 
-## Tag Map
+### Tag Map
 
 Tags are a **closed enum** — only these 15 values are valid. Every document gets 1-3 tags.
 
-### Domain Tags
+#### Domain Tags
 
 What area of a system the document relates to.
 
@@ -244,7 +246,7 @@ What area of a system the document relates to.
 | `infra` | Infrastructure, deployment, CI/CD, environments, tooling |
 | `domain` | Business logic, domain modeling, rules, workflows |
 
-### Content Type Tags
+#### Content Type Tags
 
 What kind of document this is.
 
@@ -257,7 +259,7 @@ What kind of document this is.
 | `decision` | Decision records with rationale and trade-offs |
 | `troubleshooting` | Failure modes, diagnostic procedures, gotchas |
 
-### Concern Tags
+#### Concern Tags
 
 Cross-cutting concerns the document addresses.
 
@@ -268,7 +270,7 @@ Cross-cutting concerns the document addresses.
 | `testing` | Test strategy, patterns, coverage, fixtures, mocking |
 | `accessibility` | A11y patterns, screen readers, keyboard navigation, ARIA |
 
-### Tagging Heuristic
+#### Tagging Heuristic
 
 Pick tags in this order:
 
@@ -276,7 +278,7 @@ Pick tags in this order:
 2. **One domain tag** — what area does it cover? Skip if it genuinely spans all domains.
 3. **One concern tag** — does it address a cross-cutting concern? Only if relevant.
 
-## Folder Map
+### Folder Map
 
 Folders are flat, lowercase, alphanumeric with hyphens, max 64 chars. They organize documents by broad topic area — not by project.
 

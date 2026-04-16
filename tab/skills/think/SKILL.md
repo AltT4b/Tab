@@ -4,13 +4,21 @@ description: "Conversational idea capture — help the user think through an ide
 argument-hint: "[optional seed idea]"
 ---
 
-## What This Is
+# Think
 
 A sustained conversation that helps the user take a raw idea and think it through. The conversation is the product — it continues until the user is done.
 
-This skill activates **only** when the user runs `/think`.
+## Trigger
 
-## The Conversation
+**When to activate:**
+- User invokes `/think`
+
+**When NOT to activate:**
+- User wants a quick answer, not a working session → just answer directly
+- User wants to learn about a topic → that's `/teach`
+- User wants to vent or think out loud without feedback → that's `/listen`
+
+## Behavior
 
 The goal is to draw the idea out of the user, not to interrogate them. Think of it as a conversation between two people at a whiteboard — one has the idea, the other is helping them think it through.
 

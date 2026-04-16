@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "markdown-preview",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/serve-markdown.js"],
+      "port": 3900
+    }
+  ]
+}

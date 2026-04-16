@@ -4,21 +4,19 @@ description: "Draw ASCII art dinosaurs — a fun, low-stakes creative skill."
 argument-hint: "[species]"
 ---
 
-## What This Skill Does
+# Draw Dino
 
-This skill draws ASCII art dinosaurs. It supports multiple species and styles.
+Draws ASCII art dinosaurs. Supports multiple species and styles. Exists to be fun.
 
-## When to Trigger
+## Trigger
 
-Activate this skill when the user expresses **explicit intent to see or create a dinosaur drawing**. Look for requests like:
-
+**When to activate:**
 - "Draw me a dinosaur" / "draw a T-Rex" / "show me a dino"
 - "Can you make an ASCII dinosaur?"
 - "I want to see a brontosaurus"
 - Any clear request to **draw, show, or create** a dinosaur or dino-related ASCII art
 
-**Do NOT trigger on:**
-
+**When NOT to activate:**
 - Incidental mentions of dinosaurs in conversation (e.g., "dinosaurs went extinct 66 million years ago")
 - The word "rawr" used as an exclamation or greeting without drawing intent
 - Discussions about dinosaur facts, movies, or paleontology unless the user asks for art
@@ -26,22 +24,22 @@ Activate this skill when the user expresses **explicit intent to see or create a
 
 The bar is low — the user does not need to say `/draw-dino` or use precise language. But there must be a clear signal that they want to **see** a dinosaur, not just **talk about** one.
 
-## Instructions
+## Behavior
 
 When invoked, pick an appropriate dinosaur based on the user's request. If no specific species is mentioned, pick one yourself. Always output the ASCII art inside a code block so spacing is preserved.
 
-## Customization
+### Customization
 
 - If the user asks for a **cute** or **baby** dino, use the Baby Dino.
 - If the user asks for a **flying** dinosaur, use the Pterodactyl.
 - If the user asks for something **scary** or **fierce**, use the T-Rex or Velociraptor.
 - If the user asks for something **big** or **gentle**, use the Brontosaurus.
 
-## Reference Templates
+### Reference Templates
 
 The following are quality anchors — use them as inspiration and starting points, but feel free to freestyle your own. Aim for **8-15 lines tall** so the art is substantial without overwhelming the chat.
 
-### T-Rex
+#### T-Rex
 
 ```
             __
@@ -52,7 +50,7 @@ __/ (  |  (  |
 /__.-'|_|--|_|
 ```
 
-### Brontosaurus
+#### Brontosaurus
 
 ```
                   .       .
@@ -70,7 +68,7 @@ __/ (  |  (  |
                   `-._ _}--'
 ```
 
-### Stegosaurus
+#### Stegosaurus
 
 ```
                   .  .
@@ -90,7 +88,7 @@ __/ (  |  (  |
 
 These templates set a quality bar. You can modify, embellish, or draw entirely original dinosaurs — the point is that the output should feel **crafted**, not minimal.
 
-## Workflow
+### Workflow
 
 1. Note the type of dinosaur and prompt customization, if one is given. Choose a classic if one is not.
 2. Draw the dinosaur — use a reference template as a starting point or freestyle your own. Aim for 8-15 lines tall.
