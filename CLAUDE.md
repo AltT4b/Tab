@@ -11,6 +11,7 @@ LICENSE                           # Apache-2.0 license
 scripts/validate-plugins.sh       # Plugin validation script
 tab/                              # "tab" plugin package
   .claude-plugin/plugin.json      #   Plugin metadata (agents, skills, version)
+  CHANGELOG.md                    #   Release notes (keep-a-changelog)
   settings.json                   #   Default agent: tab:Tab
   agents/tab.md                   #   Tab personality agent
   skills/draw-dino/SKILL.md       #   /draw-dino skill
@@ -20,6 +21,7 @@ tab/                              # "tab" plugin package
   skills/think/SKILL.md           #   /think — conversational idea capture
 tab-for-projects/                 # "tab-for-projects" plugin package
   .claude-plugin/plugin.json      #   Plugin metadata (agents, skills, version)
+  CHANGELOG.md                    #   Release notes (keep-a-changelog)
   agents/developer.md             #   Developer agent — pragmatic coding collaborator, reaches for workflow skills
   skills/plan-project/SKILL.md    #   /plan-project — interview + research + decompose into a groomed backlog
   skills/fix/SKILL.md             #   /fix — file a single task from conversation
@@ -63,11 +65,13 @@ Run `bash scripts/validate-plugins.sh` from the repo root after any structural c
 
 If you add or remove a skill/agent, update the Repository Structure tree above and run the validator. It will fail if the tree is out of date.
 
-## Versioning
+## Versioning and Changelogs
 
 Bump the version in both `plugin.json` and `marketplace.json` as part of any commit that changes a plugin's behavior — new skills, agent prompt changes, bug fixes. The validator enforces that versions stay in sync across the two files, so always update both together.
 
 Use semver: patch for fixes and minor prompt tweaks, minor for new skills or meaningful behavior changes, major for breaking changes. When in doubt, bump minor.
+
+**Every version bump must include a changelog entry.** Each plugin has a `CHANGELOG.md` at its package root (`tab/CHANGELOG.md`, `tab-for-projects/CHANGELOG.md`) following the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format. Add a new `## [version] — YYYY-MM-DD` section above the previous one with `### Added`, `### Changed`, `### Fixed`, or `### Removed` subsections as appropriate. Write entries for users, not for yourself — describe what changed from their perspective and why it matters, not the implementation detail.
 
 ## Key Files
 
@@ -76,7 +80,9 @@ Use semver: patch for fixes and minor prompt tweaks, minor for new skills or mea
 | `.claude-plugin/marketplace.json` | Marketplace plugin registry |
 | `scripts/validate-plugins.sh` | Plugin validation script |
 | `tab/.claude-plugin/plugin.json` | Tab plugin manifest |
+| `tab/CHANGELOG.md` | Tab plugin release notes |
 | `tab-for-projects/.claude-plugin/plugin.json` | Tab for Projects plugin manifest |
+| `tab-for-projects/CHANGELOG.md` | Tab for Projects plugin release notes |
 | `tab/agents/tab.md` | Tab agent — personality, profiles, settings |
 | `tab-for-projects/agents/developer.md` | Developer agent — pragmatic coding collaborator that reaches for workflow skills |
 | `tab/settings.json` | Tab default agent config |
