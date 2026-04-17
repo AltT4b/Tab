@@ -31,7 +31,7 @@ These are optional — Tab works fine without them. But they unlock web search, 
 Web search and content fetching.
 
 ```bash
-claude mcp add --transport http exa https://mcp.exa.ai/mcp
+claude mcp add --scope user --transport http exa https://mcp.exa.ai/mcp
 ```
 
 ---
