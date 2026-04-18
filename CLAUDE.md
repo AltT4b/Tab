@@ -33,7 +33,7 @@ tab-for-projects/                 # "tab-for-projects" plugin package
   skills/backlog/SKILL.md         #   /backlog — groom todos up to the readiness bar
   skills/work/SKILL.md            #   /work — autonomously execute the ready portion of the backlog
   skills/search/SKILL.md          #   /search — find docs and tasks via an escalating filter ladder
-  skills/save-document/SKILL.md   #   /save-document — capture a decision, convention, or reference doc
+  skills/document/SKILL.md        #   /document — capture a decision, convention, or reference doc
 ```
 
 ## Package Architecture

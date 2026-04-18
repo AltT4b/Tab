@@ -1,6 +1,6 @@
 ---
-name: save-document
-description: Capture a knowledgebase document from the current conversation or an existing file. Infers doc type (decision, convention, guide, reference), folder, tags, and summary from context, proposes the shape, and writes to the MCP. Optionally attaches the document to a project. Use when something worth preserving just got said, decided, or written. Triggers on `/save-document` and phrases like "save this as a doc", "capture that decision", "write this up as a convention", "import this file into the KB".
+name: document
+description: Capture a knowledgebase document from the current conversation or an existing file. Infers doc type (decision, convention, guide, reference), folder, tags, and summary from context, proposes the shape, and writes to the MCP. Optionally attaches the document to a project. Use when something worth preserving just got said, decided, or written. Triggers on `/document` and phrases like "save this as a doc", "capture that decision", "write this up as a convention", "import this file into the KB".
 argument-hint: "[optional: file path to import, or one-line title hint]"
 ---
 
@@ -9,7 +9,7 @@ The "this deserves to be a doc" skill. The user just worked through something â€
 ## Trigger
 
 **When to activate:**
-- User invokes `/save-document` with or without a file-path argument.
+- User invokes `/document` with or without a file-path argument.
 - User says "save this as a doc", "capture that decision", "write this up as a convention", "import this file into the KB", "file this under guides".
 - A decision or convention just crystallized in conversation and the user wants it preserved.
 

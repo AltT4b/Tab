@@ -2,6 +2,11 @@
 
 All notable changes to the **tab-for-projects** plugin. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [semver](https://semver.org/).
 
+## [0.8.1] — 2026-04-18
+
+### Changed
+- **Breaking:** `/save-document` renamed to `/document`. Matches the noun-shorthand naming the rest of the inventory settled on (`/feature`, `/backlog`, `/search`). Behavior is identical — only the invocation changes. Cross-reference in `/search`'s negative-trigger list updated.
+
 ## [0.8.0] — 2026-04-18
 
 ### Changed
