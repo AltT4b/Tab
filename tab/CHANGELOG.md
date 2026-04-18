@@ -2,6 +2,11 @@
 
 All notable changes to the **tab** plugin. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [semver](https://semver.org/).
 
+## [0.2.3] — 2026-04-17
+
+### Added
+- `/teach` now answers "what can you teach?" by showing the syllabus as a catalog — grouped by type (architecture, AI/ML, mental models, etc.) and tagged by difficulty. Browse-intent phrasings route to this summary instead of starting a teaching session.
+
 ## [0.2.2] — 2026-04-17
 
 ### Added

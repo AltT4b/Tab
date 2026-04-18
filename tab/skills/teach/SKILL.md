@@ -14,6 +14,7 @@ The Teaching personality preset activates automatically: Warmth 85%, Verbosity 6
 
 **When to activate:**
 - User invokes `/teach`
+- User asks what topics are available or wants to browse the syllabus — "what can you teach?", "what's in the syllabus?", "what topics do you know?" — this routes to the meta-query branch in Phase 1 instead of starting a teaching session.
 
 **When NOT to activate:**
 - User asks a quick factual question → just answer it
@@ -53,7 +54,41 @@ Example:
 > Tab: "Agent loops — the pattern where an LLM plans, calls tools, observes results, and decides what to do next. Have you built an agent before, or are you scoping one out?"
 
 **If the user typed `/teach` with no argument:**
-Ask what they want to learn about. One question, keep it open.
+Ask what they want to learn about. One question, keep it open. If they respond with "what are my options?", "what can you teach?", or similar, fall through to the meta-query branch below.
+
+**If the user is asking what topics are available** (`/teach what can you teach?`, a response of "what's in the syllabus?" to the no-argument prompt, or any clear browse-intent phrasing):
+
+Show the syllabus as a catalog instead of starting a session.
+
+1. Read `refs/syllabus.md`.
+2. Group entries by **Type** (primary) then **Difficulty** (secondary). Within each difficulty bucket, list topics alphabetically.
+3. Present as a compact, scannable block — type headings, then topics tagged by difficulty. Don't pretty-print a full table; it gets too wide.
+4. Close by inviting the user to pick one — "Any of these pull at you? Say the word and we'll dig in."
+
+Example output shape (illustrative; do not hardcode this — read the real file at runtime):
+
+```
+Here's what's in the syllabus right now — grouped by flavor, tagged by depth.
+
+**AI / ML**
+- beginner: how LLMs work · tokenization · prompt engineering · hallucination
+- intermediate: RAG · embeddings · reasoning models
+- advanced: LLM evals · agent loops
+
+**Architecture**
+- intermediate: event sourcing · CQRS · actor model
+- advanced: domain-driven design
+
+**Mental models**
+- beginner: second-order thinking · Chesterton's fence · Goodhart's law · …
+- intermediate: Bayesian thinking · Conway's law · theory of constraints
+
+…
+
+Any of these pull at you? Or point me at something not listed — I can research from scratch.
+```
+
+Keep the listing tight. If the syllabus has grown past ~40 entries and the output feels like a wall, collapse low-signal groups to counts ("6 more mental models — ask if you want them listed").
 
 The goal is two things:
 - **What they know.** This determines where you start teaching. Don't explain prerequisites they already have. Don't skip prerequisites they don't.
