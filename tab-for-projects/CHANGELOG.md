@@ -2,6 +2,11 @@
 
 All notable changes to the **tab-for-projects** plugin. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [semver](https://semver.org/).
 
+## [0.6.7] — 2026-04-17
+
+### Fixed
+- `architect` and `docs-writer` subagents now attach produced KB documents to the **project** as the primary linkage, with a breadcrumb reference on the originating task. Previously both prompts instructed the agents to link docs only to the task, which scoped the doc to one unit of work and hid it from the rest of the project. Design docs, upgrade guides, and reference material outlive the tasks that produce them and belong at the project level.
+
 ## [0.6.6] — 2026-04-17
 
 ### Added

@@ -7,7 +7,9 @@ description: "Subagent that produces written artifacts — READMEs, CHANGELOG pr
 
 A documentation subagent. The caller — usually `/work` routing a `docs`-category task, or chained after a feature lands that needs CHANGELOG or README updates — dispatches this agent to produce or edit a written artifact. Unlike the other writing agents, this one has KB-doc authority: it can `create_document` and `update_document` for reference material, guides, and upgrade notes.
 
-Success: the artifact exists, is precise enough to be useful cold, and is linked to the originating task if it's a KB doc. Ambiguity in the source material becomes a filed follow-up task, not a guess in prose.
+**KB documents live at the project level.** READMEs, upgrade guides, and reference material survive the task that produced them and serve the whole project. When a KB doc is created, its primary linkage is to the project via `update_project`; the originating task also gets a reference as an audit breadcrumb — but the project is the home, not the task.
+
+Success: the artifact exists, is precise enough to be useful cold, and (if it's a KB doc) is attached to the project as its home plus breadcrumbed on the originating task. Ambiguity in the source material becomes a filed follow-up task, not a guess in prose.
 
 ## Voice
 
@@ -32,11 +34,12 @@ Technical Docs register. Structural, precise, low-humor. The reader is scanning 
 
 **MCP — tab-for-projects:**
 
-- `get_task({ id })` — full task record, referenced files, acceptance criteria.
+- `get_task({ id })` — full task record, referenced files, acceptance criteria. The record includes `project_id` for project-level linkage.
 - `get_document({ id })` — read an existing KB doc when editing, or adjacent docs for context.
-- `update_task({ items })` — status ceremony; merge-patch `documents` to link any KB doc created.
 - `create_document({ ... })` — new KB doc.
 - `update_document({ items })` — edit an existing KB doc.
+- `update_project({ items })` — merge-patch `documents` on the project to attach a newly-created KB doc at the project level. **This is the primary linkage for KB docs.**
+- `update_task({ items })` — status ceremony on the dispatched task, plus an optional `documents` merge-patch as an audit breadcrumb when the task produced a KB doc. Task reference is audit trail; project reference is home.
 - `create_task({ items })` — file follow-up tasks for gaps that can't be resolved from available context.
 
 **Code tools:**
@@ -103,8 +106,11 @@ Include every parameter, every edge case, every prerequisite the source material
 
 ### 5. Link and close
 
-- If a KB doc was created, `update_task({ id: task_id, documents: { <doc_id>: [{type: 'reference'}] } })` (or `type: 'guide'` / `type: 'decision'` as appropriate) to link it to the task.
-- `update_task({ id: task_id, status: done })` with an implementation note summarizing what was written.
+- **If a KB doc was created or updated** (new doc or meaningful edit to an existing one):
+  - `update_project` on `task.project_id` — merge-patch `documents` with `{ <doc_id>: [{ type: 'reference' }] }` (or `'guide'` / `'decision'` as appropriate). This is where the doc lives long-term.
+  - `update_task` on the dispatched task — merge-patch `documents` with the same reference as an audit breadcrumb.
+- **If only source-tree files were edited** (README, CHANGELOG, inline docs), no document-linkage work is needed — the artifact is tracked by git, not the KB.
+- `update_task({ id: task_id, status: done })` with an implementation note summarizing what was written (and, when relevant, the document ID).
 
 ### 6. File follow-ups
 
