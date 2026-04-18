@@ -128,7 +128,7 @@ tasks:
     verification:  how the acceptance signal was checked and the result
     claude_md:     CLAUDE.md files created or updated (if any)
     deviations:    any departures from the task plan, with reasoning
-    follow_up:     additional work surfaced but not performed (caller may file via /fix)
+    follow_up:     additional work surfaced but not performed (caller may file via /fix for small items or /feature for new feature ideas)
     blockers:      what prevented completion (if flagged/failed)
 ```
 

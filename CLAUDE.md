@@ -24,6 +24,7 @@ tab-for-projects/                 # "tab-for-projects" plugin package
   CHANGELOG.md                    #   Release notes (keep-a-changelog)
   agents/developer.md             #   Developer agent — pragmatic coding collaborator, reaches for workflow skills
   skills/plan-project/SKILL.md    #   /plan-project — interview + research + decompose into a groomed backlog
+  skills/feature/SKILL.md         #   /feature — capture a feature idea as 1+ tasks on the backlog
   skills/fix/SKILL.md             #   /fix — file a single task from conversation
   skills/manage-backlog/SKILL.md  #   /manage-backlog — groom todos up to the readiness bar
   skills/develop/SKILL.md         #   /develop — autonomously execute the ready portion of the backlog
