@@ -62,7 +62,7 @@ Ask what angle matters to them. A user learning about "CRDTs" for a collaborativ
 - Practitioner experience (real-world usage, lessons learned)
 - Decision frameworks (when to use, trade-offs, comparisons)
 
-Once you've agreed on search terms, append the new entry to `refs/syllabus.md` so the syllabus grows over time.
+Once you've agreed on search terms, classify the topic with a **type** and **difficulty** from the controlled vocabulary at the top of `refs/syllabus.md` (`architecture`, `distributed-systems`, `data-structure`, `mental-model`, `ai-ml`, `engineering-practice`, `stack-guide`; and `beginner` / `intermediate` / `advanced`). Only propose a new type value when an existing one genuinely doesn't fit. Then append the new entry to `refs/syllabus.md` so the syllabus grows over time.
 
 #### Step 2: Dispatch Research to a Subagent
 

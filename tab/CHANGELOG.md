@@ -2,6 +2,11 @@
 
 All notable changes to the **tab** plugin. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [semver](https://semver.org/).
 
+## [0.2.1] — 2026-04-17
+
+### Changed
+- `/teach` syllabus entries now carry **type** and **difficulty** alongside search terms, so the skill can group topics when a user wants to browse what's available instead of naming a topic. All 38 existing entries backfilled; new entries must set both fields.
+
 ## [0.2.0] — 2026-04-16
 
 ### Changed
