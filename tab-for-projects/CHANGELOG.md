@@ -2,6 +2,11 @@
 
 All notable changes to the **tab-for-projects** plugin. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [semver](https://semver.org/).
 
+## [0.6.8] — 2026-04-18
+
+### Removed
+- `/get-project` skill. `/search` already covers finding specific docs and tasks, and a full project snapshot that you'd skim but not act on earns its keep less than the skill inventory cost of keeping two entry points for "tell me about this project." If you want a read on where things stand, start a conversation or use `/search`.
+
 ## [0.6.7] — 2026-04-17
 
 ### Fixed

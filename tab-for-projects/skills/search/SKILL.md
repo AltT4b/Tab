@@ -15,7 +15,6 @@ A search skill that assumes the user is right — the thing they're looking for 
 
 **When NOT to activate:**
 - User wants to create — use `/fix`, `/plan-project`, or `/save-document`.
-- User wants full project context — use `/get-project`.
 - User wants code search in the current repo — use `Grep` or `Glob` directly.
 
 ## Requires
