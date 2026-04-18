@@ -27,7 +27,7 @@ tab-for-projects/                 # "tab-for-projects" plugin package
   skills/feature/SKILL.md         #   /feature — capture a feature idea as 1+ tasks on the backlog
   skills/fix/SKILL.md             #   /fix — file a single task from conversation
   skills/manage-backlog/SKILL.md  #   /manage-backlog — groom todos up to the readiness bar
-  skills/develop/SKILL.md         #   /develop — autonomously execute the ready portion of the backlog
+  skills/work/SKILL.md            #   /work — autonomously execute the ready portion of the backlog
   skills/search/SKILL.md          #   /search — find docs and tasks via an escalating filter ladder
   skills/get-project/SKILL.md     #   /get-project — pull a project snapshot for orientation
   skills/save-document/SKILL.md   #   /save-document — capture a decision, convention, or reference doc

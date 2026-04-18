@@ -16,7 +16,7 @@ The orientation skill. At the start of a session, after a gap, or when switching
 **When NOT to activate:**
 - User wants to find a specific doc or task — use `/search`.
 - User wants to create new work — use `/plan-project` or `/fix`.
-- User wants to execute — use `/develop`.
+- User wants to execute — use `/work`.
 
 ## Requires
 
@@ -62,7 +62,7 @@ Keep it skimmable. The user is orienting, not reading a report.
 End with one concrete suggestion grounded in what the snapshot showed:
 
 - 3+ blocked tasks → suggest `/manage-backlog`.
-- Healthy ready backlog → suggest `/develop`.
+- Healthy ready backlog → suggest `/work`.
 - Lots of unscored tasks → suggest `/manage-backlog`.
 - Clean and quiet → say so; suggest the user say what they want to work on.
 

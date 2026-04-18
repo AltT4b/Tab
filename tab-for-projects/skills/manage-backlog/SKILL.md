@@ -1,21 +1,21 @@
 ---
 name: manage-backlog
-description: Groom the project backlog so every task starts above the readiness bar. Fills missing summaries/effort/impact/category/acceptance-signal, splits oversized tasks, wires dependencies, and flags or archives stale work. Use when the backlog has accumulated under-specified tasks, when `/develop` reports too many flagged items, or when planning a grooming pass before handing work to agents. Triggers on `/manage-backlog` and phrases like "groom the backlog", "clean up tasks", "get the backlog ready for execution".
+description: Groom the project backlog so every task starts above the readiness bar. Fills missing summaries/effort/impact/category/acceptance-signal, splits oversized tasks, wires dependencies, and flags or archives stale work. Use when the backlog has accumulated under-specified tasks, when `/work` reports too many flagged items, or when planning a grooming pass before handing work to agents. Triggers on `/manage-backlog` and phrases like "groom the backlog", "clean up tasks", "get the backlog ready for execution".
 argument-hint: "[optional filter: group_key or category]"
 ---
 
-Take the current backlog of `todo` tasks and move each one to one of four states: **ready** (above the readiness bar), **split** (broken into ready children), **flagged** (specific question surfaced to the user), or **archived** (stale / duplicate / obsolete). The skill does the thinking and the MCP writes, so `/develop` can pick up the result without further grooming.
+Take the current backlog of `todo` tasks and move each one to one of four states: **ready** (above the readiness bar), **split** (broken into ready children), **flagged** (specific question surfaced to the user), or **archived** (stale / duplicate / obsolete). The skill does the thinking and the MCP writes, so `/work` can pick up the result without further grooming.
 
 ## Trigger
 
 **When to activate:**
 - User invokes `/manage-backlog`, optionally scoped to a `group_key` or `category`.
 - User says "groom the backlog", "clean up tasks", "get tasks ready for execution", "score the backlog".
-- `/develop` just ran and reported several flagged tasks — the user wants to close the gaps.
+- `/work` just ran and reported several flagged tasks — the user wants to close the gaps.
 
 **When NOT to activate:**
 - User wants to create new tasks — use `/plan-project` or `/fix`.
-- User wants to execute — use `/develop`.
+- User wants to execute — use `/work`.
 - Backlog is already clean — check first; don't run for ceremony.
 
 ## Requires
@@ -106,12 +106,12 @@ After writing:
 ```
 Groomed Tab: 6 fixed, 1 split into 3, 2 archived, 1 dependency wired.
 3 tasks still flagged for your input (see list above).
-Backlog readiness: 11/14 ready for /develop.
+Backlog readiness: 11/14 ready for /work.
 ```
 
 ## Principles
 
-- **Raise tasks to the bar. Never lower the bar to clear tasks.** Silently marking underspecified tasks as "ready" corrupts the contract `/develop` depends on.
+- **Raise tasks to the bar. Never lower the bar to clear tasks.** Silently marking underspecified tasks as "ready" corrupts the contract `/work` depends on.
 - **Specificity is the product.** "This task is underspecified" is noise. "This task has no acceptance signal — propose one" is value.
 - **Splits cost less than merged ambiguity.** When in doubt between one vague task and two clear ones, propose the split.
 - **Archive aggressively, write conservatively.** Stale tasks rot the signal. Removing them is cheap.
@@ -122,4 +122,4 @@ Backlog readiness: 11/14 ready for /develop.
 - **No silent writes.** Every change is shown in the groom plan and confirmed before execution.
 - **No auto-fill for genuinely ambiguous fields.** If the skill has to guess the acceptance signal, it asks instead.
 - **Don't modify `in_progress` tasks.** Someone's working on those. Skip.
-- **Don't execute tasks.** Grooming produces a ready backlog; running it is `/develop`'s job.
+- **Don't execute tasks.** Grooming produces a ready backlog; running it is `/work`'s job.

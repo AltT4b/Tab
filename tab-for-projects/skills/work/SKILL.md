@@ -1,6 +1,6 @@
 ---
-name: develop
-description: Autonomously execute ready tasks from the project backlog. Walks the dependency graph, spawns subagent teams for parallel work, verifies acceptance signals, commits per task, and flags tasks that fall below the readiness bar instead of guessing. Use when the backlog is groomed and the user wants to hand off execution. Triggers on `/develop` and phrases like "finish the backlog", "execute the ready tasks", "work through the todo list".
+name: work
+description: Autonomously execute ready tasks from the project backlog. Walks the dependency graph, spawns subagent teams for parallel work, verifies acceptance signals, commits per task, and flags tasks that fall below the readiness bar instead of guessing. Use when the backlog is groomed and the user wants to hand off execution. Triggers on `/work` and phrases like "finish the backlog", "execute the ready tasks", "work through the todo list".
 argument-hint: "[optional: group_key, --max=N, --dry-run]"
 ---
 
@@ -9,7 +9,7 @@ Hand over execution. The skill reads the ready portion of the backlog, builds an
 ## Trigger
 
 **When to activate:**
-- User invokes `/develop`, optionally scoped to a `group_key` or limited by `--max=N`.
+- User invokes `/work`, optionally scoped to a `group_key` or limited by `--max=N`.
 - User says "finish the backlog", "execute the ready tasks", "work through the todo list", "run the groomed tasks".
 - User just finished `/manage-backlog` and wants to cash in the groomed work.
 
@@ -52,7 +52,7 @@ Below **confident**, ask. No writes below confident.
 6. Show the plan:
 
 ```
-/develop — Tab project
+/work — Tab project
 Ready: 7 tasks (4 serial, 3 parallel in group auth-mfa)
 Flagged: 3 tasks (see list at end)
 Will execute: 5 (--max=5; 2 deferred)
@@ -102,7 +102,7 @@ If a task fails — acceptance signal doesn't pass, a dependency breaks, the wor
 At the end:
 
 ```
-/develop complete — Tab project
+/work complete — Tab project
 
 Executed: 5 tasks (3 commits on main, 2 failed)
   ✓ 01KX… Update README badges

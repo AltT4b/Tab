@@ -4,7 +4,7 @@ description: Turn a broad objective into a well-groomed backlog of tasks that st
 argument-hint: "[objective]"
 ---
 
-Take a fuzzy objective and produce a backlog the user can hand to `/develop` without further grooming. The skill's job is to do the thinking, research, and decomposition work that normally happens in a planning session — compressed into one invocation and written straight to the MCP.
+Take a fuzzy objective and produce a backlog the user can hand to `/work` without further grooming. The skill's job is to do the thinking, research, and decomposition work that normally happens in a planning session — compressed into one invocation and written straight to the MCP.
 
 ## Trigger
 
@@ -15,7 +15,7 @@ Take a fuzzy objective and produce a backlog the user can hand to `/develop` wit
 
 **When NOT to activate:**
 - User wants a single task captured from conversation — use `/fix`.
-- User wants to execute existing tasks — use `/develop`.
+- User wants to execute existing tasks — use `/work`.
 - User wants to groom an existing backlog — use `/manage-backlog`.
 - User is still thinking out loud and hasn't committed to scope — use `/think`.
 
@@ -110,14 +110,14 @@ A set of tasks in the MCP, all above the readiness bar, with dependencies wired.
 ```
 Created 7 tasks in Tab (group: auth-v2).
 4 ready to execute, 3 blocked on task 01KX… (expected — that's the ordering).
-/develop will pick these up.
+/work will pick these up.
 ```
 
 ## Principles
 
 - **Interview, don't interrogate.** 3–5 questions. If you want more, write them as tasks and ask them in the executing work, not in the planning session.
 - **Decomposition is the product.** The value isn't the questions or the research — it's turning one fuzzy goal into N concrete tasks that a subagent can execute cold.
-- **Bias to more, smaller tasks.** A `high`-effort task almost always wants splitting. `/develop` batches well; `/develop` doesn't split well.
+- **Bias to more, smaller tasks.** A `high`-effort task almost always wants splitting. `/work` batches well; `/work` doesn't split well.
 - **Don't plan past the edge of confidence.** If the objective has real unknowns past task 3, stop at task 3 and note "task 4+ depends on outcome of 3." Don't fabricate a plan you don't believe.
 
 ## Constraints
