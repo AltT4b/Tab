@@ -1,13 +1,13 @@
 {
   "name": "tab-for-projects",
   "description": "Project workflow tracking — skills and agents for the Tab for Projects MCP.",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "author": {
     "name": "4lt7ab"
   },
   "license": "Apache-2.0",
   "agents": [
-    "./agents/developer.md",
+    "./agents/implementer.md",
     "./agents/architect.md"
   ],
   "skills": "./skills/"

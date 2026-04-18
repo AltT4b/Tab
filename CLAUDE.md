@@ -1,6 +1,6 @@
 # Tab
 
-Claude Code plugin marketplace containing two plugins: **tab** (a standalone personality/thinking-partner agent) and **tab-for-projects** (a developer agent that talks to the Tab for Projects MCP). Published via `.claude-plugin/marketplace.json`.
+Claude Code plugin marketplace containing two plugins: **tab** (a standalone personality/thinking-partner agent) and **tab-for-projects** (autonomous subagents and workflow skills that talk to the Tab for Projects MCP). Published via `.claude-plugin/marketplace.json`.
 
 ## Repository Structure
 
@@ -22,7 +22,7 @@ tab/                              # "tab" plugin package
 tab-for-projects/                 # "tab-for-projects" plugin package
   .claude-plugin/plugin.json      #   Plugin metadata (agents, skills, version)
   CHANGELOG.md                    #   Release notes (keep-a-changelog)
-  agents/developer.md             #   Developer agent — pragmatic coding collaborator, reaches for workflow skills
+  agents/implementer.md           #   Implementer subagent — takes one ready task, writes code, verifies, commits; files tasks for follow-ups (no KB writes)
   agents/architect.md             #   Architect subagent — produces design docs and ADRs from design/feature tasks
   skills/plan-project/SKILL.md    #   /plan-project — interview + research + decompose into a groomed backlog
   skills/feature/SKILL.md         #   /feature — capture a feature idea as 1+ tasks on the backlog
@@ -37,7 +37,7 @@ tab-for-projects/                 # "tab-for-projects" plugin package
 ## Package Architecture
 
 - **tab** is standalone. One agent (`Tab`) with a rich personality system (profiles, settings 0-100%). No MCP dependency.
-- **tab-for-projects** extends the ecosystem with one agent (developer) and a set of verb-shaped workflow skills that automate high-friction operations against the Tab for Projects MCP. Each skill is a one-shot automation, not an ambient mode. Skills resolve the active project via inference (explicit arg → `.tab-project` file → git remote → cwd → recent activity) and respect a shared task-readiness bar defined in the KB.
+- **tab-for-projects** extends the ecosystem with autonomous subagents (implementer, architect) that `/work` routes tasks to by category, plus a set of verb-shaped workflow skills that automate high-friction operations against the Tab for Projects MCP. Each skill is a one-shot automation, not an ambient mode. Skills resolve the active project via inference (explicit arg → `.tab-project` file → git remote → cwd → recent activity) and respect a shared task-readiness bar defined in the KB.
 - Each package is independently installable. A `settings.json` at a package root can set the default agent via `{"agent": "<plugin>:<agent>"}`.
 
 ## Conventions
@@ -86,5 +86,6 @@ Use semver: patch for fixes and minor prompt tweaks, minor for new skills or mea
 | `tab-for-projects/.claude-plugin/plugin.json` | Tab for Projects plugin manifest |
 | `tab-for-projects/CHANGELOG.md` | Tab for Projects plugin release notes |
 | `tab/agents/tab.md` | Tab agent — personality, profiles, settings |
-| `tab-for-projects/agents/developer.md` | Developer agent — pragmatic coding collaborator that reaches for workflow skills |
+| `tab-for-projects/agents/implementer.md` | Implementer subagent — takes one ready task, writes code, verifies, commits; files tasks for follow-ups (no KB writes) |
+| `tab-for-projects/agents/architect.md` | Architect subagent — produces design docs and ADRs from design/feature tasks |
 | `tab/settings.json` | Tab default agent config |
