@@ -2,6 +2,10 @@
 
 All notable changes to the **tab-for-projects** plugin. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [semver](https://semver.org/).
 
+## [1.0.0] — 2026-04-19
+
+First stable release. The skill set (`/project`, `/fix`, `/backlog`, `/work`, `/search`, `/document`) and agent roster (architect, implementer, test-writer, docs-writer, reviewer, shipper) have settled. The breaking renames and removals from the 0.6–0.9 series are absorbed; from here, semver applies strictly. No behavior changes in this version itself — the cut acknowledges that the plugin is safe to depend on.
+
 ## [0.9.2] — 2026-04-19
 
 ### Changed
