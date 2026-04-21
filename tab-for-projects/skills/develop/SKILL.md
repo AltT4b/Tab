@@ -148,7 +148,7 @@ When the last piece lands (or the user closes the session):
 2. **Task writes.**
    - Anchor → `done` if acceptance passed. `todo` with a progress note if the user stopped mid-way.
    - Follow-ups filed mid-session stay `todo`.
-3. **Doc drift check.** Note any README / CLAUDE.md / CHANGELOG drift implied by the work. Do not edit — `/ship` owns those sweeps.
+3. **Doc drift check.** Note any README / CLAUDE.md drift implied by the work. Do not edit — `/ship` owns those sweeps.
 4. **Do not commit.** The working tree is staged or unstaged per the user's preference. The user owns the commit.
 5. **Summary:**
 
@@ -187,7 +187,7 @@ Next: review the diff, commit when ready. /ship when you're ready to push.
 - Code + tests on the user's working tree, uncommitted.
 - Zero or more commits in worktrees from delegated `developer` dispatches.
 - Task state writes: anchor task transitions, any new tasks filed mid-session.
-- No source code outside the working tree and dispatched worktrees. No KB writes. No changelog / README / CLAUDE.md edits. No commits on the working tree. No pushes.
+- No source code outside the working tree and dispatched worktrees. No KB writes. No README / CLAUDE.md edits. No commits on the working tree. No pushes.
 - A structured wrap report with the shape above.
 
 ## Principles
@@ -207,7 +207,7 @@ Next: review the diff, commit when ready. /ship when you're ready to push.
 - **No commits on the working tree.** The user commits.
 - **No pushes or merges.** Ever.
 - **No KB writes.** Design forks become design tickets or a `/design` invocation; `/develop` does not author KB docs.
-- **No changelog, README, or CLAUDE.md edits.** Doc drift gets noted in the wrap summary for `/ship`.
+- **No README or CLAUDE.md edits.** Doc drift gets noted in the wrap summary for `/ship`.
 - **No silent resolution of design forks.** If a fork surfaces, the decision block fires — never papered over.
 - **No worktree merges.** Delegated work lands as commits in worktrees; the user integrates.
 - **No unbounded survey.** One `bug-hunter` dispatch during Ground, max. Further investigation is conversational reads, not more subagent hops.

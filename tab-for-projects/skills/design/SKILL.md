@@ -158,7 +158,7 @@ Saved <doc_id> "<Title>" in <folder>. Task left in_progress — close when ready
 - A KB document, linked to the project.
 - (Task mode) Optionally, the originating task transitioned to `done` with an implementation note referencing the doc.
 - (Both modes) Follow-up tasks filed by `project-planner` — a mix of implementation tickets (for decided pieces) and design tickets (for punted forks) — unless the user opted out.
-- No source code. No changelog edits. No docs outside the KB.
+- No source code. No docs outside the KB.
 
 ## Principles
 

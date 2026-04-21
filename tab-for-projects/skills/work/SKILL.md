@@ -134,7 +134,7 @@ Default: **serial**. Each task runs start-to-finish before the next claims.
 
 Parallel dispatch spawns subagents via a single message with multiple `Agent` tool calls. On any return, re-evaluate the graph before selecting the next batch.
 
-Parallelism is safe across worktrees — each dev works on an isolated tree. Shared-doc files (CLAUDE.md, README, CHANGELOG) are off-limits to `developer` exactly so parallel runs can't collide; `/ship` handles those centrally.
+Parallelism is safe across worktrees — each dev works on an isolated tree. Shared-doc files (CLAUDE.md, README) are off-limits to `developer` exactly so parallel runs can't collide; `/ship` handles those centrally.
 
 ### 8. Halts and design tasks are batched
 

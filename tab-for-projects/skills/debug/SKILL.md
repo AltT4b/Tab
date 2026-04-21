@@ -70,7 +70,7 @@ Chosen only when the user explicitly picks `fix inline`. This path breaks the wo
 1. **Pin current behavior with a test first if tests exist for the area.** Run the suite; a failing test is the anchor. If the area has no tests, write the first one — capturing the bug's repro — before the fix.
 2. **Make the fix.** Match the surrounding style. Narrow scope — only the files the hunter's report named as causal.
 3. **Verify.** Run the test(s). Green passes, red means the fix is wrong; iterate or escalate.
-4. **Do not touch CLAUDE.md, README, or CHANGELOG.** If doc drift is obvious, note it in the final summary — `/ship` will pick it up on the next pre-push sweep.
+4. **Do not touch CLAUDE.md or README.** If doc drift is obvious, note it in the final summary — `/ship` will pick it up on the next pre-push sweep.
 5. **Do not commit.** Leave the change staged for the user to review and commit themselves. A `/debug` fix is worth a user-authored commit, not a silent one.
 6. **Summarize.** Print the files changed, the test that now pins the behavior, and any adjacent findings from the hunter that were *not* fixed — the user may want to `/capture` those or leave them.
 
@@ -114,7 +114,7 @@ If the user picks `drop`, the skill closes with a one-line acknowledgement and d
 ## Constraints
 
 - **No KB writes.** `/debug` never writes documents. If the hunt reveals an architectural question, escalate to a task with `category: design`; `/design` will write the doc.
-- **No changelog or README edits in the inline-fix path.** `/ship` owns doc sweeps across shared files.
+- **No README or CLAUDE.md edits in the inline-fix path.** `/ship` owns doc sweeps across shared files.
 - **No auto-commit on inline fix.** The user commits. The skill leaves the change staged or unstaged per their preference.
 - **No silent escalation.** Escalating to the planner is an explicit user choice, not a fallback when the hunter is uncertain.
 - **No unbounded investigation.** Two follow-up rounds, then commit to a decision.
