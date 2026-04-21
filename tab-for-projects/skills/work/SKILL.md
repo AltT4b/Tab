@@ -58,8 +58,8 @@ Flagged: 3 tasks (see list at end)
 Plan (first 5 shown; loop continues until ready set empty):
   1. 01KX… "Update README badges" (trivial / docs) → docs-writer
   2. 01KY… "Refactor session store" (medium / refactor) → implementer, reviewer after
-  3. 01KZa… "MFA enrollment" (medium / feature, group auth-mfa) → architect, implementer, test-writer
-  4. 01KZb… "MFA verification" (medium / feature, group auth-mfa) → architect, implementer, test-writer
+  3. 01KZa… "MFA enrollment" (medium / feature, group auth-mfa) → archaeologist, implementer, test-writer
+  4. 01KZb… "MFA verification" (medium / feature, group auth-mfa) → archaeologist, implementer, test-writer
   5. 01KZc… "MFA recovery" (low / feature, group auth-mfa) → implementer, test-writer
   ...
 
@@ -74,18 +74,18 @@ Task category determines the default agent. Optional precursor or successor agen
 
 | Task category | Default agent | Optional precursor / successor                         |
 | ------------- | ------------- | ------------------------------------------------------ |
-| `feature`     | implementer   | architect (precursor, if effort ≥ medium); test-writer (successor) |
+| `feature`     | implementer   | archaeologist (precursor, if effort ≥ medium); test-writer (successor) |
 | `bugfix`      | implementer   | —                                                      |
 | `refactor`    | implementer   | reviewer (successor)                                   |
 | `test`        | test-writer   | —                                                      |
 | `docs`        | docs-writer   | —                                                      |
 | `perf`        | implementer   | —                                                      |
-| `design`      | architect     | — (produces a doc, not code)                           |
+| `design`      | archaeologist | — (produces a research brief, not a decision)          |
 | `security`    | reviewer      | implementer (successor, if fix needed)                 |
 | `infra`       | implementer   | —                                                      |
 | `chore`       | implementer   | —                                                      |
 
-A chain is still one task. The precursor (e.g. architect for a medium-effort feature) files any design artifacts and notes, then the default agent picks up the same `task_id`. Successors run after the default agent marks `done`.
+A chain is still one task. The precursor (e.g. archaeologist for a medium-effort feature) returns a research brief the user can skim before the default agent picks up the same `task_id`. Successors run after the default agent marks `done`.
 
 ### 4. Dispatch contract — IDs only
 
@@ -121,7 +121,7 @@ After a subagent returns, `/work` re-reads task state to determine outcome:
 `/work` does not interrupt the user mid-run. Throughout the loop:
 
 - Halt notes accumulate in a queue.
-- New tasks of category `design` filed by subagents (typically by the architect during a chain) accumulate in a separate queue — the user usually wants to weigh in on design forks before they spawn implementation work.
+- New tasks of category `design` filed by subagents (typically by the archaeologist during a chain) accumulate in a separate queue — the user usually wants to weigh in on design forks before they spawn implementation work.
 - All other status changes and new tasks flow without pause.
 
 At end-of-run, both queues surface in the single "needs your call" section of the report.
@@ -143,7 +143,7 @@ Parallel dispatch spawns subagents via a single message with multiple `Agent` to
 Before producing the final report, for each `group_key` whose tasks completed during this run and whose commits haven't been shipped:
 
 - Dispatch the `shipper` subagent with `{ group_key }`.
-- The shipper derives the commit range from task ULIDs in commit messages, reads linked architect docs, and produces a PR description, release notes, or CHANGELOG polish.
+- The shipper derives the commit range from task ULIDs in commit messages, reads linked design docs, and produces a PR description, release notes, or CHANGELOG polish.
 - Shipper output flows into the end-of-run report. `/work` does not push, merge, or create PRs — the user ships.
 
 ### 9. Handle failure
@@ -171,7 +171,7 @@ Executed: 7 tasks · 5 commits · 3 new tasks filed by subagents
 
   ✓ 01KX… Update README badges                   → docs-writer
   ✓ 01KY… Refactor session store                 → implementer, reviewer (clean)
-  ✓ 01KZa… MFA enrollment                        → architect, implementer, test-writer
+  ✓ 01KZa… MFA enrollment                        → archaeologist, implementer, test-writer
   ✓ 01KZb… MFA verification                      → implementer, test-writer
   ✗ 01KZc… MFA recovery                          → implementer (halt — spec unclear)
   ✓ 01KW… Add security audit log                 → implementer
@@ -185,7 +185,7 @@ Flagged (3 tasks below bar — won't execute until groomed):
 Needs your call (2 halts · 1 new design task):
   01KZc "MFA recovery" halted — note: "recovery flow: SMS or TOTP-only? spec doesn't say"
   01KV "Upgrade cookie crypto" halted — note: "need key-rotation policy before touching AEAD"
-  01KU "Choose MFA vendor" (new, category=design) — filed by architect during 01KZa
+  01KU "Choose MFA vendor" (new, category=design) — filed by archaeologist during 01KZa
 
 Shipper output:
   Group auth-mfa: 3 commits, PR description generated — see task 01KS for the draft.

@@ -48,7 +48,7 @@ Success: the dispatched task ends in one of three states — `done` with a verif
 The caller provides:
 
 - `task_id` — the task ULID to implement.
-- `parent_task_id` *(optional)* — when this task is part of a chain (e.g., spawned by an architect's design pass), the upstream task the implementation answers to.
+- `parent_task_id` *(optional)* — when this task is part of a chain (e.g., a design task the user resolved via `/design` that spawned this implementation), the upstream task the implementation answers to.
 
 Everything else comes from reading the MCP and the codebase. The dispatch is intentionally sparse — the MCP and the code are the sources of truth.
 

@@ -23,7 +23,7 @@ tab-for-projects/                 # "tab-for-projects" plugin package
   .claude-plugin/plugin.json      #   Plugin metadata (agents, skills, version)
   CHANGELOG.md                    #   Release notes (keep-a-changelog)
   agents/implementer.md           #   Implementer subagent — takes one ready task, writes code, verifies, commits; files tasks for follow-ups (no KB writes)
-  agents/architect.md             #   Architect subagent — produces design docs and ADRs from design/feature tasks
+  agents/archaeologist.md         #   Archaeologist subagent — produces short research briefs for /design on big-context codebases; does not make design decisions
   agents/test-writer.md           #   Test-writer subagent — pins current behavior with tests; suspicious behavior becomes a new bugfix task
   agents/docs-writer.md           #   Docs-writer subagent — produces READMEs, CHANGELOG prose, upgrade guides, reference docs; KB-doc authority
   agents/reviewer.md              #   Reviewer subagent — reads a diff independently, triages critical/suggestion/cosmetic; doesn't fix
@@ -39,7 +39,7 @@ tab-for-projects/                 # "tab-for-projects" plugin package
 ## Package Architecture
 
 - **tab** is standalone. One agent (`Tab`) with a rich personality system (profiles, settings 0-100%). No MCP dependency.
-- **tab-for-projects** extends the ecosystem with autonomous subagents (implementer, architect) that `/work` routes tasks to by category, plus a set of verb-shaped workflow skills that automate high-friction operations against the Tab for Projects MCP. Each skill is a one-shot automation, not an ambient mode. Skills resolve the active project via inference (explicit arg → `.tab-project` file → git remote → cwd → recent activity) and respect a shared task-readiness bar defined in the KB.
+- **tab-for-projects** extends the ecosystem with autonomous subagents (implementer, archaeologist, test-writer, docs-writer, reviewer, shipper) that `/work` routes tasks to by category, plus a set of verb-shaped workflow skills that automate high-friction operations against the Tab for Projects MCP. Each skill is a one-shot automation, not an ambient mode. Skills resolve the active project via inference (explicit arg → `.tab-project` file → git remote → cwd → recent activity) and respect a shared task-readiness bar defined in the KB.
 - Each package is independently installable. A `settings.json` at a package root can set the default agent via `{"agent": "<plugin>:<agent>"}`.
 
 ## Conventions
@@ -89,5 +89,5 @@ Use semver: patch for fixes and minor prompt tweaks, minor for new skills or mea
 | `tab-for-projects/CHANGELOG.md` | Tab for Projects plugin release notes |
 | `tab/agents/tab.md` | Tab agent — personality, profiles, settings |
 | `tab-for-projects/agents/implementer.md` | Implementer subagent — takes one ready task, writes code, verifies, commits; files tasks for follow-ups (no KB writes) |
-| `tab-for-projects/agents/architect.md` | Architect subagent — produces design docs and ADRs from design/feature tasks |
+| `tab-for-projects/agents/archaeologist.md` | Archaeologist subagent — produces short research briefs for `/design` on big-context codebases; does not make design decisions |
 | `tab/settings.json` | Tab default agent config |

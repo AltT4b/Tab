@@ -2,6 +2,11 @@
 
 All notable changes to the **tab-for-projects** plugin. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [semver](https://semver.org/).
 
+## [2.0.0] — 2026-04-20
+
+### Changed
+- **Breaking:** `architect` agent renamed to `archaeologist` and reshaped from a design-doc author into a research briefer. Invoking `tab-for-projects:architect` no longer resolves — use `tab-for-projects:archaeologist` instead. The new agent reads a design-category task and the surrounding code and KB, then returns a distilled ~1-page brief (relevant files, prior decisions, options on the table, open forks, assumptions) for a user running `/design`. It does not write source code, does not create KB documents, and does not make the design decision — design decisions are the user's to make in `/design`. The rename also lands downstream: `/work`'s design-category routing, the worked examples in `/project` and `/work`, and the cross-references in `implementer`, `docs-writer`, and `shipper` now name the new agent (and, where the agent no longer produces docs, name the user/`/design` as the source of design material).
+
 ## [1.0.0] — 2026-04-19
 
 First stable release. The skill set (`/project`, `/fix`, `/backlog`, `/work`, `/search`, `/document`) and agent roster (architect, implementer, test-writer, docs-writer, reviewer, shipper) have settled. The breaking renames and removals from the 0.6–0.9 series are absorbed; from here, semver applies strictly. No behavior changes in this version itself — the cut acknowledges that the plugin is safe to depend on.

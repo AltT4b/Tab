@@ -201,7 +201,7 @@ Last activity: 2d ago · 11/14 tasks ready · 3 below bar · 1 unblocked · 5 do
 
 In flight: 2
   01KY… Refactor session store (implementer)
-  01KZ… MFA enrollment (architect)
+  01KZ… MFA enrollment (archaeologist)
 
 Below bar (3):
   01K1… "Improve search performance" — no acceptance signal
@@ -443,11 +443,11 @@ Suggestions are advisory. The skill never auto-invokes another skill from the re
 | Tasks in the group | Routing note |
 | --- | --- |
 | All `feature` / `bugfix` / `refactor` / `perf` / `infra` / `chore` | `implementer routing` |
-| All `design` | `architect routing` |
+| All `design` | `archaeologist routing` |
 | All `test` | `test-writer routing` |
 | All `docs` | `docs-writer routing` |
 | All `security` | `implementer routing` (no security-specialist agent exists) |
-| Mixed categories | List the agents that would be touched, comma-separated, in the order they'd be hit by a topological walk: `architect + implementer routing`, `implementer + docs-writer routing`, etc. |
+| Mixed categories | List the agents that would be touched, comma-separated, in the order they'd be hit by a topological walk: `archaeologist + implementer routing`, `implementer + docs-writer routing`, etc. |
 | Single drive-by task | Omit the routing note; the `(no group)` line is short enough without it. |
 
 This is informational — `/work` does the actual routing.
@@ -458,7 +458,7 @@ This is informational — `/work` does the actual routing.
 Session recap — Auth Rewrite (01KQ8X…)
 
 Filed 5 tasks in 3 initiatives:
-  - mfa-enrollment: 01KX1A…, 01KY2B…, 01KZ3C… (3 tasks, architect + implementer routing)
+  - mfa-enrollment: 01KX1A…, 01KY2B…, 01KZ3C… (3 tasks, archaeologist + implementer routing)
   - token-rotation-fix: 01KW4D… (1 task, implementer routing)
   - (no group): 01KV5E… (1 drive-by task)
 
