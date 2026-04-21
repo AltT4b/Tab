@@ -1,137 +1,152 @@
 ---
 name: design
-description: Conversational KB doc capture for a design-category task. Loads the task + linked docs, optionally fires the archaeologist for a research brief on large codebases, then hosts the conversation with the user to produce a decision/architecture/convention document. Writes via `create_document`, links to the project, and optionally marks the originating task done on confirm. Triggers on `/design` and phrases like "let's design X", "work through this design task", "open the design conversation for 01K…".
-argument-hint: "<design-task-id> [--no-brief | --brief]"
+description: Conversational KB authorship for project-shape work and design-category tasks. Either loads a design task and hosts the decision, or opens on a freeform topic for broader architectural / convention work. Dispatches `bug-hunter` for targeted codebase research, uses `exa` for web best-practices, and iterates with the user until the design is settled. Produces a KB document, links it to the project, and files follow-up tasks via `project-planner`. Triggers on `/design` and phrases like "let's design X", "work through this design task", "document our approach to Y".
+argument-hint: "[<design-task-id> | <topic>] [--no-brief | --brief]"
 ---
 
-The "design is a conversation, not an autopilot" skill. Design-category tasks don't get executed by `/work` — they get executed by a human at the keyboard, because design decisions encode trade-offs, priorities, and unstated constraints that only the user can supply. This skill hosts that conversation: pulls the task and any context it references, optionally spends an archaeologist pass to survey the terrain before the user burns their own tokens on it, and produces a KB doc that captures the decision at the moment it crystallizes.
+The "design is a conversation, not an autopilot" skill. `/design` hosts the conversation where the user makes decisions only they can make, then captures the result in the KB. It is the sole entry point for KB authorship — decisions, architecture, conventions, references — and for project-shape work that doesn't fit a single backlog task.
 
-See `01KPQ2AA503SNHRZYQHMD6RCPG` — *Design: Design work is user-driven, not autonomous* — for the decision that shaped this skill.
+Two entry modes:
+
+- **Task mode** — `/design <task-id>` — load a design-category task from the backlog, host the conversation around its question, close when the user's happy.
+- **Free mode** — `/design` or `/design <topic>` — open without a pre-filed task; shape the conversation around the topic, capture the KB doc, file follow-up tasks that emerge.
+
+Both modes run the same four phases: **Load**, **Research** (KB + hunter + exa), **Converse**, **Capture**.
 
 ## Trigger
 
 **When to activate:**
-- User invokes `/design <task-id>`.
-- User says "let's design X", "work through the design task on Y", "open the design conversation for 01K…", "time to decide Z".
-- `/work`'s end-of-run report surfaced a design-category task in the "awaiting human" section and the user wants to resolve it.
+- User invokes `/design` with a task ID or a freeform topic.
+- User says "let's design X", "work through the design task on Y", "document our approach to Z", "decide how we handle W", "figure out the shape of V".
+- `/work`'s end-of-run report surfaced a design-category task in the "awaiting human" section and the user's ready to resolve it.
+- `/rewrite`, `/debug`, or `project-planner` filed a design ticket and the user wants to open it.
 
 **When NOT to activate:**
-- User wants to file a new design task — use `/fix` or `/project`.
-- User wants to execute an implementation task — use `/work`.
-- User wants to capture a decision that *already crystallized* in a conversation unrelated to a filed task — use `/document` directly.
-- The dispatched task isn't design-category — point the user at the right entry point (`/work` for most categories) rather than repurposing `/design`.
+- User wants to file a new implementation task — use `/capture`.
+- User wants to execute existing tasks — use `/work`.
+- User wants a bug found and fixed — use `/debug`.
+- User wants a rewrite planned — use `/rewrite` (which files design tickets of its own that `/design` later picks up).
 
 ## Requires
 
-- **MCP:** `tab-for-projects` — for `get_task`, `get_document`, `get_project`, `list_documents`, `create_document`, `update_project`, `update_task`.
-- **Subagent (optional):** `tab-for-projects:archaeologist` — research briefer. The skill degrades gracefully when the agent isn't available or the user opts out with `--no-brief`.
-- **Tools:** `Read`, `Grep`, `Glob` — when a brief isn't run and the conversation needs a quick on-the-fly lookup in the repo. Codebase surveys of any depth belong in the archaeologist, not here.
+- **MCP:** `tab-for-projects` — `get_task`, `get_document`, `get_project`, `get_project_context`, `list_documents`, `search_documents`, `create_document`, `update_document`, `update_project`, `update_task`, `create_task`.
+- **MCP:** `exa` — web research for best-practices, common patterns, anti-patterns. Always available per project constraints.
+- **Subagent:** `tab-for-projects:bug-hunter` — targeted codebase research when the conversation needs code anchors.
+- **Subagent:** `tab-for-projects:project-planner` — files follow-up tasks at the readiness bar from the design's outcome.
+- **Tools:** `Read`, `Grep`, `Glob` — for quick on-the-fly lookups when a full hunter survey would be overkill.
 
 ## Behavior
 
-The skill flows in four phases: **Load** (pull task + linked docs, resolve project), **Brief** (optionally dispatch the archaeologist), **Converse** (host the design decision with the user), **Capture** (propose the doc, confirm, write, link, optionally close the task). Every write passes through an explicit confirmation block.
+### 1. Load — resolve the entry mode
 
-### 1. Load — pull the task and validate
+**Task mode** (argument is a ULID-shaped task ID):
 
-1. `get_task(task_id)`. If the task doesn't exist, report and stop.
-2. **Readiness check.** A design task is ready when its title is verb-led and concrete, its summary explains the *why* and the *what* in 1–3 sentences, and its `acceptance_criteria` names a concrete output (usually: "a KB doc at folder X capturing decision Y"). If any field is missing, surface the gap and ask the user to groom the task via `/backlog` or supply the missing field inline before the conversation opens. No conversation starts on a below-bar task.
-3. **Category check.** If the task's `category` isn't `design`, surface that and stop. `/design` is scoped to design-category work. Other categories have their own routes (`/work` for most; `/document` for standalone decisions without a filed task).
-4. **Status check.** If the task is already `in_progress`, assume the user is resuming — continue. If the task is `done` or `archived`, report and ask whether the user wants to revisit (which would mean opening a *new* design task rather than reopening this one).
-5. `get_document` on every ULID referenced in the task's `context` or `summary`. Read each one — these are the constraints the decision has to respect.
-6. Resolve the project. Priority order:
-   1. The task's `project_id` (always present — task-scoped skills inherit the task's project).
-   2. Sanity-check against the shared inference signals (`.tab-project`, git remote, cwd) only if the task's `project_id` points at a project that looks unrelated to the cwd. If there's a mismatch, surface it and ask before writing.
+1. `get_task(task_id)`. If missing, report and stop.
+2. **Category check.** If the task isn't `category: design`, ask whether to proceed anyway (sometimes an implementation task reveals a design question worth capturing) or route elsewhere.
+3. **Readiness check.** A design task is ready when its title is verb-led and concrete, its summary explains why + what, and its acceptance signal names a concrete output (typically a KB doc). If the task's below bar, surface the gap and ask the user to groom it inline or via `project-planner` before continuing.
+4. **Status.** If `todo`, transition to `in_progress`. If already `in_progress`, assume resume. If `done`/`archived`, ask whether to open a new design task.
+5. Read every KB doc the task references — those are the constraints the decision must respect.
+6. Resolve the project: use the task's `project_id`; sanity-check against the cwd; ask if there's a mismatch.
 
-### 2. Brief — optionally dispatch the archaeologist
+**Free mode** (argument is a topic, or empty):
 
-The archaeologist is a research subagent (see `tab-for-projects:archaeologist`) that reads the task, linked docs, prior KB decisions, and the relevant source code, then returns a distilled ~1-page brief. It does not make the decision — the brief is raw material for the user.
+1. Resolve the project via the shared Project Inference convention (`.tab-project` → git remote → cwd → recent activity). Below confident, ask.
+2. No task is loaded. The topic the user named drives the conversation from the start.
+3. If during the conversation a filed task would help anchor the work (e.g., the design has a clear owner or a specific question), offer to file a design task via `/capture` + `project-planner` before continuing. Otherwise proceed without a task.
 
-**When to fire the brief (default heuristic, pending follow-up):** run the archaeologist when the task touches a non-trivial slice of the codebase and the conversation would otherwise burn main-thread context on a survey. Concrete tells:
+### 2. Research — KB + hunter + exa
 
-- The task's summary or context names files, modules, or areas of the codebase the main thread hasn't loaded.
-- Prior KB decisions in folders like `architecture`, `decisions`, or `conventions` are plausibly relevant and haven't been listed on the task.
-- The user explicitly requests a brief (`--brief`).
+Three inputs shape the conversation. Run them up front so the main thread isn't burning context mid-discussion.
 
-**When to skip:** `--no-brief` passed; the task is self-contained (greenfield, no prior code or KB material); the conversation already has the context loaded; the archaeologist subagent isn't available.
+**KB pass.**
 
-The exact trigger heuristic is intentionally soft — tuning it is tracked as a follow-up under the `archaeologist-v1` group (the skill doesn't auto-decide when the signals are weak; it asks).
+- `list_documents` and `search_documents` for relevant conventions, prior decisions, architecture docs. Read the substance of anything that constrains the current design. Surface these to the user early — the user shouldn't have to discover a constraint halfway through weighing options.
 
-**If firing:**
+**Hunter dispatch.**
 
-1. State the intent in one line: `Running archaeologist for a one-page brief on <task-id>. Hold tight — this is a single dispatch, not a loop.`
-2. Dispatch the `archaeologist` subagent with `{ task_id }` only. The agent fetches its own context and returns a structured report (see the agent's outcomes block for shape).
-3. On return, render the brief inline for the user to read. If the agent flagged the task back to `todo` (below-bar or non-design), surface the flag, stop the skill, and suggest `/backlog` or re-filing.
-4. If the archaeologist filed follow-up design tasks or surfaced open forks the user should decide first, name them before moving on — the user may want to re-scope the current task before the conversation starts.
+- When the design touches a non-trivial slice of the codebase, dispatch `bug-hunter` with a tailored concern: "Survey the current shape of <target>. Identify entry points, boundaries, coupling, and any patterns the design will need to respect or change." Single dispatch; not a loop.
+- Skip the hunter when: `--no-brief` was passed, the design is self-contained (greenfield or pure convention), the conversation already has the context, or the subagent isn't available.
+- Force a hunter pass with `--brief` even on small designs.
 
-**If skipping:** state the choice in one line (`Skipping archaeologist — <reason>. Going straight to the conversation.`) so the user can override.
+**Exa research.**
 
-### 3. Converse — host the design decision
+- For any design whose shape has external analogues (a caching strategy, an auth flow, an API shape, a queue contract), pull 2–4 best-practice / anti-pattern sources via `exa`. Summarize the substance, not the links.
+- Skip when the design is tightly project-specific. Say so.
 
-This is the skill's core and the reason it exists. The conversation shape mirrors `/think` and the design-capture sub-flow inside `/project`: the user drives, the skill listens, asks, and synthesizes. There's no fixed interview script — design decisions vary too much.
+Render everything found inline before the conversation proper starts. The user should see the full landscape before choosing a direction.
 
-A few rules of thumb for the conversation:
+### 3. Converse — host the design
 
-- **Start from the task's question, not a blank page.** Quote the task's summary back. If the archaeologist ran, surface the open forks it named. The opening turn should make the decision visible, not re-elicit it.
-- **Surface constraints before options.** Prior KB decisions (from linked docs and any the archaeologist dug up), conventions, and hard code facts come first. The user shouldn't have to discover that an option is already ruled out halfway through weighing it.
-- **Name the options explicitly.** Whether they come from the task, the archaeologist's brief, or the user's own head, list the candidate shapes before arguing between them. A decision without named alternatives is a decision without evidence.
-- **Push back on hand-waves.** "We'll figure that out later" is a fork, not an answer. If the user punts on a fork, offer to file it as a follow-up design task and keep going on what's decidable now.
-- **Stay out of the user's taste calls.** When the user has a preference grounded in priorities the skill can't see, the skill's job is to capture it cleanly, not to litigate it.
-- **Depth scales with stakes.** A small convention call lands in a short exchange; an architectural decision that constrains months of work earns a longer conversation. Don't artificially inflate the low-stakes cases.
+The skill's core. The conversation's shape varies — design decisions aren't one template. A few rules of thumb:
 
-The conversation closes when the user signals the decision is made — explicit phrases (`okay, let's go with X`, `decision's made`, `capture that`), or a natural landing where the last N turns restated the same conclusion without new information.
+- **Start from the question, not a blank page.** In task mode, quote the task's summary back. In free mode, restate the user's topic and what surfaced in the research pass.
+- **Surface constraints before options.** Prior decisions, conventions, and code realities come first. The user shouldn't discover mid-decision that an option is already ruled out.
+- **Name options explicitly.** List the candidate shapes before arguing between them. A decision without named alternatives is a decision without evidence.
+- **Push back on hand-waves.** "We'll figure that out later" is a fork, not an answer. Offer to file it as a follow-up design task and keep going on what's decidable now.
+- **Stay out of the user's taste calls.** When the user has a preference grounded in priorities the skill can't see, capture it cleanly — don't litigate it.
+- **Depth scales with stakes.** A small convention call is a short exchange; an architectural decision that constrains months of work earns a longer conversation.
+- **Do not close until the user closes.** This is the core of /design's contract: the task stays `in_progress` (or the free-mode conversation stays open) until the user signals the decision is made. Explicit phrases — "okay let's go with X", "decision's made", "capture that", "that's it" — or a natural landing where the last N turns restated the same conclusion.
 
-### 4. Capture — propose the doc, confirm, write
+If the conversation sprawls into multiple decisions, offer to close the current one and open another `/design` pass rather than stuffing everything into one doc.
 
-Once the decision is in hand, synthesize the KB doc. Follow the same shape `/document` uses — this skill is a client of that shape, not a duplicate.
+### 4. Capture — propose the doc, confirm, write, file follow-ups
 
-**Decide the doc type.** Three shapes fit most design conversations:
+Once the decision is in hand, synthesize the KB doc and produce the follow-up tickets.
 
-- **Decision** — a single resolved trade-off. Folder: `decisions` (or `architecture` if architectural). Tags: `decision`, plus domain if obvious (`architecture`, `data`, `integration`, `security`, `ui`, etc.).
-- **Architecture** — a shape that multiple decisions or features will reference. Folder: `architecture`. Tags: `architecture`, `reference`.
-- **Convention** — a rule the project will apply consistently from here on. Folder: `conventions`. Tags: `conventions`, `reference`.
+**Decide the doc type.**
 
-Generic rule: **match what's already there.** Before proposing a folder or tag, `list_documents(project_id)` to see what the project uses. Introduce new folders sparingly.
+- **Decision** — a single resolved trade-off. Folder: `decisions` (or `architecture` if architectural). Tags: `decision`, plus domain if obvious.
+- **Architecture** — a shape multiple decisions or features will reference. Folder: `architecture`. Tags: `architecture`, `reference`.
+- **Convention** — a rule the project applies consistently from here on. Folder: `conventions`. Tags: `conventions`, `reference`.
 
-**Build the doc:**
+Default to matching what the project already uses (`list_documents({ project_id })` to see folders and tags in play). Introduce new folders sparingly.
 
-- **Title** — follow the KB patterns: `Decision: <short phrase>`, `Architecture: <short phrase>`, `Conventions: <short phrase>`. Pick the pattern that matches the type.
-- **Summary** — 1–3 sentences, max 500 chars. What the doc locks down and who it's for. This is load-bearing — `/search` finds docs by this summary.
-- **Content** — structured markdown. A typical decision doc has sections: **Decision** (the resolved answer in 2–4 sentences), **Why** (the reasoning and the alternatives considered), **Consequences** (what this locks in, what it doesn't, known follow-ups), **Related** (linked tasks, sibling docs, group keys). Architecture and convention docs vary in shape — match what neighboring docs in the same folder look like.
-- **Folder / Tags** — from the type classification above.
+**Build the doc.**
 
-**Propose before writing:**
+- **Title** — `Decision: <phrase>`, `Architecture: <phrase>`, `Conventions: <phrase>`. Match the pattern for the type.
+- **Summary** — 1–3 sentences, max 500 chars. What this locks down and who it's for. Load-bearing — `/search` indexes on this.
+- **Content** — structured markdown. Decision docs typically: **Decision** (the resolved answer), **Why** (reasoning + alternatives considered), **Consequences** (what this locks in, known follow-ups), **Related** (linked tasks, sibling docs, group keys). Architecture and convention docs: match neighboring docs in the same folder.
+- **Folder / Tags** — from the type classification.
+
+**Propose before writing.**
 
 ```
-Save as: "Decision: <short phrase>"
+Save as: "Decision: <phrase>"
   Folder: decisions
   Tags: decision, architecture
   Attach to: <Project Title> (<project-id-prefix…>)
-  Close task: 01K…  (optional — "y" here marks the originating design task done)
+  Close task: 01K…  (task mode only — "y" closes the originating task)
   Summary: [1–3 sentences]
 
 Content preview (first ~20 lines):
   [render first chunk]
 
-Save? (y / edit / skip attach / skip task-close)
+Follow-up tasks (via project-planner):
+  - implementation: <N> tickets  (shape clear from the decision)
+  - design: <M> tickets           (forks the user punted)
+
+Save? (y / edit / skip attach / skip task-close / skip follow-ups)
 ```
 
-Accept inline edits on title, folder, tags, summary, content. `skip attach` keeps the doc unlinked from the project (rare — design docs are almost always project-scoped). `skip task-close` writes the doc but leaves the task in `in_progress` (useful when the decision landed but more work under the same task is pending).
+Accept inline edits on any field. `skip attach` keeps the doc unlinked (rare — design docs are almost always project-scoped). `skip task-close` writes the doc but leaves the task in `in_progress` (useful when the decision landed but more work under the same task is pending). `skip follow-ups` suppresses the planner dispatch (the user will file tasks manually later).
 
-On confirm:
+**On confirm:**
 
 1. `create_document({ title, summary, content, folder, tags })`. Capture the returned doc ID.
-2. `update_project({ id: project_id, documents: { <doc_id>: true } })` to link the doc to the project. (Skip if the user said `skip attach`.)
-3. If the user confirmed task-close, `update_task({ id: task_id, status: "done" })` with an implementation note referencing the new doc ID (`Design captured in <doc_id> "<Title>".`). Skip otherwise — the user will close the task themselves when the rest of the work lands.
+2. `update_project({ id: project_id, documents: { <doc_id>: true } })` — unless the user said `skip attach`.
+3. **Follow-up tasks.** Unless the user said `skip follow-ups`, dispatch `project-planner` with a freeform prompt (shape 3) containing the decision, the inlined doc substance, and the forks the user punted. Planner returns with implementation tickets for decided pieces and design tickets for punted forks. Surface the emitted task IDs in the close report.
+4. **Task close (task mode only).** If the user confirmed, `update_task({ id: task_id, status: "done" })` with a note referencing the doc ID.
 
 ### 5. Close
 
-One-line acknowledgement. No fanfare.
+One-line acknowledgement plus the emitted follow-ups.
 
 ```
-Saved <doc_id> "<Title>" in <folder>, linked to <Project Title>. Task 01K… marked done.
+Saved <doc_id> "<Title>" in <folder>, linked to <Project>. Task 01K… marked done.
+Follow-ups: 3 implementation tickets, 1 design ticket (see /work, /design).
 ```
 
-Or, when attachment or task-close was skipped:
+Or, when attachment, task-close, or follow-ups were skipped:
 
 ```
 Saved <doc_id> "<Title>" in <folder>. Task left in_progress — close when ready.
@@ -139,23 +154,26 @@ Saved <doc_id> "<Title>" in <folder>. Task left in_progress — close when ready
 
 ## Output
 
-- A KB document in the MCP, linked to the project.
-- Optionally, the originating design task transitioned from `in_progress` to `done` with a note referencing the doc.
-- No source code written. No implementation tasks filed as a side effect (unless the conversation explicitly produced follow-up work — then `/fix` or inline `create_task` for obvious follow-ups, confirmed alongside the doc).
+- A KB document, linked to the project.
+- (Task mode) Optionally, the originating task transitioned to `done` with an implementation note referencing the doc.
+- (Both modes) Follow-up tasks filed by `project-planner` — a mix of implementation tickets (for decided pieces) and design tickets (for punted forks) — unless the user opted out.
+- No source code. No changelog edits. No docs outside the KB.
 
 ## Principles
 
-- **Design decisions are the user's to make.** The skill loads context, runs research, hosts the conversation, and captures the result. It does not pick a winner between real alternatives. When evidence points hard one way, say so; when it doesn't, leave the fork to the user.
-- **Research before the conversation, not during.** The archaeologist exists so the main thread doesn't burn context on a codebase survey mid-conversation. Fire it up front or skip it cleanly; don't half-run a survey inline.
+- **Design decisions are the user's to make.** The skill loads context, runs research, hosts the conversation, captures the result. It does not pick a winner between real alternatives.
+- **Research before the conversation, not during.** The hunter and exa passes exist so the main thread isn't burning context on surveys mid-conversation. Run them up front, or skip cleanly.
 - **Capture at the moment of crystallization.** A decision that sits in a thread for a week rots. The skill's value is moving the decision into the KB the same turn it lands.
-- **Match the KB, don't reinvent it.** Existing folders, tags, and title patterns are the right defaults. Look at neighbors before proposing something new.
-- **One conversation, one doc.** If the conversation sprawls into multiple decisions, offer to close the current one and open another `/design` pass on a sibling task rather than stuffing everything into one doc.
+- **Match the KB, don't reinvent it.** Existing folders, tags, and title patterns are the right defaults.
+- **Do not close until the user closes.** The task stays `in_progress` as long as the conversation needs it. No rushing to `done` on the first plausible stopping point.
+- **Forks become design tickets, not hope.** If the user punts on a fork, planner files a design ticket for it; the doc reflects what was decided, not what was wished.
 
 ## Constraints
 
-- **Design-category tasks only.** If the dispatched task is any other category, surface that and stop. `/design` is scoped.
-- **No writes before confirm.** The doc, the project link, and the task-close all pass through a single visible confirm block. No silent captures.
-- **No source code.** The skill produces a document; it never edits application code. If the decision implies code changes, file them as new implementation tasks with a `blocks` edge from the implementation to this design task's output (or, more commonly, file them after the design task closes and the new tasks can reference the published doc).
-- **No autonomous fork resolution.** If the user punts on a fork (`we'll figure that out later`), file a follow-up design task rather than guessing the answer in the doc. The doc should reflect what was decided, not what was hoped.
-- **Readiness bar is non-negotiable.** Even at invocation: a below-bar design task doesn't get a conversation, it gets pointed at `/backlog`.
-- **Archaeologist dispatches are single-shot.** One `task_id` in, one brief out. The skill does not loop on the archaeologist or fire it mid-conversation — if the conversation reveals the brief missed a constraint, the user notes it directly and the skill captures the correction in the final doc.
+- **KB authorship lives here.** No other skill or agent writes KB docs. `/design` is the single entry point.
+- **No writes before confirm.** The doc, the project link, the task-close, and the follow-up dispatch all pass through the single confirm block.
+- **No source code.** Ever. If the decision implies code changes, they become follow-up implementation tickets via `project-planner`.
+- **No autonomous fork resolution.** Punted forks file as design tickets.
+- **Readiness bar applies in task mode.** A below-bar design task gets groomed before the conversation starts.
+- **Hunter dispatches are single-shot.** One `task_id` or one tailored concern in, one brief out. The skill does not loop on the hunter mid-conversation.
+- **Exa is a research tool, not a source of truth.** Summarize the substance; don't treat web snippets as authoritative without checking against the project's own context.

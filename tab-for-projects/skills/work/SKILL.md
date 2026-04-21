@@ -1,238 +1,230 @@
 ---
 name: work
-description: Autonomously execute ready tasks from the project backlog. Walks the dependency graph as a persistent loop, routes each task to the right subagent by category, keeps main-thread context small via ID-only dispatch, batches halts and new design tasks into a single end-of-run report, and invokes the shipper on any group with unshipped commits. Use when the backlog is groomed and the user wants to hand off execution. Triggers on `/work` and phrases like "finish the backlog", "execute the ready tasks", "work through the todo list".
-argument-hint: "[optional: group_key, --max=N, --dry-run, --parallel]"
+description: Autonomously execute ready tasks from the project backlog. Walks the dependency graph as a persistent loop, dispatches each non-design task to the `developer` subagent inside a git worktree, grooms vague tasks via `project-planner` before dispatch, batches design tasks and halts into a single end-of-run report, and manages parallelism across worktrees. Use when the backlog is ready and the user wants to hand off execution. Triggers on `/work` and phrases like "finish the backlog", "execute the ready tasks", "work through the todo list".
+argument-hint: "[optional: group_key, --max=N, --dry-run, --parallel=N]"
 ---
 
-Hand over execution. The skill reads the ready portion of the backlog, routes each task to the appropriate subagent by category, walks the dependency graph as the subagents complete work, and produces a single end-of-run report covering what shipped, what got flagged, and what needs a user decision. It never executes below-bar tasks, never sets subagent task state on the subagent's behalf, and never silently "finishes" work that can't be verified.
+Hand over execution. `/work` reads the ready portion of the backlog, grooms any task that's too vague via `project-planner`, dispatches each execution-ready task to `developer` in an isolated git worktree, walks the dependency graph as work completes, and produces a single end-of-run report covering what shipped, what got flagged, and what needs a user decision. It never runs below-bar tasks, never executes design-category tasks, and never sets task state on a subagent's behalf.
 
 ## Trigger
 
 **When to activate:**
 - User invokes `/work`, optionally scoped to a `group_key` or limited by `--max=N`.
 - User says "finish the backlog", "execute the ready tasks", "work through the todo list", "run the groomed tasks".
-- User just finished `/backlog` and wants to cash in the groomed work.
+- User just finished a `/rewrite` or `/design` pass and wants to cash in the emitted implementation tickets.
 
 **When NOT to activate:**
-- Backlog hasn't been groomed — run `/backlog` first.
-- User wants to file new work — use `/project` or `/fix`.
+- User wants to file new work — use `/capture` or `/rewrite` or `/design`.
 - User wants to execute a single specific task with tight oversight — direct conversation is better than autonomous mode.
+- Working tree is dirty — the skill will refuse; commit or stash first.
 
 ## Requires
 
-- **MCP:** `tab-for-projects` — for project resolution, task reads, dependency-graph reads. `/work` does not set subagent task state; it reads state after subagents return.
-- **Tool:** `Agent` — for dispatching to the subagent roster.
-- **Tool:** `Bash`, `Read`, `Grep`, `Glob` — for working-tree inspection, git state, and validation. `/work` itself does not write code; subagents do.
-- **Environment:** a git repo, clean working tree. If there are uncommitted changes, the skill stops and reports them before starting.
+- **MCP:** `tab-for-projects` — for project resolution, task reads, dependency-graph reads. `/work` reads task state after a subagent returns; it never writes task state itself.
+- **Subagent:** `tab-for-projects:developer` — executes tasks inside worktrees.
+- **Subagent:** `tab-for-projects:project-planner` — grooms vague tasks before dispatch.
+- **Tool:** `Agent` — dispatches subagents with `isolation: "worktree"`.
+- **Tool:** `Bash`, `Read`, `Grep`, `Glob` — for working-tree inspection, git state, and validation. `/work` does not write code; `developer` does.
+- **Environment:** a git repo with a clean working tree. Uncommitted changes abort before start.
 
 ## Behavior
 
 ### 1. Resolve the project
 
-Follow the shared Project Inference convention:
+Shared Project Inference convention:
 
 1. Explicit `project:<id or title>` argument wins.
-2. Read `.tab-project` at repo root if present.
-3. Parse git remote `origin`; exact repo-name match is high confidence.
-4. Match cwd basename and parent segments against project titles.
-5. Fall back to most recently updated plausible project. Never sole signal.
+2. `.tab-project` at repo root if present.
+3. Git remote `origin` — exact repo-name match is high confidence.
+4. cwd basename and parent segments against project titles.
+5. Most recently updated plausible project — never sole signal.
 
 Below **confident**, ask. No writes below confident.
 
 ### 2. Build the initial plan
 
-1. Pull all `todo` tasks for the project. Apply filters (`group_key`).
+1. Pull all `todo` tasks for the project. Apply filters (`group_key` if passed).
 2. Pull the dependency graph.
-3. For each task, evaluate readiness — a task is **ready** when all of the following hold: verb-led title; 1–3 sentence summary covering why + what; `effort`, `impact`, and `category` all set; a concrete acceptance signal (a test that must pass, an observable behavior change, an artifact produced, or an artifact removed); no unmet blocker dependencies. Partition into:
-   - **Ready** — above the bar, no unmet blockers, category is not `design`. Enters the eligible set.
+3. For each task, classify into one of four buckets:
+   - **Ready** — above the readiness bar (verb-led title, 1–3 sentence summary, `effort`/`impact`/`category` set, concrete acceptance signal, no unmet blockers), category is **not** `design`. Enters the eligible set.
+   - **Needs grooming** — has a title and project but is below-bar on one or more fields. Goes to `project-planner` during dispatch; re-evaluated after grooming.
    - **Awaiting human** — category is `design`. Not executed; surfaced in the end-of-run report with a pointer to `/design`. Task state untouched.
-   - **Flagged** — below the bar, or blocked by unready tasks. Include reason per task. Reported at end-of-run; never executed.
-4. Topologically order the ready set by dependency edges, then by category priority (see routing table).
-5. Respect `--max=N` if given. **No default cap** — `/work` is persistent and runs until the ready set is empty, the user interrupts, or three consecutive task failures abort the run.
+   - **Flagged** — blocked by unready tasks, or fundamentally ungroomable (missing title, no project context). Reported at end-of-run; never executed.
+4. Topologically order the ready + needs-grooming tasks by dependency edges.
+5. Respect `--max=N` if given. **No default cap** — `/work` is persistent and runs until the eligible set is empty, the user interrupts, or three consecutive task failures abort the run.
 6. Show the plan:
 
 ```
-/work — Tab project
+/work — <Project Title>
 Ready: 6 tasks (persistent loop; no max cap)
-Awaiting human: 1 design task (surfaced in report; run `/design` to resolve)
+Needs grooming: 2 tasks (planner will shape before dispatch)
+Awaiting human: 1 design task (surfaced in report; run /design to resolve)
 Flagged: 3 tasks (see list at end)
 
-Plan (first 5 shown; loop continues until ready set empty):
-  1. 01KX… "Update README badges" (trivial / docs) → docs-writer
-  2. 01KY… "Refactor session store" (medium / refactor) → implementer, reviewer after
-  3. 01KZa… "MFA enrollment" (medium / feature, group auth-mfa) → implementer, test-writer
-  4. 01KZb… "MFA verification" (medium / feature, group auth-mfa) → implementer, test-writer
-  5. 01KZc… "MFA recovery" (low / feature, group auth-mfa) → implementer, test-writer
+Plan (first 5 shown; loop continues until eligible set empty):
+  1. 01KX… "Update README badges"       → developer (worktree)
+  2. 01KY… "Refactor session store"     → developer (worktree)
+  3. 01KZa… "MFA enrollment"            → developer (worktree, group auth-mfa)
+  4. 01KZb… "MFA verification"          → developer (worktree, group auth-mfa)
+  5. 01KQ… "Improve search performance" → planner (groom) → developer
   ...
 
 Proceed? (y / edit / dry-run)
 ```
 
-Accept `edit` (user reorders or drops tasks), `dry-run` (prints plan only, no execution), or `--max=N` / `--parallel` flags.
+Accept `edit` (user reorders or drops tasks), `dry-run` (prints plan only, no execution), or `--max=N` / `--parallel=N` flags.
 
-### 3. Route each task to the right subagent
+### 3. Groom then dispatch
 
-Task category determines the default agent. Optional precursor or successor agents form a chain that runs in sequence for a single task. `design` is the exception — it has no autonomous route (see below).
+For each eligible task:
 
-| Task category | Default agent                | Optional precursor / successor         |
-| ------------- | ---------------------------- | -------------------------------------- |
-| `feature`     | implementer                  | test-writer (successor)                |
-| `bugfix`      | implementer                  | —                                      |
-| `refactor`    | implementer                  | reviewer (successor)                   |
-| `test`        | test-writer                  | —                                      |
-| `docs`        | docs-writer                  | —                                      |
-| `perf`        | implementer                  | —                                      |
-| `design`      | *(none — awaiting human)*    | — (surfaced in report; user runs `/design`) |
-| `security`    | reviewer                     | implementer (successor, if fix needed) |
-| `infra`       | implementer                  | —                                      |
-| `chore`       | implementer                  | —                                      |
+1. **If needs-grooming**, dispatch `project-planner` with `{ task_id }` (shape 1). Planner updates the task in place or splits it. Re-read the task record. If planner escalated to a design ticket, move the task to the awaiting-human bucket and advance.
+2. **Dispatch `developer`** with `isolation: "worktree"` and `{ task_id, parent_task_id? }`. The worktree is created by the Agent tool; the dev asserts it on entry.
 
-A chain is still one task. Successors run after the default agent marks `done`.
+The dispatch payload is **IDs only**. `/work` never passes task prose to a subagent. Subagents fetch their own context via the MCP. This is the mechanism that keeps the main thread's context window small across long persistent runs.
 
-**Design-category tasks are terminal to `/work`.** The routing table has no default agent for `design` because design decisions are the user's job — an autonomous agent can't supply the trade-offs, priorities, and unstated constraints a design doc encodes (see KB doc `01KPQ2AA503SNHRZYQHMD6RCPG`, *Design: Design work is user-driven, not autonomous*). When `/work` encounters a design task during the walk, it:
+### 4. Design-category tasks are terminal
 
-- Does **not** dispatch any subagent for it.
+`/work` never dispatches for a task with `category: design`. Design decisions encode trade-offs only the user can supply (KB doc `01KPQ2AA503SNHRZYQHMD6RCPG`, *Design: Design work is user-driven, not autonomous*). When the walk encounters a design task:
+
+- Does **not** dispatch any subagent.
 - Does **not** set task state — the task stays in `todo`.
-- Records the task ID in an "awaiting human" bucket for the end-of-run report, with a pointer to `/design`.
+- Records the task ID in the "awaiting human" bucket for the end-of-run report.
 - Advances to the next task.
 
-The archaeologist subagent exists, but it is only dispatched by the `/design` skill — never by `/work`. `/work`'s job is executing what's machine-executable; design isn't.
+New design tasks filed by subagents (or by planner during grooming) mid-run flow into the same bucket.
 
-### 4. Dispatch contract — IDs only
+### 5. Status ceremony belongs to the subagent
 
-`/work` **never** passes task prose to a subagent. The dispatch payload is:
+`/work` does not call `update_task` on dispatched tasks. `developer` owns every transition:
 
-- `task_id` — the task being worked. Always present.
-- `parent_task_id` — the task that spawned this one, if chained (e.g. a rework routed back to implementer after a reviewer critical finding).
-- `group_key` — only passed to the shipper at end-of-run.
+- `in_progress` on claim.
+- `done` on verified completion.
+- `todo` with a specific note on failure or halt.
 
-Subagents fetch their own context via the MCP (`get_task`, `get_document`). `/work` does not mirror, summarize, or reformat task content. This is the mechanism that keeps the main thread's context window small across a long persistent run.
+After a dev returns, `/work` re-reads task state to determine outcome:
 
-### 5. Status ceremony belongs to subagents
+| Dev-returned state       | `/work` response                                                             |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| `done`                   | Record the commit + worktree path. Advance.                                  |
+| `flagged` (back to `todo` with a bar-gap note) | Move to flagged bucket. Advance.                              |
+| `todo` with "halt" note  | Collect for end-of-run "needs your call" section. Advance.                   |
+| `todo` with "failed"     | Counts against the three-strikes abort threshold. Advance.                   |
 
-`/work` does not call `update_task` on dispatched tasks. Subagents own every transition:
+**On every dev return, re-evaluate the dependency graph.** New tasks filed by the dev or completions that unblocked existing tasks may expand the eligible set. Pull the graph again before picking the next task.
 
-- `in_progress` on claim
-- `done` on verified completion
-- `todo` with a specific note on failure or halt
+### 6. Worktree reconciliation
 
-After a subagent returns, `/work` re-reads task state to determine outcome:
+`developer` commits **inside the worktree**. The skill does not merge or push. At the end of the run (or after each completion when serial), `/work` reports the worktree paths for the user to reconcile — typically a rebase or merge into the working branch, or a review pass before merging.
 
-| Subagent-returned state                           | `/work` response                                                                |
-| ------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `done`                                            | Proceed. Fire the chained successor (if any), otherwise advance to next task.   |
-| `todo` with "needs rework" note + reviewer findings | Re-dispatch to implementer with `parent_task_id` pointing at the reviewer task. |
-| `todo` with "halt" note                           | Collect for end-of-run "needs your call" section. Advance to next task.         |
-| Other `todo` (generic failure)                    | Counts against the three-strikes abort threshold. Advance to next task.         |
+The skill provides the commit hashes and worktree paths; the user decides when to integrate. This keeps the skill out of destructive git territory.
 
-**On every subagent return, re-evaluate the dependency graph.** New tasks filed by the subagent, or completions that unblocked existing tasks, may expand the eligible set. Pull the graph again before picking the next task.
+### 7. Parallelism
 
-### 6. Halts and design tasks are batched
+Default: **serial**. Each task runs start-to-finish before the next claims.
+
+`--parallel=N` (N ≥ 2) allows concurrent `developer` dispatches when **all** of:
+
+- Tasks share no dependency edges.
+- Tasks are in the eligible set simultaneously (after topological ordering).
+- Each dispatch gets its own worktree (Agent tool's `isolation: "worktree"` handles this).
+
+Parallel dispatch spawns subagents via a single message with multiple `Agent` tool calls. On any return, re-evaluate the graph before selecting the next batch.
+
+Parallelism is safe across worktrees — each dev works on an isolated tree. Shared-doc files (CLAUDE.md, README, CHANGELOG) are off-limits to `developer` exactly so parallel runs can't collide; `/ship` handles those centrally.
+
+### 8. Halts and design tasks are batched
 
 `/work` does not interrupt the user mid-run. Throughout the loop:
 
 - Halt notes accumulate in a queue.
-- Design-category tasks encountered in the walk accumulate in an "awaiting human" queue — not executed, task state untouched.
-- New tasks of category `design` filed by subagents accumulate in the same "awaiting human" queue — the user weighs in on design forks before they spawn implementation work.
+- Design-category tasks (existing or newly filed) accumulate in an "awaiting human" queue.
 - All other status changes and new tasks flow without pause.
 
-At end-of-run, both queues surface in the single "needs your call" section of the report, with task IDs and a pointer to `/design` for the design items.
-
-### 7. Parallelism
-
-Default: **serial**. Every task runs start-to-finish before the next one claims.
-
-Opt-in: `--parallel` allows concurrent dispatch within a `group_key` when **all** of the following hold:
-
-- Tasks share a `group_key`.
-- No dependency edges exist between them.
-- Task `context` either declares `parallel-safe` explicitly or the tasks touch different top-level directories (heuristic, not a guarantee).
-
-Parallel dispatch spawns subagents via a single message with multiple `Agent` tool calls. On any return, re-evaluate the dependency graph before selecting the next batch. Parallelism is a safety valve for well-partitioned groups — the cost of a merge conflict or corrupted working tree is higher than the wall-clock savings most of the time.
-
-### 8. End-of-run: invoke the shipper
-
-Before producing the final report, for each `group_key` whose tasks completed during this run and whose commits haven't been shipped:
-
-- Dispatch the `shipper` subagent with `{ group_key }`.
-- The shipper derives the commit range from task ULIDs in commit messages, reads linked design docs, and produces a PR description, release notes, or CHANGELOG polish.
-- Shipper output flows into the end-of-run report. `/work` does not push, merge, or create PRs — the user ships.
+At end-of-run, both queues surface in the single "needs your call" section of the report.
 
 ### 9. Handle failure
 
-If a task fails — acceptance signal doesn't pass, the subagent returns `todo`, the work reveals the task was below-bar after all:
+If a task fails — acceptance signal doesn't pass, dev returns `todo` with a failed/halted note:
 
-- Subagent owns the failure note on the task.
+- Dev owns the failure note on the task.
 - `/work` counts the failure against the three-strikes abort threshold.
-- Advance to the next task.
+- Advance.
 
 **Abort conditions** (stop the whole run):
 
-- Git working tree ends up in a dirty state `/work` can't clean up safely.
+- Git working tree (outside worktrees) ends up in a dirty state `/work` can't clean up safely.
 - Three consecutive task failures — something's wrong with the environment or the grooming.
 - User interrupts.
 
-When abort fires, skip directly to end-of-run reporting — the shipper step and the report structure still run for whatever completed successfully.
+When abort fires, skip directly to end-of-run reporting for whatever completed successfully.
 
 ### 10. End-of-run report
 
 ```
-/work complete — Tab project
+/work complete — <Project Title>
 
-Executed: 6 tasks · 5 commits · 2 new tasks filed by subagents
+Executed: 6 tasks · 5 worktrees with commits · 2 new tasks filed by subagents
 
-  ✓ 01KX… Update README badges                   → docs-writer
-  ✓ 01KY… Refactor session store                 → implementer, reviewer (clean)
-  ✓ 01KZa… MFA enrollment                        → implementer, test-writer
-  ✓ 01KZb… MFA verification                      → implementer, test-writer
-  ✗ 01KZc… MFA recovery                          → implementer (halt — spec unclear)
-  ✓ 01KW… Add security audit log                 → implementer
+  ✓ 01KX… Update README badges                   → developer (worktree /tmp/wt-01KX…)
+  ✓ 01KY… Refactor session store                 → developer (worktree /tmp/wt-01KY…)
+  ✓ 01KZa… MFA enrollment                        → developer (worktree /tmp/wt-01KZa…)
+  ✓ 01KZb… MFA verification                      → developer (worktree /tmp/wt-01KZb…)
+  ✗ 01KZc… MFA recovery                          → developer (halt — spec unclear)
+  ✓ 01KW… Add security audit log                 → developer (worktree /tmp/wt-01KW…)
 
 Flagged (3 tasks below bar — won't execute until groomed):
-  01K1… "Improve search performance" — no acceptance signal
+  01K1… "Improve search performance" — no acceptance signal (planner escalated to design)
   01K2… "Investigate X" — blocked by 01K3… (also flagged)
   01K3… "Rethink Y" — no summary
 
 Needs your call (1 halt · 2 design tasks awaiting human):
   01KZc "MFA recovery" halted — note: "recovery flow: SMS or TOTP-only? spec doesn't say"
-  01KU "Choose MFA vendor" (design) — awaiting human, run `/design 01KU…`
-  01KT "Session-store boundary" (design, new — filed by implementer during 01KY) — awaiting human, run `/design 01KT…`
+  01KU "Choose MFA vendor" (design) — awaiting human, run /design 01KU…
+  01KT "Session-store boundary" (design, new — filed by dev during 01KY) — awaiting human, run /design 01KT…
 
-Shipper output:
-  Group auth-mfa: 3 commits, PR description generated — see task 01KS for the draft.
+Worktrees (5 — merge/rebase into your working branch when ready):
+  /tmp/wt-01KX…  → 1 commit
+  /tmp/wt-01KY…  → 1 commit
+  /tmp/wt-01KZa… → 1 commit
+  /tmp/wt-01KZb… → 1 commit
+  /tmp/wt-01KW…  → 1 commit
 
-Suggest: resolve the design tasks with `/design`, then /backlog for the flagged items, then reply to the halt above.
+Doc drift surfaced by devs (for /ship on next pre-push):
+  README.md — "MFA setup" section likely stale
+  tab-for-projects/CLAUDE.md — routing table mentions old categories
+
+Suggest: reconcile the worktrees, then /design the design tasks, then /ship when ready.
 ```
 
 ## Output
 
-- Commits on the current branch, one per completed task (subagents commit; `/work` does not).
-- MCP state: subagents set completed tasks to `done`, failed/halted tasks to `todo` with notes. `/work` itself writes nothing to task records.
-- New tasks filed by subagents appear in the backlog with `status: todo` and full readiness-bar fields.
-- A single end-of-run report in the structure above.
-- Optional: PR-description drafts or release-notes prose from the shipper, delivered as tasks the user can pick up or discard.
+- One worktree per completed `developer` dispatch, each with one commit. `/work` does not merge or push.
+- MCP state: `developer` sets completed tasks to `done`, failed/halted tasks to `todo` with notes; `project-planner` may have updated or created tasks during grooming. `/work` itself writes nothing to task records.
+- New tasks filed by subagents appear in the backlog (at the bar for implementation; as `category: design` for forks).
+- A single end-of-run report with the structure above, including doc-drift hints for `/ship`.
 
 ## Principles
 
-- **The readiness bar is absolute.** A below-bar task is never executed, even if it looks doable. Flag and move on.
-- **Verify, don't declare.** "Done" requires the acceptance signal to pass — and the subagent that did the work is the one that declares it.
-- **IDs, not prose.** Every byte of task context that flows through the main thread is a byte the main thread has to carry. Let subagents fetch.
-- **One task = one commit.** Subagents enforce this. If a run aborts halfway, the user gets a clean boundary to resume from.
+- **The readiness bar is absolute.** A below-bar task is never executed — it gets groomed by planner or flagged.
+- **Verify, don't declare.** "Done" requires the acceptance signal to pass — and the `developer` that did the work is the one that declares it.
+- **IDs, not prose.** Every byte of task context that flows through the main thread is a byte the main thread has to carry. Subagents fetch.
+- **One task = one commit, inside a worktree.** `developer` enforces this. Worktrees mean parallel dispatch is safe.
 - **Flagging is a feature, not a failure.** A run that executes 4 of 7 tasks and flags 3 with specific reasons is better than one that silently ships 7 half-done changes.
-- **Halts are batched, never interruptive.** The user ran `/work` to hand off execution; breaking in for every design question defeats the handoff.
-- **Design is the user's job.** `/work` surfaces design-category tasks and gets out of the way — it never dispatches a subagent to produce a design decision on the user's behalf.
-- **Parallelism has a cost.** Default serial. Opt in explicitly when the group is well-partitioned.
+- **Halts and design tasks are batched.** The user ran `/work` to hand off execution; breaking in for every fork defeats the handoff.
+- **Design is the user's job.** `/work` surfaces design-category tasks and gets out of the way.
+- **The skill stops at the worktree.** Reconciling into the working branch is the user's call; so is pushing, so is shipping.
 
 ## Constraints
 
 - **No writes below confident project inference.** Ask or stop.
 - **No work on a dirty working tree.** The skill stops and asks before starting.
 - **No setting task state on a subagent's behalf.** Status ceremony is the subagent's job.
-- **No passing task prose to subagents.** IDs only — `task_id`, `parent_task_id`, `group_key`.
-- **No mid-run interruption for halts.** Batch to end-of-run.
+- **No passing task prose to subagents.** IDs only — `task_id`, `parent_task_id`.
+- **No mid-run interruption for halts or design forks.** Batch to end-of-run.
 - **No force-push, no destructive git, no rewriting shared history.** Ever.
-- **No executing below-bar tasks.** Ever. Flag instead.
-- **No executing design-category tasks.** Ever. Surface with a pointer to `/design` instead.
-- **No auto-merging PRs, no pushing commits.** The shipper produces drafts; the user ships.
+- **No executing below-bar tasks.** Flag or groom instead.
+- **No executing design-category tasks.** Surface with a pointer to `/design`.
+- **No merging worktrees.** The user integrates.
 - **Never skip acceptance-signal verification.** A task without verification is not done.
-- **Three-strikes abort is non-negotiable.** Three consecutive failures means something structural is wrong — stop the run and hand it back.
+- **Three-strikes abort is non-negotiable.** Three consecutive failures mean something structural is wrong — stop the run and hand back.

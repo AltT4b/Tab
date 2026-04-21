@@ -22,25 +22,22 @@ tab/                              # "tab" plugin package
 tab-for-projects/                 # "tab-for-projects" plugin package
   .claude-plugin/plugin.json      #   Plugin metadata (agents, skills, version)
   CHANGELOG.md                    #   Release notes (keep-a-changelog)
-  agents/implementer.md           #   Implementer subagent — takes one ready task, writes code, verifies, commits; files tasks for follow-ups (no KB writes)
-  agents/archaeologist.md         #   Archaeologist subagent — produces short research briefs for /design on big-context codebases; does not make design decisions
-  agents/test-writer.md           #   Test-writer subagent — pins current behavior with tests; suspicious behavior becomes a new bugfix task
-  agents/docs-writer.md           #   Docs-writer subagent — produces READMEs, CHANGELOG prose, upgrade guides, reference docs; KB-doc authority
-  agents/reviewer.md              #   Reviewer subagent — reads a diff independently, triages critical/suggestion/cosmetic; doesn't fix
-  agents/shipper.md               #   Shipper subagent — packages a completed group into PR description, release notes, CHANGELOG polish
-  skills/project/SKILL.md         #   /project — session-oriented project planning; resolves/creates a project, scores health, hosts iteration
-  skills/fix/SKILL.md             #   /fix — file a single task from conversation
-  skills/backlog/SKILL.md         #   /backlog — groom todos up to the readiness bar
-  skills/work/SKILL.md            #   /work — autonomously execute the ready portion of the backlog
+  agents/bug-hunter.md            #   Bug-hunter subagent — targeted codebase investigation; structured report with file+line anchors; no edits, no backlog writes
+  agents/developer.md             #   Developer subagent — worktree-only; atomic on code + tests; never touches shared docs (CLAUDE.md, README, CHANGELOG, KB)
+  agents/project-planner.md       #   Project-planner subagent — turns a below-bar task, hunter report, or freeform prompt into a well-formed backlog task; falls back to a design ticket when the input is too fuzzy
+  skills/capture/SKILL.md         #   /capture — zero-friction raw task drop from conversation
+  skills/debug/SKILL.md           #   /debug — bug-find-and-fix; dispatches bug-hunter, then fixes inline or escalates to a task
+  skills/design/SKILL.md          #   /design — conversational KB authorship for project-shape work and design-category tasks; sole entry point for KB writes
+  skills/rewrite/SKILL.md         #   /rewrite — plan-focused targeted rewrite of a chunk of the application; emits a mix of implementation and design tickets
   skills/search/SKILL.md          #   /search — find docs and tasks via an escalating filter ladder
-  skills/document/SKILL.md        #   /document — capture a decision, convention, or reference doc
-  skills/design/SKILL.md          #   /design — conversational KB doc capture for a design-category task; optionally fires archaeologist for a research brief
+  skills/ship/SKILL.md            #   /ship — pre-push sweep: changelog synthesis from commits, version bump, README/CLAUDE.md drift review
+  skills/work/SKILL.md            #   /work — autonomously execute the ready portion of the backlog by dispatching developer in worktrees
 ```
 
 ## Package Architecture
 
 - **tab** is standalone. One agent (`Tab`) with a rich personality system (profiles, settings 0-100%). No MCP dependency.
-- **tab-for-projects** extends the ecosystem with autonomous subagents (implementer, archaeologist, test-writer, docs-writer, reviewer, shipper) that `/work` routes tasks to by category, plus a set of verb-shaped workflow skills that automate high-friction operations against the Tab for Projects MCP. Each skill is a one-shot automation, not an ambient mode. Skills resolve the active project via inference (explicit arg → `.tab-project` file → git remote → cwd → recent activity) and respect a shared task-readiness bar defined in the KB.
+- **tab-for-projects** extends the ecosystem with three subagents (`developer`, `project-planner`, `bug-hunter`) and seven verb-shaped workflow skills that automate high-friction operations against the Tab for Projects MCP. `/work` dispatches `developer` in isolated git worktrees for execution, invoking `project-planner` first for any task that needs grooming. `/debug` and `/rewrite` dispatch `bug-hunter` for codebase investigation. `/design` owns all KB authorship and may dispatch `bug-hunter` plus the `exa` MCP for research. `/ship` owns cross-cutting doc sweeps (README, CLAUDE.md) and changelog synthesis at the pre-push checkpoint — `developer` stays out of shared files so parallel `/work` runs don't collide. Skills resolve the active project via inference (explicit arg → `.tab-project` file → git remote → cwd → recent activity) and respect a shared task-readiness bar.
 - Each package is independently installable. A `settings.json` at a package root can set the default agent via `{"agent": "<plugin>:<agent>"}`.
 
 ## Conventions
@@ -89,6 +86,7 @@ Use semver: patch for fixes and minor prompt tweaks, minor for new skills or mea
 | `tab-for-projects/.claude-plugin/plugin.json` | Tab for Projects plugin manifest |
 | `tab-for-projects/CHANGELOG.md` | Tab for Projects plugin release notes |
 | `tab/agents/tab.md` | Tab agent — personality, profiles, settings |
-| `tab-for-projects/agents/implementer.md` | Implementer subagent — takes one ready task, writes code, verifies, commits; files tasks for follow-ups (no KB writes) |
-| `tab-for-projects/agents/archaeologist.md` | Archaeologist subagent — produces short research briefs for `/design` on big-context codebases; does not make design decisions |
+| `tab-for-projects/agents/developer.md` | Developer subagent — worktree-only; writes code + tests atomically; never touches shared docs so `/work` can parallelize safely |
+| `tab-for-projects/agents/project-planner.md` | Project-planner subagent — turns vague input (below-bar task, hunter report, freeform prompt) into a well-formed backlog task; falls back to a design ticket when the input is too fuzzy to implement |
+| `tab-for-projects/agents/bug-hunter.md` | Bug-hunter subagent — targeted investigation returning a structured report with file + line anchors and explicit confidence levels; does not edit code or touch the backlog |
 | `tab/settings.json` | Tab default agent config |

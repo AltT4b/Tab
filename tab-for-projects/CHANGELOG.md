@@ -2,6 +2,32 @@
 
 All notable changes to the **tab-for-projects** plugin. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [semver](https://semver.org/).
 
+## [3.0.0] — 2026-04-20
+
+### Changed
+- **Breaking: full rewrite.** The plugin now ships three subagents (`developer`, `project-planner`, `bug-hunter`) and seven skills (`/capture`, `/debug`, `/design`, `/rewrite`, `/search`, `/ship`, `/work`) — replacing the prior roster of six subagents and seven skills. The previous version's workflow accumulated too many moving parts for too little gain; this rewrite rebuilds around three coherent pieces: `/work` dispatches `developer` inside isolated git worktrees (so parallel execution is safe), `project-planner` grooms vague tasks inline or on demand, `bug-hunter` investigates without editing, `/design` owns all knowledgebase authorship, and `/ship` handles the pre-push sweep (version bumps, changelog synthesis from commits, README/CLAUDE.md drift review). Upgraders will find the old commands gone; see the migration list below.
+
+### Added
+- `developer` agent — worktree-only implementer. Atomic on code + tests together; never touches shared documentation (`CLAUDE.md` at any depth, `README`, `CHANGELOG`, or the KB). The shared-docs boundary is what makes `--parallel` in `/work` safe: two devs can't merge-conflict on files they can't reach.
+- `project-planner` agent — accepts a below-bar task, a `bug-hunter` report, or a freeform prompt, and produces at least one well-formed task on the backlog. Inlines the substance of relevant KB documents instead of referencing their IDs, so downstream agents don't chase links. Falls back to a `category: design` ticket when the input is too fuzzy for an implementation ticket — the backlog is always the destination.
+- `bug-hunter` agent — targeted codebase investigation. Runs tests, reads code, uses the dev-server preview when relevant, and returns a structured report with file + line anchors and explicit confidence (confirmed / likely / suspected). Does not edit code, touch the backlog, or write KB documents — callers act on the report.
+- `/debug` skill — bug-find-and-fix. Dispatches `bug-hunter`, presents findings, and lets the user fix inline (Claude edits the current tree with a test) or escalate via `project-planner` to a filed task. Built around the observation that bugs get fixed inline or not at all — there is no middle "report sits there unfixed" state.
+- `/ship` skill — pre-push sweep, user-invoked. Synthesizes a changelog entry from commits since the last version tag, surfaces likely-stale READMEs and CLAUDE.md files, applies a version bump, and produces a single commit ready to push. Does not push. Never creates a changelog from scratch — skips cleanly if no `CHANGELOG.md` exists.
+- `/capture` skill — zero-friction raw task drop from the current conversation. Pulls title and summary from what's already been said, asks one clarifying question max, and files the task without scoring or grooming. Planner handles grooming later when `/work` picks the task up.
+- `/rewrite` skill — plan-focused targeted rewrite ("rewrite the repository layer", "redo the component system"). Interviews the user, pulls relevant KB context, dispatches `bug-hunter` to survey current state, uses `exa` for best-practice research, flags multi-target scope creep, and emits a mix of implementation and design tickets via `project-planner`. Does not write code and does not auto-execute — the user drives the timing.
+
+### Changed
+- `/design` skill reshaped. Absorbs the old `/project` (project-shape conversations) and `/document` (KB authorship) into a single entry point. Two modes: task mode (`/design <task-id>`) loads a design-category task and stays open until the user is happy; free mode (`/design <topic>`) opens on a freeform topic. Dispatches `bug-hunter` for codebase research (replacing the old `archaeologist`) and uses `exa` for web research. Files follow-up tasks via `project-planner`, producing a mix of implementation tickets (for decided pieces) and design tickets (for punted forks).
+- `/work` skill reshaped. Dispatches the new `developer` agent with `isolation: "worktree"` instead of routing across six subagents by category. Invokes `project-planner` on vague tasks before dispatching. Still treats `design`-category tasks as terminal (never executed autonomously); still ID-only dispatch; still batches halts and design forks into a single end-of-run report. Removed: the shipper step (replaced by the separate `/ship` skill) and the multi-agent routing table (there's one executor now).
+- `/search` cross-references updated — creation verbs now point at `/capture`, `/design`, and `/rewrite` instead of the retired skills.
+
+### Removed
+- **Breaking:** `/fix` skill. Replaced by `/capture`. Same shape, clearer verb.
+- **Breaking:** `/project` skill. Session-oriented project planning merged into `/design`'s free mode — a planning session and KB authorship are the same activity.
+- **Breaking:** `/backlog` skill. Grooming moved inline — `project-planner` handles vague tasks on demand when `/work` picks them up.
+- **Breaking:** `/document` skill. KB authorship is `/design`'s job; there's no longer a separate capture path.
+- **Breaking:** `implementer`, `archaeologist`, `test-writer`, `docs-writer`, `reviewer`, and `shipper` agents. Replaced by `developer` (subsumes implementer + test-writer; enforces worktree + atomic code+tests), `bug-hunter` (broader than archaeologist; investigates for both `/debug` and `/design`), and `project-planner` (new shape — always produces a task). `docs-writer` is gone because `/ship` owns cross-cutting doc sweeps. `reviewer` is gone because `developer`'s test discipline is the review signal. `shipper` is replaced by the user-invoked `/ship` skill — shipping is a deliberate checkpoint, not an end-of-run automation.
+
 ## [2.3.0] — 2026-04-20
 
 ### Changed
