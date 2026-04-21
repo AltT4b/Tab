@@ -17,7 +17,7 @@ A bug skill built around the observation that bugs get fixed inline or not at al
 - The concern is really a design fork, not a bug — route to `/design`.
 - The user knows the bug and wants it filed as a task — use `/capture`.
 - The user knows the bug and wants it fixed right now without investigation — just fix it directly; `/debug` adds friction for simple cases.
-- The hunt needs to cover a large chunk of the codebase for a rewrite — use `/rewrite` instead; it runs the hunter as part of its own flow.
+- The hunt needs to cover a large chunk of the codebase for a rewrite — use `/plan rewrite` instead; it runs the hunter as part of its own flow when needed.
 
 ## Requires
 

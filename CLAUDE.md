@@ -24,20 +24,21 @@ tab-for-projects/                 # "tab-for-projects" plugin package
   CHANGELOG.md                    #   Release notes (keep-a-changelog)
   agents/bug-hunter.md            #   Bug-hunter subagent — targeted codebase investigation; structured report with file+line anchors; no edits, no backlog writes
   agents/developer.md             #   Developer subagent — worktree-only; atomic on code + tests; never touches shared docs (CLAUDE.md, README, CHANGELOG, KB)
-  agents/project-planner.md       #   Project-planner subagent — turns a below-bar task, hunter report, or freeform prompt into a well-formed backlog task; falls back to a design ticket when the input is too fuzzy
+  agents/project-planner.md       #   Project-planner subagent — expert codebase reader; scope-mode returns proposals (for /plan to confirm), other modes write; typed TODOs (split / decision) for scope-mode callers
   skills/capture/SKILL.md         #   /capture — zero-friction raw task drop from conversation
   skills/debug/SKILL.md           #   /debug — bug-find-and-fix; dispatches bug-hunter, then fixes inline or escalates to a task
   skills/design/SKILL.md          #   /design — conversational KB authorship for project-shape work and design-category tasks; sole entry point for KB writes
-  skills/rewrite/SKILL.md         #   /rewrite — plan-focused targeted rewrite of a chunk of the application; emits a mix of implementation and design tickets
+  skills/develop/SKILL.md         #   /develop — conversational pair-programming mode; surveys code + KB + backlog, shapes a lightweight plan, iterates test-first on the working tree; opt-in developer dispatches to worktrees for bounded sub-scopes
+  skills/plan/SKILL.md            #   /plan — intent-to-backlog; modes: intent / survey / groom / rewrite; parallel planner fan-out on split sub-scopes; confirm-before-write
   skills/search/SKILL.md          #   /search — find docs and tasks via an escalating filter ladder
   skills/ship/SKILL.md            #   /ship — pre-push sweep: changelog synthesis from commits, version bump, README/CLAUDE.md drift review
-  skills/work/SKILL.md            #   /work — autonomously execute the ready portion of the backlog by dispatching developer in worktrees
+  skills/work/SKILL.md            #   /work — autonomously execute above-bar tasks via developer-in-worktree; below-bar and design tasks surface for /plan groom and /design
 ```
 
 ## Package Architecture
 
 - **tab** is standalone. One agent (`Tab`) with a rich personality system (profiles, settings 0-100%). No MCP dependency.
-- **tab-for-projects** extends the ecosystem with three subagents (`developer`, `project-planner`, `bug-hunter`) and seven verb-shaped workflow skills that automate high-friction operations against the Tab for Projects MCP. `/work` dispatches `developer` in isolated git worktrees for execution, invoking `project-planner` first for any task that needs grooming. `/debug` and `/rewrite` dispatch `bug-hunter` for codebase investigation. `/design` owns all KB authorship and may dispatch `bug-hunter` plus the `exa` MCP for research. `/ship` owns cross-cutting doc sweeps (README, CLAUDE.md) and changelog synthesis at the pre-push checkpoint — `developer` stays out of shared files so parallel `/work` runs don't collide. Skills resolve the active project via inference (explicit arg → `.tab-project` file → git remote → cwd → recent activity) and respect a shared task-readiness bar.
+- **tab-for-projects** extends the ecosystem with three subagents (`developer`, `project-planner`, `bug-hunter`) and eight verb-shaped workflow skills that automate high-friction operations against the Tab for Projects MCP. `/work` dispatches `developer` in isolated git worktrees for execution, running only above-bar tasks — below-bar and design-category tasks surface for `/plan groom` and `/design` to resolve. `/develop` is the conversational counterpart to `/work`: takes prose intent, surveys the code + KB + backlog, shapes a lightweight plan, and iterates test-first on the user's working tree, with opt-in `developer` dispatches to worktrees for bounded sub-scopes. Grooming never happens inside `/work`; the old "groom-then-dispatch" path was the source of an infinite-loop failure mode and is gone. `/plan` is the intent-to-backlog skill (intent / survey / groom / rewrite modes) and the primary caller of `project-planner`; in scope-mode the planner returns proposals and `/plan` fans out parallel planners on split sub-scopes before the user confirms, one level deep. `/debug` and `/plan` (rewrite mode) dispatch `bug-hunter` for codebase investigation. `/design` owns all KB authorship and may dispatch `bug-hunter` plus the `exa` MCP for research. `/ship` owns cross-cutting doc sweeps (README, CLAUDE.md) and changelog synthesis at the pre-push checkpoint — `developer` stays out of shared files so parallel `/work` runs don't collide. Skills resolve the active project via inference (explicit arg → `.tab-project` file → git remote → cwd → recent activity) and respect a shared task-readiness bar.
 - Each package is independently installable. A `settings.json` at a package root can set the default agent via `{"agent": "<plugin>:<agent>"}`.
 
 ## Conventions
@@ -87,6 +88,6 @@ Use semver: patch for fixes and minor prompt tweaks, minor for new skills or mea
 | `tab-for-projects/CHANGELOG.md` | Tab for Projects plugin release notes |
 | `tab/agents/tab.md` | Tab agent — personality, profiles, settings |
 | `tab-for-projects/agents/developer.md` | Developer subagent — worktree-only; writes code + tests atomically; never touches shared docs so `/work` can parallelize safely |
-| `tab-for-projects/agents/project-planner.md` | Project-planner subagent — turns vague input (below-bar task, hunter report, freeform prompt) into a well-formed backlog task; falls back to a design ticket when the input is too fuzzy to implement |
+| `tab-for-projects/agents/project-planner.md` | Project-planner subagent — expert codebase reader; four dispatch shapes (scope / existing task / hunter report / freeform prompt); scope-mode returns proposals with typed TODOs (split vs decision) for `/plan` to confirm, other modes write directly |
 | `tab-for-projects/agents/bug-hunter.md` | Bug-hunter subagent — targeted investigation returning a structured report with file + line anchors and explicit confidence levels; does not edit code or touch the backlog |
 | `tab/settings.json` | Tab default agent config |

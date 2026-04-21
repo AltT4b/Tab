@@ -56,10 +56,10 @@ Example (drawn from commit history, not fabricated):
 
 ```
 ### Added
-- `/rewrite` skill — freeform "rewrite the repository layer" → tasks on the backlog.
+- `/plan` skill — intent / survey / groom / rewrite modes; parallel planner fan-out on split sub-scopes.
 
 ### Changed
-- `/work` no longer routes design-category tasks; they surface to the user for `/design`.
+- `/work` no longer grooms below-bar tasks mid-run; surfaces them for `/plan groom` instead.
 
 ### Fixed
 - `/search` ladder no longer stops on a weak single hit when rung 3 would return a clean five.

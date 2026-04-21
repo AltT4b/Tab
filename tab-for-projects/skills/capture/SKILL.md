@@ -1,10 +1,10 @@
 ---
 name: capture
-description: Zero-friction task drop. Captures a single task from the current conversation — pulls title and summary from what's already been said, asks one clarifying question only if truly needed, and files it raw. No grooming, no scoring, no interview. `project-planner` grooms the task later when `/work` picks it up. Triggers on `/capture` and phrases like "file this as a task", "add a todo", "drop that on the backlog", "capture this".
+description: Zero-friction task drop. Captures a single task from the current conversation — pulls title and summary from what's already been said, asks one clarifying question only if truly needed, and files it raw. No grooming, no scoring, no interview. `/plan groom` shapes the task later when the user is ready; `/work` only runs above-bar tasks. Triggers on `/capture` and phrases like "file this as a task", "add a todo", "drop that on the backlog", "capture this".
 argument-hint: "[optional: one-line hint]"
 ---
 
-The lightest possible path from "that should be a task" to a backlog entry. `/capture` reads the conversation, writes a raw task, and exits. Grooming is `project-planner`'s job and happens downstream when `/work` picks the task up. The reason this skill exists: a thought worth capturing is often not worth interrupting the current work to groom.
+The lightest possible path from "that should be a task" to a backlog entry. `/capture` reads the conversation, writes a raw task, and exits. Grooming happens later via `/plan groom` — explicit and user-driven, never inside `/work`. The reason this skill exists: a thought worth capturing is often not worth interrupting the current work to groom.
 
 ## Trigger
 
@@ -14,9 +14,9 @@ The lightest possible path from "that should be a task" to a backlog entry. `/ca
 - A task-worthy item came up in the current turn and the user wants to park it.
 
 **When NOT to activate:**
-- User wants to plan a rewrite or a chunk of work — use `/rewrite`.
+- User wants to plan a rewrite or a chunk of work — use `/plan` (rewrite mode for replacements, intent mode for new features).
 - User wants to file a design question — `/capture` is fine, but `/design` (on the captured task) is where the decision happens.
-- User wants to groom several tasks at once — dispatch `project-planner` directly or let `/work` handle grooming downstream.
+- User wants to groom several tasks at once — use `/plan groom`.
 - User wants to execute immediately — go straight to `/work` or direct conversation.
 
 ## Requires
@@ -42,7 +42,7 @@ Shape:
 - **Category** — infer when obvious (`bugfix` for bugs, `feature` for new behavior, `docs` for docs, `refactor` for cleanup, `chore` for housekeeping). If unclear, leave it unset; planner will set it.
 - **Project** — resolve via the shared Project Inference convention: `.tab-project` → git remote → cwd basename → recent activity. If the resolution is uncertain, surface the options in the confirm block.
 
-Do **not** set effort, impact, acceptance signal, or dependencies. That's grooming — planner's job. A raw task is allowed to be raw; the readiness bar applies at `/work` time, not at capture time.
+Do **not** set effort, impact, acceptance signal, or dependencies. That's grooming — `/plan groom`'s job. A raw task is allowed to be raw; the readiness bar applies when `/work` tries to execute it, at which point below-bar tasks skip until groomed.
 
 ### 2. Confirm — only if truly needed
 
@@ -66,7 +66,7 @@ Ask one question when:
 Report back in one line:
 
 ```
-Filed 01K… "<title>" on <Project Name>. Planner will groom it when /work picks it up.
+Filed 01K… "<title>" on <Project Name>. Run /plan groom when you're ready to shape it for /work.
 ```
 
 ## Output
@@ -78,9 +78,9 @@ Filed 01K… "<title>" on <Project Name>. Planner will groom it when /work picks
 ## Principles
 
 - **Zero friction is the feature.** A capture that takes 30 seconds is a capture that happens. A capture that takes five minutes is a capture that doesn't.
-- **Raw is allowed.** Grooming happens downstream. The backlog tolerates below-bar tasks as long as they get groomed before execution.
-- **One question, max.** If it takes more, the task is too complex for `/capture` — planner will handle it at `/work` time.
-- **Trust planner.** The design is: `/capture` drops, `/work` → `project-planner` grooms, `developer` executes. Each stage does one thing.
+- **Raw is allowed.** Grooming happens later, via `/plan groom`. The backlog tolerates below-bar tasks; they just won't run until shaped.
+- **One question, max.** If it takes more, the task is too complex for `/capture` — run `/plan` (intent or rewrite mode) instead, which surveys the codebase before proposing tasks.
+- **Each stage does one thing.** `/capture` drops, `/plan groom` shapes, `developer` (via `/work`) executes. No stage tries to do the next stage's job.
 
 ## Constraints
 

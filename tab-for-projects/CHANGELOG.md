@@ -2,6 +2,31 @@
 
 All notable changes to the **tab-for-projects** plugin. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [semver](https://semver.org/).
 
+## [4.1.0] — 2026-04-21
+
+### Added
+- **`/develop` skill.** Conversational pair-programming mode. Takes prose intent and does the heavy lifting: surveys the codebase (inline reads plus an optional single-shot `bug-hunter` dispatch when the scope warrants it), pulls overlapping backlog tasks, surfaces KB constraints, shapes a lightweight plan with the user, then iterates test-first through the pieces on the user's working tree. Unlike `/work` (autonomous, worktree-based, no conversation) and `/plan` (no code), `/develop` is inline and conversational — edits land where the user is sitting, each piece gets a confirm, and design forks pause the flow for `/design` or file as design tickets. Opt-in delegation to `developer` in a worktree for bounded self-contained sub-scopes; parallel dispatch is supported when pieces don't share files. Writes task state directly — anchor task transitions `todo` → `in_progress` → `done` as pieces land, and follow-up tasks file at the readiness bar as they emerge. Never commits — the working tree is left ready for the user to review. Escalates to `/plan` when Ground shows the scope sprawls beyond a single pair-programming session.
+
+## [4.0.0] — 2026-04-21
+
+### Changed
+- **Breaking: grooming is out of `/work`.** The previous version dispatched `project-planner` to groom below-bar tasks mid-run, which could loop without termination — planner's "always produce a task" contract combined with `/work`'s dependency-graph re-evaluation meant new below-bar tasks filed by the planner could feed back into the same run. `/work` is now strictly above-bar: below-bar and design-category tasks are classified as `skipped` at plan time (or at dev-return time) and surface in the end-of-run report with a pointer to `/plan groom` or `/design`. Grooming is never implied by an execute invocation; it's always an explicit, user-initiated pass.
+- **Breaking: `project-planner` has a new scope-mode (shape 4).** Given `{ scope, project_id, intent? }`, planner surveys the codebase with `Read` / `Grep` / `Glob`, returns a structured batch of task *proposals* (not writes) alongside typed TODOs — `split_todos` for sub-scopes that need a deeper dedicated pass, `decision_todos` for questions that need a user taste call. The caller (`/plan`) owns the confirm and the write. The three existing shapes (below-bar task, hunter report, freeform prompt) still write directly because their callers already own a confirm step upstream.
+- **`project-planner`'s tool access expanded.** `Read` / `Grep` / `Glob` move from "verify the proposed acceptance signal is grounded" to full codebase surveying in scope-mode. The agent is now the plan flow's codebase reader — no separate `bug-hunter` dispatch is needed for most plan passes. `bug-hunter` remains for dynamic investigation (running tests, reproducing bugs, driving the preview) where reading isn't enough.
+- **`/design` points at `/plan groom` for below-bar tasks.** When `/design` loads a task mode and the task is below the readiness bar, the skill now points the user at `/plan groom <task-id>` rather than dispatching `project-planner` directly. `/design` still dispatches `project-planner` post-decision to file follow-up tasks from the KB doc — that write-on-dispatch path is unchanged.
+
+### Added
+- **`/plan` skill.** The intent-to-backlog skill. Four modes via menu entry:
+  - **intent** — user names an outcome ("add MFA"); `/plan` dispatches scope-mode planner and fans out parallel planners on any split sub-scopes the first pass surfaces.
+  - **survey** — user points at a scope ("audit auth/"); planner proposes tasks for what's worth doing.
+  - **groom** — user hands over one or more below-bar tasks; `/plan` dispatches planner in write-mode to shape them in place.
+  - **rewrite** — absorbs the previous `/rewrite` skill's flow (scope interview, KB pull, optional hunter dispatch, optional exa research, user consolidation) and then hands the consolidated shape to scope-mode planner.
+  Parallel fan-out runs one level deep by default — deeper sub-scopes surface as hints ("consider running `/plan survey <sub_scope>`") so the skill stays bounded. Decision TODOs default to filing as design tickets; users can opt to answer inline per question. All proposals pass through one confirm block before any write.
+- **Scope-mode on `project-planner`.** See Changed above. Listed here so callers can find the dispatch shape in one place: `{ scope, project_id, intent? }` → returns `{ task_proposals, split_todos, decision_todos, inlined_docs, notes }`.
+
+### Removed
+- **Breaking: `/rewrite` skill.** Folded into `/plan` as rewrite-mode. The full flow is preserved — scope interview, KB pull, optional hunter survey, optional exa research, user consolidation, multi-target check — and then the consolidated shape is handed to scope-mode planner (new) rather than the old write-on-dispatch planner. Invocations like `/rewrite the repository layer` now map to `/plan rewrite the repository layer` (or `/plan` with no args and picking `rewrite` from the menu). The consolidation of multi-task planning under a single verb is the long-term shape; a dedicated `/rewrite` entry point was never doing work the `/plan` verb couldn't.
+
 ## [3.0.0] — 2026-04-20
 
 ### Changed

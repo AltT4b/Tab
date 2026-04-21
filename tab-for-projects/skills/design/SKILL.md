@@ -19,13 +19,14 @@ Both modes run the same four phases: **Load**, **Research** (KB + hunter + exa),
 - User invokes `/design` with a task ID or a freeform topic.
 - User says "let's design X", "work through the design task on Y", "document our approach to Z", "decide how we handle W", "figure out the shape of V".
 - `/work`'s end-of-run report surfaced a design-category task in the "awaiting human" section and the user's ready to resolve it.
-- `/rewrite`, `/debug`, or `project-planner` filed a design ticket and the user wants to open it.
+- `/plan`, `/debug`, or `project-planner` filed a design ticket and the user wants to open it.
 
 **When NOT to activate:**
 - User wants to file a new implementation task — use `/capture`.
 - User wants to execute existing tasks — use `/work`.
 - User wants a bug found and fixed — use `/debug`.
-- User wants a rewrite planned — use `/rewrite` (which files design tickets of its own that `/design` later picks up).
+- User wants a rewrite planned — use `/plan rewrite` (which files design tickets of its own that `/design` later picks up).
+- User wants to shape existing below-bar tasks — use `/plan groom`.
 
 ## Requires
 
@@ -43,7 +44,7 @@ Both modes run the same four phases: **Load**, **Research** (KB + hunter + exa),
 
 1. `get_task(task_id)`. If missing, report and stop.
 2. **Category check.** If the task isn't `category: design`, ask whether to proceed anyway (sometimes an implementation task reveals a design question worth capturing) or route elsewhere.
-3. **Readiness check.** A design task is ready when its title is verb-led and concrete, its summary explains why + what, and its acceptance signal names a concrete output (typically a KB doc). If the task's below bar, surface the gap and ask the user to groom it inline or via `project-planner` before continuing.
+3. **Readiness check.** A design task is ready when its title is verb-led and concrete, its summary explains why + what, and its acceptance signal names a concrete output (typically a KB doc). If the task's below bar, surface the gap and ask the user to groom it inline or via `/plan groom <task-id>` before continuing.
 4. **Status.** If `todo`, transition to `in_progress`. If already `in_progress`, assume resume. If `done`/`archived`, ask whether to open a new design task.
 5. Read every KB doc the task references — those are the constraints the decision must respect.
 6. Resolve the project: use the task's `project_id`; sanity-check against the cwd; ask if there's a mismatch.
@@ -174,6 +175,6 @@ Saved <doc_id> "<Title>" in <folder>. Task left in_progress — close when ready
 - **No writes before confirm.** The doc, the project link, the task-close, and the follow-up dispatch all pass through the single confirm block.
 - **No source code.** Ever. If the decision implies code changes, they become follow-up implementation tickets via `project-planner`.
 - **No autonomous fork resolution.** Punted forks file as design tickets.
-- **Readiness bar applies in task mode.** A below-bar design task gets groomed before the conversation starts.
+- **Readiness bar applies in task mode.** A below-bar design task gets groomed (via `/plan groom`) before the conversation starts.
 - **Hunter dispatches are single-shot.** One `task_id` or one tailored concern in, one brief out. The skill does not loop on the hunter mid-conversation.
 - **Exa is a research tool, not a source of truth.** Summarize the substance; don't treat web snippets as authoritative without checking against the project's own context.
