@@ -2,6 +2,11 @@
 
 All notable changes to the **tab-for-projects** plugin. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [semver](https://semver.org/).
 
+## [2.2.0] — 2026-04-20
+
+### Changed
+- `/fix`, `/backlog`, and `/project` now prompt on design ancestry before filing any non-design task. The prompt offers three routes: name an existing design task ULID and the skill wires a `blocks` edge to the new task; say `file design` and the skill files an inline design task (inheriting the initiative's `group_key` where one exists) and wires the edge; say `no` to proceed unchanged. `/fix` surfaces the prompt once per drive-by; `/backlog` batches it once per split parent (covering all non-design children); `/project` batches it once per initiative batch and once per drive-by. The check catches implementation tasks that trail an unmade decision at filing time, so they land with the right ancestor instead of losing the link in conversation.
+
 ## [2.1.0] — 2026-04-20
 
 ### Added

@@ -68,14 +68,40 @@ Summary: [1–3 sentences]
 Acceptance: [one line]
 ```
 
-Ask: "File this?" Accept inline edits. Once confirmed, create the task.
+Ask: "File this?" Accept inline edits. Once confirmed, continue to the design-ancestry check (§5) if the task's category isn't `design`, then create the task.
+
+### 5. Design-ancestry check (non-design tasks only)
+
+Implementation work often trails a design decision that hasn't been made yet. Before firing `create_task` on any task whose category is not `design`, surface one short prompt:
+
+```
+Before filing — is this blocked by a design decision you haven't made yet?
+
+  - Name an existing design task (01K…) and I'll wire a `blocks` edge.
+  - Say `file design` and I'll file a design task inline and wire the edge.
+  - Say `no` to proceed as-is.
+```
+
+Three responses:
+
+- **`no`** (or a no-shaped phrase like `nope`, `already decided`, `n/a`) — proceed to `create_task` with no extra wiring.
+- **An existing task ULID** — `get_task` to verify it exists and is `design`-category. If it isn't design or doesn't exist, say so and re-prompt; don't silently wire the wrong thing. On verify, file the new task, then add a `blocks` dependency from the design task to the new task (`update_task` on the new task with `add_dependencies: [{ task_id: <design-id>, type: "blocks" }]`).
+- **`file design`** — run a compact inline design-task proposal: title (verb-led, e.g. `Decide <X>`), 1–3 sentence summary (usually pulled from the same conversation), acceptance signal (almost always `a KB doc at folder X capturing decision Y` — point at the `/design` skill at `tab-for-projects/skills/design/SKILL.md` for how the decision will eventually land). Confirm the design task in one compact block, then file it with `category: design`. Once it's filed, file the original task and wire the `blocks` edge from the design task to it. Report both IDs.
+
+Skip §5 entirely when the task's category is `design` — design tasks don't need a design ancestor.
 
 ## Output
 
-A single task in the MCP, above the readiness bar. Skill closes with a one-line acknowledgement:
+A single task in the MCP, above the readiness bar. When the design-ancestry check fired and the user pointed at or filed a design task, also a `blocks` edge between the two (and, in the `file design` case, a second filed design task). Skill closes with a one-line acknowledgement:
 
 ```
 Filed 01KX… in Tab.
+```
+
+When a design ancestor was filed or wired:
+
+```
+Filed 01KX… (blocked by design task 01KY…).
 ```
 
 No fanfare. The user was in the middle of something else.

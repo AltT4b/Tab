@@ -93,11 +93,31 @@ Ask: "Apply? (y / edit / skip bucket)". Accept batch-level edits before writing.
 Once confirmed, execute the approved changes in batches:
 
 1. Fixable updates → `update_task` batch.
-2. Splits → create child tasks, archive parent (or convert parent to tracking shell — user choice once, applied to all splits in the pass).
+2. Splits → create child tasks, archive parent (or convert parent to tracking shell — user choice once, applied to all splits in the pass). Before firing `create_task` on any split child whose category is not `design`, run the design-ancestry check (§6).
 3. Archives → `update_task` with `status: archived`.
 4. Dependency wires → dependency-edge writes.
 
 **Needs user input** tasks are never auto-written. They're handed back as a short list the user can walk through one by one, or defer.
+
+### 6. Design-ancestry check (non-design splits only)
+
+Split children are new task filings, and implementation work often trails a design decision that hasn't been made yet. Before firing `create_task` on any split child whose category is not `design`, surface one short prompt — batch it per split parent, not per child, so grooming doesn't turn into a question march:
+
+```
+Before filing the children of 01KZ… — are any of these blocked by a design decision you haven't made yet?
+
+  - Name an existing design task (01K…) for any child and I'll wire a `blocks` edge.
+  - Say `file design` and I'll file a design task inline and wire the edge(s).
+  - Say `no` to proceed as-is.
+```
+
+Three responses:
+
+- **`no`** — proceed with the split's `create_task` batch and no extra wiring.
+- **An existing task ULID (optionally with child indexes, e.g. `01K… for 2,3`)** — `get_task` to verify it exists and is `design`-category. If it isn't design or doesn't exist, say so and re-prompt. On verify, file the children, then add `blocks` dependencies from the design task to the named children.
+- **`file design`** — propose a design task inline: title (verb-led, e.g. `Decide <X>`), 1–3 sentence summary pulled from the split parent's summary, acceptance signal (usually `a KB doc at folder X capturing decision Y` — the `/design` skill at `tab-for-projects/skills/design/SKILL.md` will host that conversation). Confirm in a single compact block. File the design task, file the split children, wire `blocks` edges from the design task to the affected children. Report the design task ID alongside the child IDs.
+
+Skip §6 when no split child is non-design, or when a split parent is itself design-category (the parent's ancestor, if any, already covers the children).
 
 ## Output
 

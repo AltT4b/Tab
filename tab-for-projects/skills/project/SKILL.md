@@ -228,7 +228,7 @@ The loop runs until the user closes. Each turn, classify the user's input into o
 | **New initiative** | "I want to build", "let's plan", "break down", "file tasks for" | Run the capture sub-flow (§5). |
 | **Research question** | "how do teams", "what's the right way", "is there a pattern for", a named technology the user hasn't used | Research sub-flow (§7); fold findings into task context or propose a KB doc. |
 | **Decision / convention** | "we decided", "we're going with", "from now on" | KB capture sub-flow (§6). |
-| **Single drive-by task** | "add a todo for", "don't let me forget", "file this small thing" | Single-task filing — same shape `/fix` uses. Confirm once, write, loop back. |
+| **Single drive-by task** | "add a todo for", "don't let me forget", "file this small thing" | Single-task filing — same shape `/fix` uses (including the design-ancestry check for non-design tasks; see §5a). Confirm once, write, loop back. |
 | **Grooming request** | "groom", "what's below bar", "clean up tasks" | Hand off to `/backlog`-shaped sub-flow (read the below-bar list, propose fixes or splits, confirm, write). |
 | **Status / search** | "what's in flight", "find that doc about X" | Read-only answer (`list_tasks`, `search_documents`, etc.). No sub-flow, no writes. |
 | **Ambiguous / still thinking** | Open-ended musing with no commit | Acknowledge; ask one bounded clarifying question, or invite continued thinking. Do not file. |
@@ -259,13 +259,33 @@ Dependencies: (shown only when present)
   3 relates_to 1
 ```
 
-Ask: "File these?" Accept inline edits — drop a task, tighten a title, flip effort. On confirm, batch `create_task` calls, then dependency wires. Report the filed IDs and loop back to the open-ended prompt.
+Ask: "File these?" Accept inline edits — drop a task, tighten a title, flip effort. On confirm, run the design-ancestry check (§5a) for any task in the batch whose category is not `design`, then batch `create_task` calls, then dependency wires. Report the filed IDs and loop back to the open-ended prompt.
 
 **Confirmation cadence:**
 
 - **One confirmation per write batch**, not one per initiative's component tasks. Three tasks for initiative A → one confirm of the batch. Initiative B that follows gets its own single confirmation.
 - **No implicit "auto-apply" mode.** Every write — task, doc, or project entity — passes through a visible confirm. The session's value is shared thinking, not batch speed.
 - **Inline edits on the confirmation block are always accepted.** The user shouldn't have to cancel and restart to adjust.
+
+#### 5a. Design-ancestry check (non-design tasks only)
+
+Implementation work often trails a design decision that hasn't been made yet. After the batch is confirmed but before `create_task` fires, surface one short prompt — once per initiative, not once per task — covering every non-design task in the batch:
+
+```
+Before filing — are any of these blocked by a design decision you haven't made yet?
+
+  - Name an existing design task (01K…) for any of them and I'll wire a `blocks` edge.
+  - Say `file design` and I'll file a design task inline (joined to this initiative's group_key) and wire the edge(s).
+  - Say `no` to proceed as-is.
+```
+
+Three responses:
+
+- **`no`** (or a no-shaped phrase) — proceed with the batch and no extra wiring.
+- **An existing task ULID (optionally with task indexes from the batch, e.g. `01K… for 1,3`)** — `get_task` to verify it exists and is `design`-category. If it isn't design or doesn't exist, say so and re-prompt. On verify, file the batch, then add `blocks` dependencies from the design task to the named children.
+- **`file design`** — propose a design task inline: title (verb-led, e.g. `Decide <X>`), 1–3 sentence summary drawn from the initiative's framing, acceptance signal (usually `a KB doc at folder X capturing decision Y` — the `/design` skill at `tab-for-projects/skills/design/SKILL.md` will host that conversation), `group_key` inherited from the initiative when one is set. Confirm in a single compact block. File the design task first, file the initiative's tasks, then wire `blocks` edges from the design task to the affected children. Report the design task ID alongside the initiative's IDs.
+
+Skip §5a when every task in the batch is already `design`-category.
 
 ### 6. Iterate — KB documentation sub-flow
 
