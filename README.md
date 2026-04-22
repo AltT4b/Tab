@@ -30,8 +30,8 @@ The marketplace configuration at `.claude-plugin/marketplace.json` defines both 
 
 | Package | Version | Description |
 | --- | --- | --- |
-| [tab](./tab) | 0.0.3 | A sharp, warm thinking partner who helps you make better decisions |
-| [tab-for-projects](./tab-for-projects) | 0.2.0 | Project workflow tracking -- skills and agents for the Tab for Projects MCP |
+| [tab](./tab) | 0.2.3 | A sharp, warm thinking partner who helps you make better decisions |
+| [tab-for-projects](./tab-for-projects) | 4.3.0 | Project workflow tracking -- skills and agents for the Tab for Projects MCP |
 
 ## Trademark
 
