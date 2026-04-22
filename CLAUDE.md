@@ -74,6 +74,19 @@ Use semver: patch for fixes and minor prompt tweaks, minor for new skills or mea
 
 This repo does not maintain a changelog — git history is the source of truth for what changed.
 
+## Commit Messages
+
+Short. Wordplay over summary. The diff already says *what* changed — the subject line is flavor, not a recap.
+
+Riff on the code being committed: a pun, a callback, a phrase that fits. Aim for under ~40 chars. Drop the conventional-commit prefix (`fix:`, `feat:`) unless it's part of the joke.
+
+Recent examples to calibrate against:
+
+- `always be shufflin'`
+- `fix: no more changelogs`
+
+If the joke doesn't land in a line, it's too much. A body is fine when context genuinely needs it, but the subject stays terse.
+
 ## Key Files
 
 | File | Purpose |
