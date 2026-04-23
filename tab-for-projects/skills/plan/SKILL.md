@@ -25,14 +25,14 @@ Read the input first. You might hand me:
 
 The loop is the same whichever shape the input takes:
 
-1. **Read the scope at a glance** — `get_project_context`, a light KB pass, a peek at the code if the input names a path. Enough to decide whether the dispatch needs splitting and whether any up-front forks need your call.
+1. **Ground in the code at a depth proportional to input** — `get_project_context` and a light KB pass always. Code reads scale from there: a named path gets a skim of those files; an outcome touching known surfaces gets a quick orient against them; a replacement target gets a structural read across the subsystem feeding the research pass; grooming skips the code read entirely — task IDs go straight to the planner. Enough grounding to shape a dispatch the planner can run with, not enough to duplicate the planner's own deep read.
 2. **Shape the dispatch** — one planner call, or N parallel planners across sub-scopes if the scope is large enough to warrant it. One level deep; if sub-scopes themselves turn out too big, I surface that as follow-up hints rather than fanning out recursively.
 3. **Preview** — the prompt(s) I'll send, the sub-scopes if splitting, up-front forks you should decide now, and the research context the dispatch will lean on.
 4. **Confirm** — `y` dispatches; `edit` accepts inline changes to the prompt or split; `cancel` exits.
 5. **Dispatch** — planner(s) write directly to the backlog.
 6. **Report** — what landed, what forks the planner filed as design tickets, deferred sub-scope hints, anything surfaced in notes.
 
-**Research depth scales with input shape.** Outcomes and scopes get the scope-glance. Replacement targets deepen into a full research pass — KB reads, optional `bug-hunter` when the target needs a behavior survey, optional `exa` for external analogues. Grooming skips the glance — task IDs go straight to the planner.
+**Research depth scales with input shape.** Outcomes and scopes get the scope-glance described above. Replacement targets deepen that into a full research pass — structural code read, KB reads, optional `bug-hunter` when the target needs a behavior survey, optional `exa` for external analogues. Grooming skips the glance — task IDs go straight to the planner.
 
 ## What I won't do
 

@@ -16,7 +16,15 @@ Knows when to stop. Three red-green cycles on a piece is the ceiling. If it isn'
 
 ## Approach
 
-I start by reading your intent, resolving the project, and pulling overlapping backlog tasks. If one's a natural anchor, I offer to load it — `in_progress` on first piece, `done` when it passes. A quick KB pass surfaces conventions or decisions that constrain the work, rendered before the plan so you don't discover a constraint mid-build. Non-trivial scopes get one `archaeologist` dispatch to orient against existing patterns and prior decisions; when the concern is behavior-shaped — bug suspicion, performance question, runtime mystery — `bug-hunter` is the call instead. Self-contained scopes need neither.
+I start by reading your intent, resolving the project, and pulling overlapping backlog tasks. If one's a natural anchor, I offer to load it — `in_progress` on first piece, `done` when it passes. A quick KB pass surfaces conventions or decisions that constrain the work, rendered before the plan so you don't discover a constraint mid-build.
+
+Grounding depth scales with input depth. Every run orients against the code itself — I open the files the intent names, trace the surfaces it touches, and quote back what I found before shaping the plan. The depth of that orient, and whether it gets backup from a subagent, tracks the scope:
+
+- **Self-contained scope** (a single file, a narrow behavior, a shape you've already framed): direct read of the named surfaces + KB skim. No subagent.
+- **Non-trivial scope** (multi-file, touches patterns I can't see at a glance, overlaps prior decisions): direct read to frame my questions, then one `archaeologist` dispatch to synthesize patterns and prior decisions across the broader surface.
+- **Behavior-shaped concern** (bug suspicion, performance question, runtime mystery): direct read of the suspected surface, then `bug-hunter` instead of archaeologist — the report comes back with file + line anchors and confidence levels.
+
+Whichever shape, the grounding lands before the plan, not mid-build.
 
 With the landscape on the table, we shape a lightweight plan — ordered pieces, a test approach per piece, any bounded chunks flagged as delegation candidates. You confirm or edit. If the scope is really `/plan`-shaped — many surfaces, unmade decisions — I say so and you pick: narrow slice, or hand off.
 

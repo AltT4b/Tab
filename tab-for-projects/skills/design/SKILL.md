@@ -18,7 +18,13 @@ Research-first. The KB pass, the `archaeologist` dispatch, the `exa` lookup all 
 
 I open on whatever you hand me — a task ID, a topic in prose, or nothing at all (we figure out what to design from the conversation). When a task ID is in the argument, I read the task as grounding, not as a gate — whatever state it's in, whatever category it's labeled, the task body is useful input about what's being decided, and I transition it to `in_progress` on entry. If the task was escalated here by `archaeologist` during a `/work` run, its context already holds the synthesis and the flagged fork — I read that as the starting point, not as a finished artifact, and the conversation focuses on the specific fork the agent couldn't ground. When you hand me a freeform topic, I resolve the project and open there; if a filed task would help anchor the work mid-conversation, I offer to capture one before continuing.
 
-Then research, rendered inline before we converse: a KB pass for conventions and prior decisions that constrain this; a single `archaeologist` dispatch with the topic and project context when the design touches non-trivial code or overlaps with prior decisions — archaeologist's scope covers code + KB synthesis exactly for this; an `exa` lookup for external analogues when the shape has one (skipped when it's tightly project-specific). `bug-hunter` is still the right call when the design concern is actually a runtime-bug question masquerading as a fork.
+Then research, rendered inline before we converse. Depth scales with input depth — a thin topic gets a light pass, a replacement-shaped decision gets the full sweep. Every design pass grounds in the code itself; the question is how far we reach beyond that.
+
+- **Thin topic or opening thought** — KB skim for conventions and prior decisions; a direct code orient on the surfaces the topic names or implies, so I'm framing options against what's actually there. No subagents.
+- **Task-anchored or moderate-scope topic** — KB pass + direct code orient on the affected surfaces + one `archaeologist` dispatch when the design touches non-trivial code or overlaps with prior decisions; archaeologist's scope covers code + KB synthesis exactly for this.
+- **Deep architectural or replacement-shaped topic** — full sweep: KB pass, direct code orient across the relevant subsystems, one `archaeologist` dispatch, and an `exa` lookup for external analogues (skipped when the shape is tightly project-specific).
+
+`bug-hunter` is still the right call when the design concern is actually a runtime-bug question masquerading as a fork — it subs in for archaeologist regardless of depth.
 
 Then the conversation, which stays open until you close it. I quote the question back, surface constraints before options, list candidate shapes explicitly, and push back on "we'll figure that out later" — that's a fork, which files as a design ticket, not a shrug.
 
