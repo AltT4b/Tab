@@ -1,6 +1,13 @@
 # Tab
 
-Claude Code plugin marketplace containing two plugins: **tab** (a standalone personality/thinking-partner agent) and **tab-for-projects** (autonomous subagents and workflow skills that talk to the Tab for Projects MCP). Published via `.claude-plugin/marketplace.json`.
+Personality, workflows, and skills defined in plain markdown — runtimes are interchangeable.
+
+Two runtimes live here:
+
+- **Claude Code plugins** under `plugins/`: **tab** (a standalone personality/thinking-partner agent) and **tab-for-projects** (autonomous subagents and workflow skills that talk to the Tab for Projects MCP). Published via `.claude-plugin/marketplace.json`.
+- **Tab CLI** under `cli/`: a Python package (`tab`) that runs the same markdown substrate outside Claude Code — multi-provider via pydantic-ai, semantic-gated skill routing via grimoire, exposable as an MCP server.
+
+The markdown is the source of truth; the runtimes read it.
 
 ## Repository Structure
 
@@ -9,7 +16,10 @@ Claude Code plugin marketplace containing two plugins: **tab** (a standalone per
 README.md                           # Project README
 LICENSE                             # Apache-2.0 license
 scripts/validate-plugins.sh         # Plugin validation script
-cli/                                # Tab CLI Python package (scaffold; bootstrap fills it)
+cli/                                # Tab CLI — Python runtime for the markdown substrate
+  pyproject.toml                    #   Package metadata; entry point: `tab` -> tab_cli.cli:app
+  src/tab_cli/                      #   Typer app, personality compiler, grimoire registry, MCP server
+  tests/                            #   pytest suite
 plugins/
   tab/                              # "tab" plugin package
     .claude-plugin/plugin.json      #   Plugin metadata (agents, skills, version)
@@ -36,9 +46,12 @@ plugins/
 
 ## Package Architecture
 
-- **tab** is standalone. One agent (`Tab`) with a rich personality system (profiles, settings 0-100%). No MCP dependency.
-- **tab-for-projects** extends the ecosystem with four subagents (`developer`, `project-planner`, `bug-hunter`, `archaeologist`) and six verb-shaped workflow skills that automate high-friction operations against the Tab for Projects MCP. `archaeologist` is the autonomous design-synthesis path — reads project code and KB, returns a structured design summary, closes design tasks on clean synthesis (picks sane defaults and flags them when real forks surface). `/work` dispatches `developer` in isolated git worktrees for implementation tasks and `archaeologist` on the main thread for design-category tasks — below-bar tasks surface for `/plan groom`, archaeologist-escalated forks surface for `/design`. `/develop` is the conversational counterpart to `/work`: takes prose intent, surveys the code + KB + backlog, shapes a lightweight plan, and iterates test-first on the user's working tree, with opt-in `developer` dispatches to worktrees for bounded sub-scopes. Grooming never happens inside `/work`; the old "groom-then-dispatch" path was the source of an infinite-loop failure mode and is gone. `/plan` is the intent-to-backlog skill and the primary caller of `project-planner`; it handles new work from outcomes, scopes, or replacement targets plus grooming of existing below-bar tasks. `/plan` shapes the dispatch (one planner call, or parallel planners for large scopes — one level deep), confirms it with the user, and hands off a well-formed prompt. The planner writes tasks directly — the confirm gate is upstream, at dispatch time. Replacement-target scopes trigger a research pass (KB reads, optional `bug-hunter` for behavior surveys, optional `exa` for external analogues) before the dispatch is shaped. `/plan` (rewrite mode) dispatches `bug-hunter` for codebase investigation. `/design` owns all KB authorship and dispatches `archaeologist` for code + KB synthesis research plus the `exa` MCP for external analogues; `bug-hunter` stays available for runtime-bug concerns that masquerade as design forks. `/ship` owns cross-cutting doc sweeps (README, CLAUDE.md) at the pre-push checkpoint as a coherent pass: changelog synthesis, version bump, drift review. Skills resolve the active project via inference (explicit arg → `.tab-project` file → git remote → cwd → recent activity) and respect a shared task-readiness bar.
-- Each package is independently installable. A `settings.json` at a package root can set the default agent via `{"agent": "<plugin>:<agent>"}`.
+Two Claude Code plugins (`plugins/tab`, `plugins/tab-for-projects`) and one Python runtime (`cli/`). All three sit on the same markdown substrate — `agents/*.md` and `skills/*/SKILL.md` under `plugins/tab/` — so personality and skill changes flow to whichever runtime loads them.
+
+- **tab** (Claude Code plugin) is standalone. One agent (`Tab`) with a rich personality system (profiles, settings 0-100%). No MCP dependency.
+- **tab-for-projects** (Claude Code plugin) extends the ecosystem with four subagents (`developer`, `project-planner`, `bug-hunter`, `archaeologist`) and six verb-shaped workflow skills that automate high-friction operations against the Tab for Projects MCP. `archaeologist` is the autonomous design-synthesis path — reads project code and KB, returns a structured design summary, closes design tasks on clean synthesis (picks sane defaults and flags them when real forks surface). `/work` dispatches `developer` in isolated git worktrees for implementation tasks and `archaeologist` on the main thread for design-category tasks — below-bar tasks surface for `/plan groom`, archaeologist-escalated forks surface for `/design`. `/develop` is the conversational counterpart to `/work`: takes prose intent, surveys the code + KB + backlog, shapes a lightweight plan, and iterates test-first on the user's working tree, with opt-in `developer` dispatches to worktrees for bounded sub-scopes. Grooming never happens inside `/work`; the old "groom-then-dispatch" path was the source of an infinite-loop failure mode and is gone. `/plan` is the intent-to-backlog skill and the primary caller of `project-planner`; it handles new work from outcomes, scopes, or replacement targets plus grooming of existing below-bar tasks. `/plan` shapes the dispatch (one planner call, or parallel planners for large scopes — one level deep), confirms it with the user, and hands off a well-formed prompt. The planner writes tasks directly — the confirm gate is upstream, at dispatch time. Replacement-target scopes trigger a research pass (KB reads, optional `bug-hunter` for behavior surveys, optional `exa` for external analogues) before the dispatch is shaped. `/plan` (rewrite mode) dispatches `bug-hunter` for codebase investigation. `/design` owns all KB authorship and dispatches `archaeologist` for code + KB synthesis research plus the `exa` MCP for external analogues; `bug-hunter` stays available for runtime-bug concerns that masquerade as design forks. `/ship` owns cross-cutting doc sweeps (README, CLAUDE.md) at the pre-push checkpoint as a coherent pass: changelog synthesis, version bump, drift review. Skills resolve the active project via inference (explicit arg → `.tab-project` file → git remote → cwd → recent activity) and respect a shared task-readiness bar.
+- **tab-cli** (Python package, `cli/`) runs the markdown substrate outside Claude Code. Typer for the verb-shaped CLI surface (`tab ask`, `tab chat`, `tab <skill>`, `tab mcp`, `tab setup`); pydantic-ai for the agent loop and multi-provider support (Anthropic, OpenAI, Google, Groq, Ollama); grimoire for semantic-gate routing of user input against skill descriptions with per-skill thresholds. v0 ports the `tab/` plugin's personality skills (`draw-dino`, `listen`, `think`, `teach`); the `tab-for-projects` skills stay Claude-Code-shaped because they're tightly coupled to the MCP and the subagent dispatch primitive. The CLI reads its substrate from `plugins/tab/` so the markdown stays singular. `tab mcp` exposes the CLI as an MCP server for any MCP-aware host (including Claude Code) to call.
+- Each Claude Code plugin is independently installable. A `settings.json` at a package root can set the default agent via `{"agent": "<plugin>:<agent>"}`. The CLI installs separately via `uv sync` inside `cli/`.
 
 ## Conventions
 
@@ -56,6 +69,8 @@ No other frontmatter fields should be added. Information about which agents run 
 
 **Marketplace manifest** at `.claude-plugin/marketplace.json` lists all plugins with `name`, `source`, `description`, `version`, `strict`.
 
+**CLI package** lives in `cli/` with standard Python conventions: `pyproject.toml`, `src/tab_cli/`, `tests/`. The CLI reads markdown from `plugins/tab/` rather than duplicating it — the substrate stays singular across runtimes. CLI work runs from `cli/` (`uv sync`, `uv run tab`, `uv run pytest`).
+
 ## Validation
 
 Run `bash scripts/validate-plugins.sh` from the repo root after any structural change — adding/removing skills, agents, or updating plugin metadata. It checks:
@@ -70,6 +85,8 @@ If you add or remove a skill/agent, update the Repository Structure tree above a
 ## Versioning
 
 Bump the version in both `plugin.json` and `marketplace.json` as part of any commit that changes a plugin's behavior — new skills, agent prompt changes, bug fixes. The validator enforces that versions stay in sync across the two files, so always update both together.
+
+The CLI versions independently in `cli/pyproject.toml`. It's not in the marketplace, so the validator doesn't touch it.
 
 Use semver: patch for fixes and minor prompt tweaks, minor for new skills or meaningful behavior changes, major for breaking changes. When in doubt, bump minor.
 
@@ -102,3 +119,8 @@ If the joke doesn't land in a line, it's too much. A body is fine when context g
 | `plugins/tab-for-projects/agents/project-planner.md` | Project-planner subagent — expert codebase reader; takes a well-formed prompt and acts on the project backlog: creates tasks for uncaptured work, grooms below-bar tasks to the quality bar for their effort, searches the KB, reads the codebase; falls back to design tickets for forks it can't resolve; never writes KB docs, never edits code |
 | `plugins/tab-for-projects/agents/bug-hunter.md` | Bug-hunter subagent — targeted investigation returning a structured report with file + line anchors and explicit confidence levels; does not edit code or touch the backlog |
 | `plugins/tab/settings.json` | Tab default agent config |
+| `cli/pyproject.toml` | Tab CLI package metadata; entry point `tab` -> `tab_cli.cli:app` |
+| `cli/src/tab_cli/cli.py` | Typer app — verb-shaped subcommands (`ask`, `chat`, `<skill>`, `mcp`, `setup`); bare `tab` defaults to `chat` |
+| `cli/src/tab_cli/personality.py` | Compiles `plugins/tab/agents/tab.md` (body + 0-100% settings frontmatter) into a pydantic-ai system prompt |
+| `cli/src/tab_cli/registry.py` | Skill registry — parses SKILL.md descriptions for grimoire's semantic-gate routing |
+| `cli/src/tab_cli/mcp_server.py` | `tab mcp` runtime — exposes the CLI as an MCP server for any MCP-aware host |
