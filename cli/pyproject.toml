@@ -10,6 +10,7 @@ dependencies = [
     "typer>=0.15.1",
     "pydantic-ai>=0.0.20",
     "grimoire",
+    "pyyaml>=6.0",
 ]
 
 [project.scripts]

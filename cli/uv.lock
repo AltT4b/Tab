@@ -2010,6 +2010,7 @@ source = { editable = "." }
 dependencies = [
     { name = "grimoire" },
     { name = "pydantic-ai" },
+    { name = "pyyaml" },
     { name = "typer" },
 ]
 
@@ -2022,6 +2023,7 @@ dev = [
 requires-dist = [
     { name = "grimoire", git = "https://github.com/4lt7ab/grimoire.git?tag=v0.1.1" },
     { name = "pydantic-ai", specifier = ">=0.0.20" },
+    { name = "pyyaml", specifier = ">=6.0" },
     { name = "typer", specifier = ">=0.15.1" },
 ]
 
