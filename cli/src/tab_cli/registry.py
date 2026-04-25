@@ -18,11 +18,12 @@ What the loader does **not** do:
 
 - Invoke skills. It returns "this input matches skill X above
   threshold" or "no match"; what to do next is the caller's business.
-- Tune per-item thresholds. v0 ships one default for every skill. The
-  per-item tuning UX is owned by a deferred design ticket
-  (config file vs CLI command vs implicit-from-usage — TBD).
 - Load the ``tab-for-projects`` skills. Those stay Claude-Code-shaped;
   the CLI sticks to the personality plugin.
+
+Per-skill thresholds are read from each SKILL.md's optional
+``grimoire-threshold`` frontmatter key (a float in ``[0, 1]``); a skill
+that omits the key inherits :data:`DEFAULT_THRESHOLD`.
 """
 
 from __future__ import annotations
@@ -44,18 +45,18 @@ if TYPE_CHECKING:  # avoid forcing grimoire's Postgres import path at module loa
 SKILL_CORPUS = "tab-cli-skills"
 
 
-# v0 single-default threshold across every skill. Calibrated against
-# ollama's ``nomic-embed-text`` on description-shaped prompts: cosine
-# similarity for an obvious paraphrase ("draw me a dinosaur" against the
-# draw-dino description) sits comfortably above this; an unrelated query
-# ("what's the weather in Berlin") sits below.
+# Fallback threshold for a SKILL.md that omits ``grimoire-threshold``.
+# Calibrated against ollama's ``nomic-embed-text`` on description-shaped
+# prompts: cosine similarity for an obvious paraphrase ("draw me a
+# dinosaur" against the draw-dino description) sits comfortably above
+# this; an unrelated query ("what's the weather in Berlin") sits below.
 #
-# Per-item tuning is the deferred design ticket's job — config file vs
-# CLI command vs implicit-from-usage is unresolved, and v0 doesn't need
-# it to ship. Picking too-low here over-routes (false positives, the
-# agent never sees a chunk of input); picking too-high under-routes
-# (skills silently miss). Mid-range biases toward under-routing, which
-# is the safer failure mode given silence-by-default.
+# Picking too-low here over-routes (false positives, the agent never
+# sees a chunk of input); picking too-high under-routes (skills silently
+# miss). Mid-range biases toward under-routing, which is the safer
+# failure mode given silence-by-default. Per-skill overrides via
+# ``grimoire-threshold:`` in SKILL.md frontmatter are the per-item
+# tuning surface.
 DEFAULT_THRESHOLD = 0.55
 
 
@@ -63,11 +64,10 @@ DEFAULT_THRESHOLD = 0.55
 class SkillRecord:
     """One parsed ``SKILL.md`` ready to seed grimoire.
 
-    ``threshold`` is held alongside the parsed fields so the loader can
-    pass per-row thresholds to :meth:`grimoire.Gate.seed` without going
-    back to a constant; today every record ships with
-    :data:`DEFAULT_THRESHOLD`, but the deferred per-item-tuning ticket
-    lands on this same field.
+    ``threshold`` carries the per-row gate bar straight to
+    :meth:`grimoire.Gate.seed`. A SKILL.md may set ``grimoire-threshold``
+    in its frontmatter to override; absent the override, the loader fills
+    in :data:`DEFAULT_THRESHOLD`.
     """
 
     name: str
@@ -130,11 +130,16 @@ class SkillRegistry:
 def parse_skill_frontmatter(path: Path) -> SkillRecord:
     """Read a ``SKILL.md`` and return its parsed frontmatter.
 
-    Required keys: ``name``, ``description``. Optional: ``argument-hint``.
-    Anything else in the frontmatter is ignored — the parent
-    ``CLAUDE.md`` documents the convention that nothing else should be
-    added, so unknown keys are a planner-side problem to flag, not a
-    loader-side translation problem.
+    Required keys: ``name``, ``description``. Optional: ``argument-hint``,
+    ``grimoire-threshold``. Anything else in the frontmatter is ignored —
+    the parent ``CLAUDE.md`` documents the convention for Claude Code
+    runtime fields, and ``grimoire-threshold`` is the CLI's runtime field
+    for tuning the per-skill match bar.
+
+    ``grimoire-threshold`` must be a number in ``[0, 1]`` when present;
+    missing falls back to :data:`DEFAULT_THRESHOLD`. Bools are rejected
+    even though Python treats them as ``int`` — a YAML ``true`` is almost
+    certainly a typo, not a threshold of 1.
 
     Raises :class:`SkillFrontmatterError` for missing/invalid documents.
     """
@@ -159,10 +164,12 @@ def parse_skill_frontmatter(path: Path) -> SkillRecord:
             f"{path}: 'argument-hint' must be a string when present",
         )
 
+    threshold = _parse_threshold(frontmatter.get("grimoire-threshold"), path)
+
     return SkillRecord(
         name=name.strip(),
         description=description.strip(),
-        threshold=DEFAULT_THRESHOLD,
+        threshold=threshold,
         path=path,
         argument_hint=argument_hint_raw.strip() if argument_hint_raw else None,
     )
@@ -270,3 +277,28 @@ def _extract_frontmatter(text: str, path: Path) -> dict[str, object]:
         )
 
     return parsed
+
+
+def _parse_threshold(value: object, path: Path) -> float:
+    """Validate an optional ``grimoire-threshold`` frontmatter value.
+
+    ``None`` (key absent) falls back to :data:`DEFAULT_THRESHOLD`.
+    A real number in ``[0, 1]`` passes through. Anything else raises
+    :class:`SkillFrontmatterError` with the path keyed in the message —
+    bool is treated as not-a-number even though Python's ``isinstance``
+    would accept it as ``int``, because a YAML ``true`` here is almost
+    always a typo.
+    """
+    if value is None:
+        return DEFAULT_THRESHOLD
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise SkillFrontmatterError(
+            f"{path}: 'grimoire-threshold' must be a number in [0, 1], "
+            f"got {type(value).__name__}",
+        )
+    threshold = float(value)
+    if not 0.0 <= threshold <= 1.0:
+        raise SkillFrontmatterError(
+            f"{path}: 'grimoire-threshold' must be in [0, 1], got {threshold}",
+        )
+    return threshold

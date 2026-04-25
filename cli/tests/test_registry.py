@@ -254,6 +254,153 @@ body
         parse_skill_frontmatter(skill)
 
 
+# --------------------------------------------------------- threshold parsing
+
+
+def _write_skill(
+    tmp_path: Path,
+    *,
+    threshold_line: str | None,
+    name: str = "demo",
+    description: str = "A demo skill.",
+) -> Path:
+    """Helper: emit a minimal SKILL.md with an optional threshold line."""
+    skill = tmp_path / name / "SKILL.md"
+    skill.parent.mkdir(parents=True, exist_ok=True)
+    extra = f"{threshold_line}\n" if threshold_line is not None else ""
+    skill.write_text(
+        f"""---
+name: {name}
+description: "{description}"
+{extra}---
+
+body
+""",
+        encoding="utf-8",
+    )
+    return skill
+
+
+def test_parse_frontmatter_reads_grimoire_threshold(tmp_path: Path) -> None:
+    skill = _write_skill(tmp_path, threshold_line="grimoire-threshold: 0.72")
+    record = parse_skill_frontmatter(skill)
+    assert record.threshold == pytest.approx(0.72)
+
+
+def test_parse_frontmatter_falls_back_to_default_threshold(tmp_path: Path) -> None:
+    skill = _write_skill(tmp_path, threshold_line=None)
+    record = parse_skill_frontmatter(skill)
+    assert record.threshold == DEFAULT_THRESHOLD
+
+
+@pytest.mark.parametrize("boundary", [0.0, 1.0])
+def test_parse_frontmatter_accepts_threshold_boundaries(
+    tmp_path: Path,
+    boundary: float,
+) -> None:
+    skill = _write_skill(
+        tmp_path,
+        threshold_line=f"grimoire-threshold: {boundary}",
+        name=f"boundary-{boundary}".replace(".", "-"),
+    )
+    record = parse_skill_frontmatter(skill)
+    assert record.threshold == pytest.approx(boundary)
+
+
+def test_parse_frontmatter_rejects_non_numeric_threshold(tmp_path: Path) -> None:
+    skill = _write_skill(tmp_path, threshold_line='grimoire-threshold: "high"')
+    with pytest.raises(SkillFrontmatterError, match="grimoire-threshold"):
+        parse_skill_frontmatter(skill)
+
+
+def test_parse_frontmatter_rejects_bool_threshold(tmp_path: Path) -> None:
+    """A YAML ``true`` is a typo, not a threshold of 1."""
+    skill = _write_skill(tmp_path, threshold_line="grimoire-threshold: true")
+    with pytest.raises(SkillFrontmatterError, match="grimoire-threshold"):
+        parse_skill_frontmatter(skill)
+
+
+@pytest.mark.parametrize("out_of_range", [-0.01, 1.01, 2.0, -1.0])
+def test_parse_frontmatter_rejects_out_of_range_threshold(
+    tmp_path: Path,
+    out_of_range: float,
+) -> None:
+    skill = _write_skill(
+        tmp_path,
+        threshold_line=f"grimoire-threshold: {out_of_range}",
+        name=f"oor-{out_of_range}".replace(".", "-").replace("-", "_"),
+    )
+    with pytest.raises(SkillFrontmatterError, match=r"\[0, 1\]"):
+        parse_skill_frontmatter(skill)
+
+
+def test_parse_frontmatter_threshold_error_includes_path(tmp_path: Path) -> None:
+    """Validation errors are keyed to the offending SKILL.md path."""
+    skill = _write_skill(tmp_path, threshold_line="grimoire-threshold: 1.5")
+    with pytest.raises(SkillFrontmatterError) as excinfo:
+        parse_skill_frontmatter(skill)
+    assert str(skill) in str(excinfo.value)
+
+
+def test_load_skill_registry_threads_per_skill_threshold_to_gate(
+    tmp_path: Path,
+) -> None:
+    """End-to-end: a custom grimoire-threshold on one skill flows to Gate.seed.
+
+    The acceptance signal: build a synthetic plugins tree with two
+    skills, give one of them a non-default threshold, load through
+    `load_skill_registry`, and confirm the gate's seeded row carries
+    the override (and the other row carries the fallback).
+    """
+    skills_dir = tmp_path / "tab" / "skills"
+    skills_dir.mkdir(parents=True)
+
+    (skills_dir / "tuned").mkdir()
+    (skills_dir / "tuned" / "SKILL.md").write_text(
+        """---
+name: tuned
+description: "Tuned skill with a custom bar."
+grimoire-threshold: 0.81
+---
+
+body
+""",
+        encoding="utf-8",
+    )
+
+    (skills_dir / "default").mkdir()
+    (skills_dir / "default" / "SKILL.md").write_text(
+        """---
+name: default
+description: "Default skill, no override."
+---
+
+body
+""",
+        encoding="utf-8",
+    )
+
+    gate = _make_gate()
+    registry = load_skill_registry(tmp_path, gate=gate)
+
+    by_name = {record.name: record for record in registry.records}
+    assert by_name["tuned"].threshold == pytest.approx(0.81)
+    assert by_name["default"].threshold == DEFAULT_THRESHOLD
+
+    # And the gate received those same per-row thresholds — pull a top-1
+    # for each skill's own description so the threshold field on the
+    # returned Hit is the seeded threshold for that row.
+    tuned_hit = registry.match("Tuned skill with a custom bar.")
+    assert tuned_hit is not None
+    assert tuned_hit.name == "tuned"
+    assert tuned_hit.threshold == pytest.approx(0.81)
+
+    default_hit = registry.match("Default skill, no override.")
+    assert default_hit is not None
+    assert default_hit.name == "default"
+    assert default_hit.threshold == pytest.approx(DEFAULT_THRESHOLD)
+
+
 # --------------------------------------------------------------- loader
 
 
