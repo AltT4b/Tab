@@ -1,0 +1,23 @@
+[
+  {"query": "draw me a dinosaur", "expected": "draw-dino"},
+  {"query": "can you make an ASCII T-Rex", "expected": "draw-dino"},
+  {"query": "dinosaurs went extinct 66 million years ago", "expected": null},
+
+  {"query": "just listen for a moment, I'm thinking", "expected": "listen"},
+  {"query": "don't say anything, let me work this out", "expected": "listen"},
+  {"query": "can you listen for errors in this log?", "expected": null},
+
+  {"query": "help me think through this idea", "expected": "think"},
+  {"query": "I want to talk through a half-formed plan", "expected": "think"},
+  {"query": "what do you think about Rust?", "expected": null},
+
+  {"query": "teach me how OAuth works", "expected": "teach"},
+  {"query": "explain transformers from first principles", "expected": "teach"},
+  {"query": "what's the capital of France?", "expected": null},
+
+  {"query": "good morning", "expected": null},
+  {"query": "thanks, that worked", "expected": null},
+
+  {"query": "can you draw something cool?", "expected": "draw-dino", "notes": "Generic 'draw' request — calling it as fire because draw-dino is the only drawing skill v0 ships. Re-evaluate when a sibling drawing skill lands."},
+  {"query": "I'm overwhelmed", "expected": null, "notes": "Could route to /listen, but the trigger requires explicit listening intent. Calling it falls-through; revisit if /listen wants emotional-state pickup."}
+]
