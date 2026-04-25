@@ -147,19 +147,51 @@ def _stream_agent_turn(session: _Session, prompt: str, stdout: IO[str]) -> None:
         session.history = list(result.all_messages())
 
 
-def _handle_skill_match(name: str, stdout: IO[str]) -> None:
-    """Report that a skill matched without dispatching it.
+def _dispatch_skill(
+    session: _Session, skill_name: str, user_prompt: str, stdout: IO[str]
+) -> None:
+    """Run one streamed skill turn and merge its messages into history.
 
-    v0 boundary: per-skill dispatch logic lives in each skill's own
-    port ticket (e.g. ``01KQ2YXEDEKEGSNNW424JH763B`` for draw-dino).
-    The chat REPL's job here is to demonstrate the routing edge — that
-    grimoire fired and the agent was bypassed — not to fake a behavior
-    a port ticket will own. When a port lands, this function becomes
-    a real dispatcher that hands ``name`` off to the registered skill
-    runner.
+    The grimoire registry tells us which personality skill fired; this
+    function actually does the work — compile a skill-aware agent
+    (:func:`tab_cli.skills.compile_skill_agent` adds the skill body
+    underneath the regular Tab persona prompt), stream the response,
+    and roll the resulting messages into the session's shared history
+    so the next agent or skill turn sees the dino in context.
+
+    Errors compiling the skill agent (missing SKILL.md, malformed
+    skill name) propagate up the call stack — the REPL's outer wrapper
+    in ``cli.py`` collapses them into the standard ``tab: <reason>`` /
+    exit-1 line. We don't catch here because a per-turn skill failure
+    inside the loop should kill the session, not silently fall through
+    to the agent and confuse the user about what just happened.
     """
-    stdout.write(f"[skill match: {name} — port ticket pending]\n")
-    stdout.flush()
+    # Lazy import: keeps `tab --help` and the agent-only chat path from
+    # paying for the skill module's import cost when no skill ever fires.
+    from tab_cli.skills import compile_skill_agent
+
+    skill_agent = compile_skill_agent(
+        skill_name,
+        settings=session.settings,
+        model=session.model,
+    )
+
+    with skill_agent.run_stream_sync(
+        user_prompt,
+        message_history=session.history,
+    ) as result:
+        for chunk in result.stream_text(delta=True):
+            stdout.write(chunk)
+            stdout.flush()
+        stdout.write("\n")
+        stdout.flush()
+        # Merge into the shared history. The skill agent's system prompt
+        # differs from the regular Tab agent's, but pydantic-ai stores
+        # only the user/model message exchange in `all_messages()` —
+        # the system prompt is recomputed at each compile, so threading
+        # these messages back into the regular agent for the next turn
+        # works without prompt drift.
+        session.history = list(result.all_messages())
 
 
 def run_chat(
@@ -251,7 +283,7 @@ def run_chat(
         # — in that case ``match`` returns ``None`` and we fall through.
         hit = session.registry.match(stripped) if session.registry else None
         if hit is not None and hit.passed:
-            _handle_skill_match(hit.name, stdout)
+            _dispatch_skill(session, hit.name, stripped, stdout)
             continue
 
         # Default: route to the agent and stream the response back.

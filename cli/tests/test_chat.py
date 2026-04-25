@@ -139,25 +139,43 @@ class _StubRegistry:
 
 
 @contextmanager
-def _patched_compile(stub_agent: _StubAgent) -> Iterator[list[dict[str, Any]]]:
-    """Patch ``compile_tab_agent`` to return ``stub_agent`` and record kwargs.
+def _patched_compile(
+    stub_agent: _StubAgent,
+    skill_agent: _StubAgent | None = None,
+) -> Iterator[tuple[list[dict[str, Any]], list[dict[str, Any]]]]:
+    """Patch the agent factories used by the REPL.
 
-    Two patches: the source module (where the REPL imports from) and
-    ``tab_cli.chat`` (in case the REPL imports it at module level in a
-    future refactor). Yields the kwargs-list so tests can assert what
-    was passed in.
+    Two factories live in the call path: ``compile_tab_agent`` (the
+    regular Tab persona agent — every chat turn that misses the skill
+    registry) and ``compile_skill_agent`` (built per-skill-dispatch by
+    the chat module's ``_dispatch_skill``). Yields ``(tab_calls,
+    skill_calls)`` so tests can assert which factory ran and with which
+    kwargs. ``skill_agent`` defaults to a fresh empty ``_StubAgent`` so
+    a skill match in a test that didn't preload it gets sensible
+    "ok"-stream behaviour from the agent stub instead of crashing.
     """
-    calls: list[dict[str, Any]] = []
+    tab_calls: list[dict[str, Any]] = []
+    skill_calls: list[dict[str, Any]] = []
+    skill_agent_to_return = skill_agent if skill_agent is not None else _StubAgent()
 
-    def _factory(**kwargs: Any) -> _StubAgent:
-        calls.append(kwargs)
+    def _tab_factory(**kwargs: Any) -> _StubAgent:
+        tab_calls.append(kwargs)
         return stub_agent
 
+    def _skill_factory(skill_name: str, **kwargs: Any) -> _StubAgent:
+        # Skill name is the first positional arg in
+        # `compile_skill_agent`; capture it alongside the kwargs so a
+        # test can assert which skill was dispatched.
+        skill_calls.append({"skill_name": skill_name, **kwargs})
+        return skill_agent_to_return
+
     with (
-        patch("tab_cli.personality.compile_tab_agent", _factory),
-        patch("tab_cli.chat.compile_tab_agent", _factory),
+        patch("tab_cli.personality.compile_tab_agent", _tab_factory),
+        patch("tab_cli.chat.compile_tab_agent", _tab_factory),
+        patch("tab_cli.skills.compile_skill_agent", _skill_factory),
+        patch("tab_cli.chat.compile_skill_agent", _skill_factory, create=True),
     ):
-        yield calls
+        yield tab_calls, skill_calls
 
 
 def _run_chat_with_input(
@@ -166,20 +184,21 @@ def _run_chat_with_input(
     agent: _StubAgent,
     registry: _StubRegistry | None = None,
     model: str | None = None,
-) -> tuple[str, list[dict[str, Any]]]:
-    """Drive the REPL with stdin=``text`` and return (stdout, compile_calls)."""
+    skill_agent: _StubAgent | None = None,
+) -> tuple[str, list[dict[str, Any]], list[dict[str, Any]]]:
+    """Drive the REPL with stdin=``text`` and return ``(stdout, tab_calls, skill_calls)``."""
     from tab_cli.chat import run_chat
 
     stdin = io.StringIO(text)
     stdout = io.StringIO()
-    with _patched_compile(agent) as compile_calls:
+    with _patched_compile(agent, skill_agent=skill_agent) as (tab_calls, skill_calls):
         run_chat(
             model=model,
             registry=registry if registry is not None else _StubRegistry(),
             stdin=stdin,
             stdout=stdout,
         )
-    return stdout.getvalue(), compile_calls
+    return stdout.getvalue(), tab_calls, skill_calls
 
 
 # -------------------------------------------------------------------- tests
@@ -187,7 +206,7 @@ def _run_chat_with_input(
 
 def test_eof_exits_cleanly() -> None:
     agent = _StubAgent()
-    out, _ = _run_chat_with_input("", agent=agent)
+    out, _, _ = _run_chat_with_input("", agent=agent)
     # Greeting was printed.
     assert "tab" in out.lower()
     # No agent call — EOF on the first prompt.
@@ -196,7 +215,7 @@ def test_eof_exits_cleanly() -> None:
 
 def test_slash_exit_ends_loop_without_calling_agent() -> None:
     agent = _StubAgent()
-    out, _ = _run_chat_with_input("/exit\n", agent=agent)
+    out, _, _ = _run_chat_with_input("/exit\n", agent=agent)
     assert agent.runs == []
     # Greeting and prompt rendered, no traceback.
     assert "tab" in out.lower()
@@ -204,7 +223,7 @@ def test_slash_exit_ends_loop_without_calling_agent() -> None:
 
 def test_slash_quit_also_exits() -> None:
     agent = _StubAgent()
-    _, _ = _run_chat_with_input("/quit\n", agent=agent)
+    _, _, _ = _run_chat_with_input("/quit\n", agent=agent)
     assert agent.runs == []
 
 
@@ -213,7 +232,7 @@ def test_unmatched_input_routes_to_agent_and_streams_output() -> None:
     agent = _StubAgent(
         response_stream=[(["hel", "lo ", "there"], [object(), object()])]
     )
-    out, _ = _run_chat_with_input("hi tab\n/exit\n", agent=agent)
+    out, _, _ = _run_chat_with_input("hi tab\n/exit\n", agent=agent)
     # Stream chunks all reached stdout in order.
     assert "hello there" in out
     # Agent was called exactly once with the user's prompt.
@@ -221,20 +240,73 @@ def test_unmatched_input_routes_to_agent_and_streams_output() -> None:
     assert agent.runs[0]["user_prompt"] == "hi tab"
 
 
-def test_skill_match_bypasses_agent_and_names_the_skill() -> None:
-    """Acceptance signal #2: registry hit dispatches the skill, not the agent."""
-    agent = _StubAgent()
+def test_skill_match_dispatches_skill_agent_not_persona_agent() -> None:
+    """Acceptance signal #2: registry hit routes to the skill agent.
+
+    ``_dispatch_skill`` compiles a skill-aware agent (Tab persona +
+    SKILL.md body) and runs *that* against the user prompt. The regular
+    persona-agent factory must not see the turn — the test stubs both
+    factories and asserts the routing edge.
+    """
+    persona_agent = _StubAgent()
+    skill_agent = _StubAgent(
+        response_stream=[(["    /\\__/\\\n   ( o.o )"], [object(), object()])]
+    )
     registry = _StubRegistry(
         responder=lambda q: _StubHit(name="draw-dino", passed=True)
         if "dinosaur" in q
         else None
     )
-    out, _ = _run_chat_with_input(
-        "draw me a dinosaur\n/exit\n", agent=agent, registry=registry
+    out, tab_calls, skill_calls = _run_chat_with_input(
+        "draw me a dinosaur\n/exit\n",
+        agent=persona_agent,
+        skill_agent=skill_agent,
+        registry=registry,
     )
-    assert "draw-dino" in out, out
-    # Agent was NOT called for the skill turn.
-    assert agent.runs == []
+
+    # Persona agent was bypassed; skill agent ran exactly once.
+    assert persona_agent.runs == []
+    assert len(skill_agent.runs) == 1
+    assert skill_agent.runs[0]["user_prompt"] == "draw me a dinosaur"
+
+    # The skill compile saw the matched skill name.
+    assert len(skill_calls) == 1
+    assert skill_calls[0]["skill_name"] == "draw-dino"
+
+    # The skill's streamed output reached stdout.
+    assert "/\\__/\\" in out
+
+    # The persona-agent factory was still called once at session start
+    # (that's how the REPL builds the default Tab agent), but never
+    # for the skill turn.
+    assert len(tab_calls) == 1
+
+
+def test_skill_match_threads_messages_into_session_history() -> None:
+    """Skill turn's ``all_messages()`` must roll into the session history.
+
+    Otherwise the next agent turn loses context — the user's "what did
+    you just draw?" follow-up wouldn't see the dino exchange.
+    """
+    persona_agent = _StubAgent(response_stream=[(["a brontosaurus"], [object()])])
+    skill_agent = _StubAgent(response_stream=[(["dino-art"], ["skill-msg-1"])])
+    registry = _StubRegistry(
+        responder=lambda q: _StubHit(name="draw-dino", passed=True)
+        if "dinosaur" in q
+        else None
+    )
+
+    _, _, _ = _run_chat_with_input(
+        "draw me a dinosaur\nwhat was that?\n/exit\n",
+        agent=persona_agent,
+        skill_agent=skill_agent,
+        registry=registry,
+    )
+
+    # Second turn (the persona agent) must see the skill turn's
+    # messages threaded in as message_history.
+    assert len(persona_agent.runs) == 1
+    assert persona_agent.runs[0]["message_history"] == ["skill-msg-1"]
 
 
 def test_below_threshold_hit_falls_through_to_agent() -> None:
@@ -243,7 +315,7 @@ def test_below_threshold_hit_falls_through_to_agent() -> None:
     registry = _StubRegistry(
         responder=lambda _q: _StubHit(name="draw-dino", passed=False)
     )
-    out, _ = _run_chat_with_input(
+    out, _, _ = _run_chat_with_input(
         "ambient draw something\n/exit\n", agent=agent, registry=registry
     )
     assert "fallback" in out
@@ -256,7 +328,7 @@ def test_history_persists_across_turns() -> None:
     turn2 = (["two"], ["msg-from-turn-1", "msg-from-turn-2"])
     agent = _StubAgent(response_stream=[turn1, turn2])
 
-    out, _ = _run_chat_with_input("first\nsecond\n/exit\n", agent=agent)
+    out, _, _ = _run_chat_with_input("first\nsecond\n/exit\n", agent=agent)
 
     assert "one" in out
     assert "two" in out
@@ -271,7 +343,7 @@ def test_set_humor_command_recompiles_agent_with_new_setting() -> None:
     """Acceptance signal #4: numeric set commands mutate the active settings."""
     agent = _StubAgent(response_stream=[(["after"], [object()])])
 
-    out, calls = _run_chat_with_input(
+    out, calls, _ = _run_chat_with_input(
         "set humor to 90%\nhello\n/exit\n", agent=agent
     )
 
@@ -298,7 +370,7 @@ def test_comparative_phrase_falls_through_to_agent() -> None:
     """
     agent = _StubAgent(response_stream=[(["agent fielded it"], [object()])])
 
-    out, calls = _run_chat_with_input("be more direct\n/exit\n", agent=agent)
+    out, calls, _ = _run_chat_with_input("be more direct\n/exit\n", agent=agent)
 
     # Only the session-start compile — no settings change happened.
     assert len(calls) == 1
@@ -310,7 +382,7 @@ def test_set_command_clamps_out_of_range_value() -> None:
     """Out-of-range numeric values clamp to [0, 100] rather than reject."""
     agent = _StubAgent()
 
-    _, calls = _run_chat_with_input("set humor to 250\n/exit\n", agent=agent)
+    _, calls, _ = _run_chat_with_input("set humor to 250\n/exit\n", agent=agent)
 
     assert calls[1]["settings"].humor == 100
 
@@ -321,7 +393,7 @@ def test_setting_change_does_not_reset_history() -> None:
     turn2 = (["second"], ["msg-1", "msg-2"])
     agent = _StubAgent(response_stream=[turn1, turn2])
 
-    _, _ = _run_chat_with_input(
+    _, _, _ = _run_chat_with_input(
         "hello\nset humor to 20%\nhi again\n/exit\n", agent=agent
     )
 
@@ -332,7 +404,7 @@ def test_setting_change_does_not_reset_history() -> None:
 def test_model_kwarg_is_passed_through_to_compile() -> None:
     """``--model`` must round-trip into ``compile_tab_agent``."""
     agent = _StubAgent()
-    _, calls = _run_chat_with_input(
+    _, calls, _ = _run_chat_with_input(
         "/exit\n", agent=agent, model="anthropic:claude-sonnet-4-7"
     )
     assert calls[0]["model"] == "anthropic:claude-sonnet-4-7"
@@ -341,7 +413,7 @@ def test_model_kwarg_is_passed_through_to_compile() -> None:
 def test_empty_lines_are_skipped() -> None:
     """Whitespace-only input shouldn't trigger an agent call."""
     agent = _StubAgent(response_stream=[(["actual response"], [object()])])
-    out, _ = _run_chat_with_input("\n   \nhello\n/exit\n", agent=agent)
+    out, _, _ = _run_chat_with_input("\n   \nhello\n/exit\n", agent=agent)
     assert "actual response" in out
     # Only the non-blank line reached the agent.
     assert len(agent.runs) == 1

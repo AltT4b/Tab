@@ -290,6 +290,81 @@ def mcp(
         raise typer.Exit(code=1) from exc
 
 
+@app.command("draw-dino")
+def draw_dino(
+    request: list[str] = typer.Argument(
+        None,
+        metavar="[REQUEST]...",
+        help=(
+            "Optional free-form request (e.g. 'a cute baby pterodactyl'). "
+            "Words are joined with single spaces and forwarded to the skill "
+            "as the user prompt. Omit for the skill's default 'pick something' "
+            "behavior."
+        ),
+        show_default=False,
+    ),
+    model: str | None = typer.Option(
+        None,
+        "--model",
+        help=(
+            "pydantic-ai model name in <provider:model> form "
+            "(e.g. anthropic:claude-sonnet-4)."
+        ),
+        show_default=False,
+    ),
+    humor: int | None = _DIAL_OPTS["humor"],
+    directness: int | None = _DIAL_OPTS["directness"],
+    warmth: int | None = _DIAL_OPTS["warmth"],
+    autonomy: int | None = _DIAL_OPTS["autonomy"],
+    verbosity: int | None = _DIAL_OPTS["verbosity"],
+) -> None:
+    """Draw an ASCII dinosaur — direct port of the ``draw-dino`` skill.
+
+    Runs ``plugins/tab/skills/draw-dino/SKILL.md`` as the system-prompt
+    delta on top of the Tab persona, prints the result to stdout, and
+    exits. The same readable-error / non-zero exit contract as
+    ``tab ask`` applies — missing model configuration, network failure,
+    or a missing SKILL.md collapses to a single ``tab: <reason>`` line
+    on stderr.
+
+    The optional ``REQUEST`` words are concatenated with spaces and
+    forwarded to the skill as the user prompt. Skipping it is fine; the
+    skill's body picks a dino on its own.
+    """
+    for name, value in (
+        ("humor", humor),
+        ("directness", directness),
+        ("warmth", warmth),
+        ("autonomy", autonomy),
+        ("verbosity", verbosity),
+    ):
+        _validate_dial(name, value)
+
+    settings = _resolve_settings(humor, directness, warmth, autonomy, verbosity)
+
+    # Empty list (no positional args) -> empty string. The SKILL.md
+    # explicitly handles the "no specific species" path, so we don't
+    # need to fabricate a default prompt here.
+    user_input = " ".join(request) if request else ""
+
+    # Lazy import: keeps `tab --help` and unrelated subcommands from
+    # paying for pydantic-ai's import cost. Same pattern as `tab ask`.
+    from tab_cli.skills import run_skill
+
+    try:
+        output = run_skill(
+            "draw-dino",
+            user_input,
+            settings=settings,
+            model=model,
+        )
+    except Exception as exc:  # noqa: BLE001 — collapse to readable error
+        typer.echo(f"tab: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+
+    typer.echo(output)
+
+
 @app.command("chat")
 def chat(
     model: str | None = typer.Option(
