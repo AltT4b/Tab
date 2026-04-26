@@ -32,6 +32,7 @@ plugins/
     skills/think/SKILL.md           #   /think — conversational idea capture
   tab-for-projects/                 # "tab-for-projects" plugin package
     .claude-plugin/plugin.json      #   Plugin metadata (agents, skills, version)
+    agents/advocate.md              #   Advocate subagent — adversarial position-defender; takes assigned position + archaeologist report + design question, returns strongest case with file/line and doc/passage anchors; explicitly non-neutral; dispatched by /design in parallel after archaeologist runs on contested decisions; no KB writes, no code edits
     agents/archaeologist.md         #   Archaeologist subagent — autonomous design synthesis; reads code + project KB, produces structured design summary; closes design tasks on clean synthesis, picks sane defaults and flags them on real forks; no KB writes, no code edits
     agents/bug-hunter.md            #   Bug-hunter subagent — targeted codebase investigation; structured report with file+line anchors; no edits, no backlog writes
     agents/developer.md             #   Developer subagent — worktree-only; atomic on code + tests; commits in the worktree; never merges
@@ -117,6 +118,7 @@ If the joke doesn't land in a line, it's too much. A body is fine when context g
 | `plugins/tab/.claude-plugin/plugin.json` | Tab plugin manifest |
 | `plugins/tab-for-projects/.claude-plugin/plugin.json` | Tab for Projects plugin manifest |
 | `plugins/tab/agents/tab.md` | Tab agent — personality, profiles, settings |
+| `plugins/tab-for-projects/agents/advocate.md` | Advocate subagent — adversarial position-defender; takes an assigned position + archaeologist report + design question, returns the strongest case with file/line and doc/passage anchors; explicitly non-neutral; dispatched by `/design` in parallel after `archaeologist` runs on contested decisions; no KB writes, no code edits |
 | `plugins/tab-for-projects/agents/archaeologist.md` | Archaeologist subagent — autonomous design synthesis; reads code + project KB, returns a structured summary with resolved and flagged decisions; closes design tasks on clean synthesis; no KB writes, no code edits |
 | `plugins/tab-for-projects/agents/developer.md` | Developer subagent — worktree-only; writes code + tests atomically; commits in the worktree; never merges |
 | `plugins/tab-for-projects/agents/project-planner.md` | Project-planner subagent — expert codebase reader; takes a well-formed prompt and acts on the project backlog: creates tasks for uncaptured work, grooms below-bar tasks to the quality bar for their effort, searches the KB, reads the codebase; falls back to design tickets for forks it can't resolve; never writes KB docs, never edits code |
