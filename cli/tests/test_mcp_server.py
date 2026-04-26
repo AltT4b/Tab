@@ -305,9 +305,13 @@ def test_mcp_invokes_run_server_with_resolved_settings(
     runner: CliRunner, monkeypatch: pytest.MonkeyPatch, tmp_path: Any
 ) -> None:
     """The Typer wrapper resolves settings + model and hands them to the server."""
-    # Isolate XDG so a real user config can't leak into the assertion.
-    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
-    (tmp_path / "tab").mkdir()
+    # Isolate ``Path.home()`` so a real user config can't leak into
+    # the assertion. Tab no longer honors XDG_CONFIG_HOME — it reads
+    # ``~/.tab/config.toml`` derived from ``Path.home()``.
+    from pathlib import Path
+
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+    (tmp_path / ".tab").mkdir()
 
     captured: dict[str, Any] = {}
 

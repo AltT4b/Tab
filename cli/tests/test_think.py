@@ -58,9 +58,16 @@ def runner() -> CliRunner:
 def isolated_xdg(
     tmp_path: Any, monkeypatch: pytest.MonkeyPatch
 ) -> Any:
-    """Empty ``XDG_CONFIG_HOME`` so config lookups don't read a real file."""
-    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
-    tab_dir = tmp_path / "tab"
+    """Sandbox ``Path.home()`` so config lookups don't read a real file.
+
+    Name is a holdover from XDG_CONFIG_HOME days; Tab now uses
+    dotfile-style ``~/.tab/``. Returns ``<tmp>/.tab/`` for tests that
+    write a config file.
+    """
+    from pathlib import Path
+
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+    tab_dir = tmp_path / ".tab"
     tab_dir.mkdir()
     return tab_dir
 

@@ -1,4 +1,11 @@
-"""Tests for `tab_cli.config.load_settings_from_config`."""
+"""Tests for `tab_cli.config` loaders.
+
+Two loaders share file location and warning conventions:
+:func:`load_settings_from_config` (personality dials) and
+:func:`load_default_model_from_config` (the default model identifier).
+Both honor missing-file silence, malformed-file single-warning,
+per-value drops with a warning.
+"""
 
 from __future__ import annotations
 
@@ -6,14 +13,24 @@ from pathlib import Path
 
 import pytest
 
-from tab_cli.config import load_settings_from_config
+from tab_cli.config import (
+    load_default_model_from_config,
+    load_settings_from_config,
+)
 
 
 @pytest.fixture
 def fake_xdg(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """Point `XDG_CONFIG_HOME` at a tmp dir and return the tab/ subdir."""
-    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
-    tab_dir = tmp_path / "tab"
+    """Sandbox ``Path.home()`` and return the ``.tab/`` subdir.
+
+    Name is a holdover from when the loader honored ``XDG_CONFIG_HOME``;
+    Tab now uses the dotfile-style ``~/.tab/`` layout, so the fixture
+    patches ``Path.home()`` to a tmp directory and returns ``<tmp>/.tab/``.
+    Tests keep their existing shape:
+    ``(fake_xdg / "config.toml").write_text(...)``.
+    """
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+    tab_dir = tmp_path / ".tab"
     tab_dir.mkdir()
     return tab_dir
 
@@ -21,8 +38,8 @@ def fake_xdg(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 def test_missing_file_returns_empty_dict(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
-    # No tab/config.toml created.
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+    # No .tab/config.toml created.
     result = load_settings_from_config()
     assert result == {}
     # Missing file is a silent no-op.
@@ -138,26 +155,141 @@ def test_missing_settings_table(fake_xdg: Path) -> None:
     assert load_settings_from_config() == {}
 
 
-def test_xdg_config_home_redirects_path(
+def test_config_path_resolves_under_home_dot_tab(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    elsewhere = tmp_path / "elsewhere"
-    (elsewhere / "tab").mkdir(parents=True)
-    (elsewhere / "tab" / "config.toml").write_text("[settings]\nhumor = 42\n")
+    """Config path is ``~/.tab/config.toml``, derived from ``Path.home()``.
 
-    # The default ~/.config path should NOT be used.
-    monkeypatch.setenv("XDG_CONFIG_HOME", str(elsewhere))
-    assert load_settings_from_config() == {"humor": 42}
-
-
-def test_xdg_unset_falls_back_to_home_config(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
+    Before the move, the loader honored ``XDG_CONFIG_HOME`` and fell back
+    to ``~/.config/tab/`` — there were two tests exercising both legs of
+    that. Tab now uses dotfile-style ``~/.tab/`` exclusively, so this
+    one test pins the canonical resolution: patch ``Path.home()``, write
+    ``<home>/.tab/config.toml``, confirm the loader reads it. The
+    ``XDG_CONFIG_HOME`` env var is intentionally not honored — that
+    behavior is gone.
+    """
     fake_home = tmp_path / "home"
-    (fake_home / ".config" / "tab").mkdir(parents=True)
-    (fake_home / ".config" / "tab" / "config.toml").write_text(
+    (fake_home / ".tab").mkdir(parents=True)
+    (fake_home / ".tab" / "config.toml").write_text(
         "[settings]\nautonomy = 55\n"
     )
     monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
     assert load_settings_from_config() == {"autonomy": 55}
+
+
+def test_xdg_config_home_is_not_honored(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``XDG_CONFIG_HOME`` must NOT redirect the lookup any more.
+
+    Pin this so a future refactor doesn't accidentally restore XDG
+    support without a deliberate decision. The user's home is the only
+    thing that determines the config path now.
+    """
+    # Set XDG to a path that has a config.toml under tab/.
+    elsewhere = tmp_path / "elsewhere"
+    (elsewhere / "tab").mkdir(parents=True)
+    (elsewhere / "tab" / "config.toml").write_text(
+        "[settings]\nhumor = 42\n"
+    )
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(elsewhere))
+
+    # Point Path.home() at a separate empty dir — the loader must read
+    # from there (and find nothing) rather than honoring the XDG env
+    # var.
+    fake_home = tmp_path / "home"
+    fake_home.mkdir()
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
+
+    assert load_settings_from_config() == {}
+
+
+# --------------------------------------------------------------- model.default
+
+
+def test_default_model_missing_file_returns_none(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """No config file at all → ``None``, silently. No warning."""
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+    assert load_default_model_from_config() is None
+    assert capsys.readouterr().err == ""
+
+
+def test_default_model_missing_section_returns_none(
+    fake_xdg: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """File exists but has no ``[model]`` section → ``None``, silently."""
+    (fake_xdg / "config.toml").write_text("[settings]\nhumor = 65\n")
+    assert load_default_model_from_config() is None
+    assert capsys.readouterr().err == ""
+
+
+def test_default_model_returns_configured_value(fake_xdg: Path) -> None:
+    """Standard happy path."""
+    (fake_xdg / "config.toml").write_text(
+        '[model]\ndefault = "anthropic:claude-sonnet-4-5"\n'
+    )
+    assert load_default_model_from_config() == "anthropic:claude-sonnet-4-5"
+
+
+def test_default_model_strips_whitespace(fake_xdg: Path) -> None:
+    """Leading/trailing whitespace gets stripped — copy-paste from a
+    setup doc shouldn't fail with a confusing 'model not found' later."""
+    (fake_xdg / "config.toml").write_text(
+        '[model]\ndefault = "  ollama:gemma4:latest  "\n'
+    )
+    assert load_default_model_from_config() == "ollama:gemma4:latest"
+
+
+def test_default_model_empty_string_warns_and_returns_none(
+    fake_xdg: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Empty string is invalid — warn so the user knows the config
+    didn't take effect, return ``None`` so the resolver falls through."""
+    (fake_xdg / "config.toml").write_text('[model]\ndefault = ""\n')
+    assert load_default_model_from_config() is None
+    assert "ignoring invalid model.default" in capsys.readouterr().err
+
+
+def test_default_model_non_string_warns_and_returns_none(
+    fake_xdg: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A non-string ``default`` (int, bool, etc.) is malformed — warn,
+    return ``None``."""
+    (fake_xdg / "config.toml").write_text("[model]\ndefault = 42\n")
+    assert load_default_model_from_config() is None
+    assert "ignoring invalid model.default" in capsys.readouterr().err
+
+
+def test_default_model_section_must_be_table(
+    fake_xdg: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """``model = "..."`` (not a table) is malformed at the section level.
+    Warn rather than guessing the user's intent."""
+    (fake_xdg / "config.toml").write_text('model = "anthropic:claude-sonnet-4-5"\n')
+    assert load_default_model_from_config() is None
+    assert "must be a TOML table" in capsys.readouterr().err
+
+
+def test_default_model_malformed_toml_warns_once(
+    fake_xdg: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Malformed TOML → one stderr warning, return ``None``."""
+    (fake_xdg / "config.toml").write_text("[model\ndefault = oops\n")
+    assert load_default_model_from_config() is None
+    assert "ignoring malformed config" in capsys.readouterr().err
+
+
+def test_default_model_path_resolves_under_home_dot_tab(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The default-model loader uses the same ``~/.tab/config.toml`` path
+    as the settings loader. Pin both ends of the contract."""
+    fake_home = tmp_path / "home"
+    (fake_home / ".tab").mkdir(parents=True)
+    (fake_home / ".tab" / "config.toml").write_text(
+        '[model]\ndefault = "anthropic:claude-haiku"\n'
+    )
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
+    assert load_default_model_from_config() == "anthropic:claude-haiku"

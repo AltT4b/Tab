@@ -470,3 +470,235 @@ def test_compile_tab_agent_none_model_passes_through():
     # We just confirm we didn't accidentally route ``None`` through
     # the Ollama branch.
     assert not isinstance(agent.model, OllamaNativeModel)
+
+
+# --- streaming: OllamaNativeModel.request_stream + _OllamaStreamedResponse ---
+
+
+def _async_iter(items: list[Any]) -> Any:
+    """Wrap a list as an async iterator for stream-streamed-response stubs.
+
+    ``ollama-python``'s ``AsyncClient.chat(stream=True)`` returns an
+    async iterator; tests that mock the client need to return one with
+    the same shape. ``aiter`` doesn't have a builtin one-liner, so we
+    define a tiny generator here.
+    """
+
+    async def _gen():
+        for item in items:
+            yield item
+
+    return _gen()
+
+
+def test_request_stream_yields_text_deltas_through_parts_manager():
+    """Streamed ``message.content`` fragments must reach the parts
+    manager as text deltas. The parts manager produces ``PartStartEvent``
+    on the first delta and ``PartDeltaEvent`` on subsequent ones; the
+    chat REPL's ``stream_text(delta=True)`` reads those events and
+    returns the concatenated text."""
+    model = OllamaNativeModel("gemma3:latest")
+
+    # Three streamed chunks: greeting, body, final period.
+    chunks = [
+        ChatResponse(
+            model="gemma3:latest",
+            message=Message(role="assistant", content="hello"),
+        ),
+        ChatResponse(
+            model="gemma3:latest",
+            message=Message(role="assistant", content=", "),
+        ),
+        ChatResponse(
+            model="gemma3:latest",
+            message=Message(role="assistant", content="world."),
+            done=True,
+        ),
+    ]
+
+    model._client = AsyncMock()
+    model._client.chat.return_value = _async_iter(chunks)
+
+    request_params = ModelRequestParameters(
+        function_tools=[],
+        output_mode="text",
+        output_object=None,
+        output_tools=[],
+        allow_text_output=True,
+    )
+
+    async def _drain() -> str:
+        out: list[str] = []
+        async with model.request_stream(
+            messages=[ModelRequest(parts=[UserPromptPart(content="hi")])],
+            model_settings=None,
+            model_request_parameters=request_params,
+        ) as streamed:
+            # Iterate the events; the parts manager builds up a
+            # TextPart we then read out. Most chat code uses
+            # ``stream_text(delta=True)`` which sits on top of this.
+            async for _event in streamed:
+                pass
+            # ``streamed.get()`` returns the assembled ``ModelResponse``
+            # built from the parts manager's accumulated parts.
+            response = streamed.get()
+            for part in response.parts:
+                if isinstance(part, TextPart):
+                    out.append(part.content)
+        return "".join(out)
+
+    text = _run(_drain())
+    assert text == "hello, world."
+
+
+def test_request_stream_passes_messages_and_tools_to_client():
+    """The streamed path must call ``AsyncClient.chat`` with
+    ``stream=True`` and the same translated payload the non-stream
+    path uses."""
+    model = OllamaNativeModel("gemma3:latest")
+    model._client = AsyncMock()
+    model._client.chat.return_value = _async_iter(
+        [
+            ChatResponse(
+                model="gemma3:latest",
+                message=Message(role="assistant", content="ok"),
+                done=True,
+            )
+        ]
+    )
+
+    tool = ToolDefinition(
+        name="web_search",
+        description="search",
+        parameters_json_schema={"type": "object", "properties": {}},
+    )
+    request_params = ModelRequestParameters(
+        function_tools=[tool],
+        output_mode="text",
+        output_object=None,
+        output_tools=[],
+        allow_text_output=True,
+    )
+
+    async def _drain() -> None:
+        async with model.request_stream(
+            messages=[
+                ModelRequest(
+                    parts=[
+                        SystemPromptPart(content="be tab"),
+                        UserPromptPart(content="search please"),
+                    ]
+                )
+            ],
+            model_settings=None,
+            model_request_parameters=request_params,
+        ) as streamed:
+            async for _event in streamed:
+                pass
+
+    _run(_drain())
+
+    call_kwargs = model._client.chat.await_args.kwargs
+    assert call_kwargs["model"] == "gemma3:latest"
+    assert call_kwargs["stream"] is True
+    assert call_kwargs["messages"] == [
+        {"role": "system", "content": "be tab"},
+        {"role": "user", "content": "search please"},
+    ]
+    # Tools translate the same way they do for the non-stream path.
+    assert call_kwargs["tools"] is not None
+    assert call_kwargs["tools"][0]["function"]["name"] == "web_search"
+
+
+def test_request_stream_emits_tool_call_when_chunk_has_tool_calls():
+    """When a streamed chunk carries ``tool_calls``, the parts manager
+    must see a tool-call delta. Ollama doesn't typically stream tool-call
+    arguments token-by-token — it emits the full call as a single chunk
+    after text streaming completes — so the model's resulting parts
+    list contains both a ``TextPart`` and a ``ToolCallPart``."""
+    model = OllamaNativeModel("gemma3:latest")
+
+    chunks = [
+        ChatResponse(
+            model="gemma3:latest",
+            message=Message(role="assistant", content="searching"),
+        ),
+        ChatResponse(
+            model="gemma3:latest",
+            message=Message(
+                role="assistant",
+                content="",
+                tool_calls=[
+                    Message.ToolCall(
+                        function=Message.ToolCall.Function(
+                            name="web_search",
+                            arguments={"query": "ollama streaming"},
+                        )
+                    )
+                ],
+            ),
+            done=True,
+        ),
+    ]
+
+    model._client = AsyncMock()
+    model._client.chat.return_value = _async_iter(chunks)
+
+    request_params = ModelRequestParameters(
+        function_tools=[],
+        output_mode="text",
+        output_object=None,
+        output_tools=[],
+        allow_text_output=True,
+    )
+
+    async def _drain() -> Any:
+        async with model.request_stream(
+            messages=[ModelRequest(parts=[UserPromptPart(content="search")])],
+            model_settings=None,
+            model_request_parameters=request_params,
+        ) as streamed:
+            async for _event in streamed:
+                pass
+            return streamed.get()
+
+    response = _run(_drain())
+
+    # One TextPart ('searching'), one ToolCallPart ('web_search'). The
+    # parts manager order matches the chunk order.
+    text_parts = [p for p in response.parts if isinstance(p, TextPart)]
+    tool_parts = [p for p in response.parts if isinstance(p, ToolCallPart)]
+    assert len(text_parts) == 1
+    assert text_parts[0].content == "searching"
+    assert len(tool_parts) == 1
+    assert tool_parts[0].tool_name == "web_search"
+    assert tool_parts[0].args == {"query": "ollama streaming"}
+
+
+def test_streamed_response_metadata_properties():
+    """``model_name``, ``provider_name``, ``provider_url``, and
+    ``timestamp`` round-trip cleanly. These hit the agent loop's
+    diagnostic surface and need to be answerable without making a
+    real request."""
+    from datetime import datetime
+
+    from tab_cli.models.ollama_native import _OllamaStreamedResponse
+
+    request_params = ModelRequestParameters(
+        function_tools=[],
+        output_mode="text",
+        output_object=None,
+        output_tools=[],
+        allow_text_output=True,
+    )
+    streamed = _OllamaStreamedResponse(
+        model_request_parameters=request_params,
+        _model_name="gemma3:latest",
+        _provider_url="http://localhost:11434",
+        _response=None,
+    )
+
+    assert streamed.model_name == "gemma3:latest"
+    assert streamed.provider_name == "ollama"
+    assert streamed.provider_url == "http://localhost:11434"
+    assert isinstance(streamed.timestamp, datetime)

@@ -182,22 +182,27 @@ def _stream_agent_turn(session: _Session, prompt: str, stdout: IO[str]) -> None:
     stream is fully drained — appending those to the session's history
     preserves cross-turn context for the next call.
     """
-    with session.agent.run_stream_sync(
+    # ``run_stream_sync`` returns a ``StreamedRunResultSync`` directly
+    # — not a context manager. (Earlier code used ``with ... as result``
+    # which only worked because test fakes happened to be context-manager-
+    # shaped; live pydantic-ai surfaces a TypeError.) Iterate the result
+    # straight, write deltas as they arrive.
+    result = session.agent.run_stream_sync(
         prompt,
         message_history=session.history,
-    ) as result:
-        for chunk in result.stream_text(delta=True):
-            stdout.write(chunk)
-            stdout.flush()
-        stdout.write("\n")
+    )
+    for chunk in result.stream_text(delta=True):
+        stdout.write(chunk)
         stdout.flush()
-        # Replace history wholesale: ``all_messages()`` returns the
-        # complete conversation including this turn's user prompt and
-        # model response. Appending ``new_messages()`` to ``history``
-        # would also work but ``all_messages`` is the documented "this
-        # is the canonical history" accessor and matches what tests can
-        # assert on.
-        session.history = list(result.all_messages())
+    stdout.write("\n")
+    stdout.flush()
+    # Replace history wholesale: ``all_messages()`` returns the
+    # complete conversation including this turn's user prompt and
+    # model response. Appending ``new_messages()`` to ``history``
+    # would also work but ``all_messages`` is the documented "this
+    # is the canonical history" accessor and matches what tests can
+    # assert on.
+    session.history = list(result.all_messages())
 
 
 def _dispatch_skill(
@@ -230,22 +235,24 @@ def _dispatch_skill(
         tools=_tools_for_skill(skill_name),
     )
 
-    with skill_agent.run_stream_sync(
+    # See ``_stream_agent_turn`` — ``run_stream_sync`` returns the
+    # ``StreamedRunResultSync`` directly, not a context manager.
+    result = skill_agent.run_stream_sync(
         user_prompt,
         message_history=session.history,
-    ) as result:
-        for chunk in result.stream_text(delta=True):
-            stdout.write(chunk)
-            stdout.flush()
-        stdout.write("\n")
+    )
+    for chunk in result.stream_text(delta=True):
+        stdout.write(chunk)
         stdout.flush()
-        # Merge into the shared history. The skill agent's system prompt
-        # differs from the regular Tab agent's, but pydantic-ai stores
-        # only the user/model message exchange in `all_messages()` —
-        # the system prompt is recomputed at each compile, so threading
-        # these messages back into the regular agent for the next turn
-        # works without prompt drift.
-        session.history = list(result.all_messages())
+    stdout.write("\n")
+    stdout.flush()
+    # Merge into the shared history. The skill agent's system prompt
+    # differs from the regular Tab agent's, but pydantic-ai stores
+    # only the user/model message exchange in `all_messages()` —
+    # the system prompt is recomputed at each compile, so threading
+    # these messages back into the regular agent for the next turn
+    # works without prompt drift.
+    session.history = list(result.all_messages())
 
 
 def run_chat(
@@ -353,6 +360,17 @@ def run_chat(
         # — in that case ``match`` returns ``None`` and we fall through.
         hit = session.registry.match(stripped) if session.registry else None
         if hit is not None and hit.passed:
+            # Announce the dispatch before streaming the skill's
+            # response. Without this, a grimoire match is invisible —
+            # the user types, sees a different-shaped reply, and has
+            # no signal that routing happened. Important when a match
+            # is surprising (e.g. ``hello`` matching ``hey-tab``).
+            # Only fires on the entry turn; sticky-mode continuations
+            # take the ``session.active_skill`` branch above and stay
+            # quiet, which matches the intent — once you're inside
+            # ``listen``, every line is the skill, no need to re-announce.
+            stdout.write(f"[skill: {hit.name}]\n")
+            stdout.flush()
             _dispatch_skill(session, hit.name, stripped, stdout)
             # Sticky skills (e.g. ``listen``) take over the session
             # until ``/done``. Set the flag *after* the dispatch so the

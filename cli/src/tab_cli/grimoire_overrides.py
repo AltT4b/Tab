@@ -21,7 +21,8 @@ Persistence shape — v0
 The synthesis defers the durable shape of user state to the
 settings-system design ticket (01KQ2YXEDHVD2YG1DPD9HEVR2S). Until that
 lands, this module writes a tiny JSON file at
-``~/.config/tab/grimoire-overrides.json`` (honoring ``XDG_CONFIG_HOME``):
+``~/.tab/grimoire-overrides.json`` (alongside :mod:`tab_cli.config`'s
+``~/.tab/config.toml``):
 
 .. code-block:: json
 
@@ -46,7 +47,6 @@ location.
 from __future__ import annotations
 
 import json
-import os
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
@@ -102,15 +102,14 @@ class EffectiveThreshold:
 
 
 def overrides_path() -> Path:
-    """Resolve the v0 overrides file path.
+    """Resolve the v0 overrides file path: ``~/.tab/grimoire-overrides.json``.
 
-    Honors ``XDG_CONFIG_HOME`` (matching :mod:`tab_cli.config`'s
-    convention so a user pointing both stores at the same prefix gets
-    the obvious thing). When unset, falls back to ``~/.config/tab/``.
+    Lives alongside :mod:`tab_cli.config`'s ``~/.tab/config.toml`` so all
+    Tab user state stays under one directory. The XDG_CONFIG_HOME env
+    var is intentionally not honored — Tab uses the dotfile-style
+    ``~/.<app>/`` layout (see :mod:`tab_cli.config` for rationale).
     """
-    xdg = os.environ.get("XDG_CONFIG_HOME")
-    base = Path(xdg) if xdg else Path.home() / ".config"
-    return base / "tab" / "grimoire-overrides.json"
+    return Path.home() / ".tab" / "grimoire-overrides.json"
 
 
 def load_overrides(path: Path | None = None) -> dict[str, float]:
@@ -181,7 +180,7 @@ def save_overrides(values: dict[str, float], path: Path | None = None) -> None:
     """Write the override table back to disk.
 
     Creates the parent directory if needed (the user may not have run
-    anything else that writes to ``~/.config/tab/`` yet). Writes
+    anything else that writes to ``~/.tab/`` yet). Writes
     pretty-printed JSON with sorted keys so a hand-edit-then-CLI-write
     round-trip produces a stable diff.
     """

@@ -122,7 +122,7 @@ def compile_tab_agent(
         A ready-to-run pydantic-ai `Agent`. Recompile to change settings.
     """
     prompt = build_system_prompt(settings)
-    resolved_model = _resolve_model(model)
+    resolved_model = resolve_model(model)
     return Agent(
         model=resolved_model,
         system_prompt=prompt,
@@ -130,7 +130,7 @@ def compile_tab_agent(
     )
 
 
-def _resolve_model(model: str | None):
+def resolve_model(model: str | None):
     """Dispatch a model string to the appropriate backend.
 
     The two prefixes Tab supports are:

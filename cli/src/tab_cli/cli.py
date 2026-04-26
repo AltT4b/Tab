@@ -65,7 +65,7 @@ def _resolve_settings(
     Per the settings-system synthesis (task 01KQ2YXEDHVD2YG1DPD9HEVR2S):
     flag > config file > tab.md defaults. Flags win for the whole
     invocation; anything still unset comes from
-    ``~/.config/tab/config.toml``; anything still unset uses
+    ``~/.tab/config.toml``; anything still unset uses
     :class:`TabSettings`'s field defaults (which mirror tab.md's
     Settings table).
 
@@ -96,6 +96,44 @@ def _resolve_settings(
             merged[name] = value
 
     return TabSettings(**merged)
+
+
+def _resolve_model_or_exit(flag_value: str | None) -> str:
+    """Resolve the model string at command-start time, exit-1 on failure.
+
+    Layering matches the dial-resolution pattern: explicit flag wins,
+    then config file, then a readable error before any subcommand work
+    runs. The early-exit shape matters for ``tab chat`` specifically —
+    deferring this check would let the REPL print its prompt, accept
+    user input, and then blow up on the first turn with pydantic-ai's
+    ``model must either be set on the agent or included when calling
+    it`` message. Better to fail at command-start with a hint pointing
+    at the fix.
+
+    The error contract — one stderr line plus exit-1 — matches the
+    runtime-error path used elsewhere in the CLI (``tab: <reason>``),
+    so shell-out callers can do the standard ``|| handle`` idiom.
+    """
+    if flag_value is not None and flag_value.strip():
+        return flag_value
+
+    # Lazy import: keeps ``tab --help`` cheap and avoids reading the
+    # config file when the user passed an explicit ``--model``.
+    from tab_cli.config import load_default_model_from_config
+
+    configured = load_default_model_from_config()
+    if configured is not None:
+        return configured
+
+    typer.echo(
+        "tab: no model configured. Pass --model or set [model].default "
+        "in ~/.tab/config.toml.\n"
+        "Example:\n"
+        '  [model]\n'
+        '  default = "anthropic:claude-sonnet-4-5"  # or "ollama:gemma4:latest"',
+        err=True,
+    )
+    raise typer.Exit(code=1)
 
 
 def _dial_options() -> dict[str, typer.models.OptionInfo]:
@@ -163,13 +201,14 @@ def _root(
         _validate_dial(name, value)
 
     settings = _resolve_settings(humor, directness, warmth, autonomy, verbosity)
+    resolved_model = _resolve_model_or_exit(model)
 
     # Imported lazily so ``tab --help`` and unrelated subcommands don't
     # pay for the agent stack's import cost.
     from tab_cli.chat import run_chat
 
     try:
-        run_chat(model=model, settings=settings)
+        run_chat(model=resolved_model, settings=settings)
     except Exception as exc:  # noqa: BLE001 — collapse to readable error
         typer.echo(f"tab: {exc}", err=True)
         raise typer.Exit(code=1) from exc
@@ -218,6 +257,7 @@ def ask(
         _validate_dial(name, value)
 
     settings = _resolve_settings(humor, directness, warmth, autonomy, verbosity)
+    resolved_model = _resolve_model_or_exit(model)
 
     # Imported lazily so `tab --help` and unrelated subcommands don't pay
     # for pydantic-ai's import cost (and don't fail in environments where
@@ -225,7 +265,7 @@ def ask(
     from tab_cli.personality import compile_tab_agent
 
     try:
-        agent = compile_tab_agent(settings=settings, model=model)
+        agent = compile_tab_agent(settings=settings, model=resolved_model)
         result = agent.run_sync(prompt)
     except Exception as exc:  # noqa: BLE001 — surface anything as a readable error
         # Typer's default behavior on uncaught exceptions is a traceback
@@ -278,13 +318,14 @@ def mcp(
         _validate_dial(name, value)
 
     settings = _resolve_settings(humor, directness, warmth, autonomy, verbosity)
+    resolved_model = _resolve_model_or_exit(model)
 
     # Lazy-imported so ``tab --help`` and unrelated subcommands don't
     # pay for FastMCP's import cost.
     from tab_cli.mcp_server import run_server
 
     try:
-        run_server(settings=settings, model=model)
+        run_server(settings=settings, model=resolved_model)
     except Exception as exc:  # noqa: BLE001
         typer.echo(f"tab: {exc}", err=True)
         raise typer.Exit(code=1) from exc
@@ -341,6 +382,7 @@ def draw_dino(
         _validate_dial(name, value)
 
     settings = _resolve_settings(humor, directness, warmth, autonomy, verbosity)
+    resolved_model = _resolve_model_or_exit(model)
 
     # Empty list (no positional args) -> empty string. The SKILL.md
     # explicitly handles the "no specific species" path, so we don't
@@ -356,7 +398,7 @@ def draw_dino(
             "draw-dino",
             user_input,
             settings=settings,
-            model=model,
+            model=resolved_model,
         )
     except Exception as exc:  # noqa: BLE001 — collapse to readable error
         typer.echo(f"tab: {exc}", err=True)
@@ -419,6 +461,7 @@ def listen(
         _validate_dial(name, value)
 
     settings = _resolve_settings(humor, directness, warmth, autonomy, verbosity)
+    resolved_model = _resolve_model_or_exit(model)
 
     # Empty list (no positional args) -> empty string. The SKILL.md's
     # entry path covers the "no specific topic" case explicitly.
@@ -434,7 +477,7 @@ def listen(
             "listen",
             user_input,
             settings=settings,
-            model=model,
+            model=resolved_model,
         )
     except Exception as exc:  # noqa: BLE001 — collapse to readable error
         typer.echo(f"tab: {exc}", err=True)
@@ -496,6 +539,7 @@ def think(
         _validate_dial(name, value)
 
     settings = _resolve_settings(humor, directness, warmth, autonomy, verbosity)
+    resolved_model = _resolve_model_or_exit(model)
 
     # Empty list (no positional args) -> empty string. The SKILL.md's
     # "no argument" branch covers the open-ended prompt path.
@@ -511,7 +555,7 @@ def think(
             "think",
             user_input,
             settings=settings,
-            model=model,
+            model=resolved_model,
         )
     except Exception as exc:  # noqa: BLE001 — collapse to readable error
         typer.echo(f"tab: {exc}", err=True)
@@ -580,6 +624,7 @@ def teach(
         _validate_dial(name, value)
 
     settings = _resolve_settings(humor, directness, warmth, autonomy, verbosity)
+    resolved_model = _resolve_model_or_exit(model)
 
     # Empty list (no positional args) -> empty string. The SKILL.md's
     # "no argument" branch covers the open-ended prompt path.
@@ -596,7 +641,7 @@ def teach(
             "teach",
             user_input,
             settings=settings,
-            model=model,
+            model=resolved_model,
             tools=[default_web_search()],
         )
     except Exception as exc:  # noqa: BLE001 — collapse to readable error
@@ -639,7 +684,7 @@ def setup() -> None:
 # ``tab grimoire`` is the user-facing override surface for the
 # personality-skill registry's per-item thresholds. Three subcommands —
 # ``set``, ``reset``, ``show`` — read and write a tiny JSON store at
-# ``~/.config/tab/grimoire-overrides.json``. The store and its
+# ``~/.tab/grimoire-overrides.json``. The store and its
 # settings-system migration debt live in :mod:`tab_cli.grimoire_overrides`.
 #
 # Per the design synthesis (task 01KQ2YXEDJFXCJCFTERK6WFZW9), this
@@ -712,7 +757,7 @@ def grimoire_set(
 ) -> None:
     """Override the matching threshold for a skill.
 
-    Writes a row into ``~/.config/tab/grimoire-overrides.json`` (the
+    Writes a row into ``~/.tab/grimoire-overrides.json`` (the
     v0 store; this migrates into the settings-system file when that
     ticket lands). Values must be in ``[0.0, 1.0]``; the rest of the
     error contract matches every other ``tab`` subcommand — collapse

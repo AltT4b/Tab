@@ -143,14 +143,18 @@ def test_ask_passes_model_option_through_to_compile(
     assert recorder.calls[0].get("model") == "anthropic:claude-sonnet-4"
 
 
-def test_ask_default_model_is_none(
+def test_ask_resolves_default_model_when_no_flag(
     runner: CliRunner, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Without --model, the CLI must pass ``model=None`` to the compiler.
+    """Without --model, the CLI must resolve via ``_resolve_model_or_exit``.
 
-    ``None`` defers model resolution to pydantic-ai, mirroring
-    ``compile_tab_agent``'s default. A bare ``tab ask`` should not
-    silently inject a different default and surprise the caller.
+    Production behavior: the resolver reads ``[model].default`` from
+    ``~/.config/tab/config.toml`` and falls through to a stderr error
+    when neither flag nor config is set. The suite-wide ``conftest.py``
+    autouse fixture stubs the resolver to return
+    ``"anthropic:test-stub"`` when no flag is passed, so ``compile_tab_agent``
+    sees a real model identifier rather than ``None`` (the old behavior
+    that let pydantic-ai blow up later).
     """
     agent = _StubAgent()
     recorder = _patch_compile(monkeypatch, agent)
@@ -158,7 +162,10 @@ def test_ask_default_model_is_none(
     result = runner.invoke(app, ["ask", "hello"])
 
     assert result.exit_code == 0, result.stderr
-    assert recorder.calls[0].get("model") is None
+    # The conftest autouse fixture's stub returns this when flag is None.
+    # The contract this test pins is: ``ask`` no longer passes ``None``
+    # to the compiler — model resolution happens at command-start.
+    assert recorder.calls[0].get("model") == "anthropic:test-stub"
 
 
 def test_ask_surfaces_runtime_errors_as_readable_message(
@@ -230,15 +237,18 @@ def test_ask_help_lists_command_and_model_flag(runner: CliRunner) -> None:
 def isolated_xdg(
     tmp_path: Any, monkeypatch: pytest.MonkeyPatch
 ) -> Any:
-    """Point ``XDG_CONFIG_HOME`` at an empty tmp dir.
+    """Sandbox ``Path.home()`` at a tmp dir; return the ``.tab/`` subdir.
 
-    Keeps every flag test from accidentally picking up the developer's
-    real ``~/.config/tab/config.toml`` and reading values that aren't in
-    the test's setup. Returns the tab/ subdir so individual tests can
-    write a config file when they want to exercise the layering.
+    Name is a holdover from when the loader honored ``XDG_CONFIG_HOME``;
+    Tab now uses dotfile-style ``~/.tab/`` exclusively, so the fixture
+    patches ``Path.home()`` to a tmp directory and returns the
+    ``<tmp>/.tab/`` subdir. Tests that write a config file keep their
+    existing shape: ``(isolated_xdg / "config.toml").write_text(...)``.
     """
-    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
-    tab_dir = tmp_path / "tab"
+    from pathlib import Path
+
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+    tab_dir = tmp_path / ".tab"
     tab_dir.mkdir()
     return tab_dir
 

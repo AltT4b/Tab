@@ -160,11 +160,20 @@ def compile_skill_agent(
     # the package follows.
     from pydantic_ai import Agent
 
+    from tab_cli.personality import resolve_model
+
     prompt = build_skill_system_prompt(
         skill_name, settings=settings, plugins_dir=plugins_dir
     )
+    # Dispatch the model string the same way ``compile_tab_agent`` does:
+    # ``ollama:<name>`` routes to the in-house ``OllamaNativeModel``,
+    # ``anthropic:<name>`` and everything else passes through to
+    # pydantic-ai. Without this, ``ollama:`` strings reach pydantic-ai's
+    # ``Agent`` constructor which constructs ``OllamaProvider()`` and
+    # raises about a missing ``OLLAMA_BASE_URL`` env var.
+    resolved_model = resolve_model(model)
     return Agent(
-        model=model,
+        model=resolved_model,
         system_prompt=prompt,
         defer_model_check=True,
         tools=tuple(tools) if tools else (),

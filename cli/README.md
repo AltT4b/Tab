@@ -31,7 +31,18 @@ uv run tab mcp
 uv run tab setup
 ```
 
-Personality dials (`--humor`, `--directness`, `--warmth`, `--autonomy`, `--verbosity`) accept ints in 0-100 and apply to any subcommand. Layering: flag > `~/.config/tab/config.toml` > `tab.md` defaults.
+Personality dials (`--humor`, `--directness`, `--warmth`, `--autonomy`, `--verbosity`) accept ints in 0-100 and apply to any subcommand. Layering: flag > `~/.tab/config.toml` > `tab.md` defaults.
+
+`~/.tab/config.toml` also holds the default model identifier so bare `tab` works without `--model`:
+
+```toml
+[model]
+default = "anthropic:claude-sonnet-4-5"  # or "ollama:gemma4:latest"
+
+[settings]
+humor = 65
+directness = 80
+```
 
 ## Layout
 
@@ -43,7 +54,7 @@ cli/
     __main__.py            # python -m tab_cli
     cli.py                 # Typer app; verb-shaped subcommands
     personality.py         # Compiles plugins/tab/agents/tab.md into a pydantic-ai Agent
-    config.py              # Reads ~/.config/tab/config.toml for personality persistence
+    config.py              # Reads ~/.tab/config.toml for [model].default + personality dials
     chat.py                # tab chat REPL with sticky-skill mode and history threading
     skills.py              # Shared skill runner (read SKILL.md body + compile skill agent)
     registry.py            # SKILL.md loader: seeds grimoire's Gate for semantic routing

@@ -282,6 +282,61 @@ def test_skill_match_dispatches_skill_agent_not_persona_agent() -> None:
     assert len(tab_calls) == 1
 
 
+def test_skill_match_announces_dispatch_before_streaming_response() -> None:
+    """When grimoire fires, the REPL prints ``[skill: <name>]`` before
+    streaming the skill's response.
+
+    This is the user-visible signal that routing happened. Without it,
+    a surprising match (e.g. ``hello`` matching ``hey-tab``) just looks
+    like Tab's regular chat reply with a different shape — confusing
+    and undebuggable. The announcement is on its own line, before the
+    skill body, so the user can see the match name regardless of what
+    the skill emits.
+
+    Sticky-mode continuations skip this branch entirely (they take the
+    ``session.active_skill`` path, which doesn't print an announcement)
+    — that's the intended UX: announce on entry, stay quiet during the
+    body of a sticky skill like ``listen``.
+    """
+    persona_agent = _StubAgent()
+    skill_agent = _StubAgent(
+        response_stream=[(["bone-dry response"], [object()])]
+    )
+    registry = _StubRegistry(
+        responder=lambda q: _StubHit(name="hey-tab", passed=True)
+        if "hello" in q
+        else None
+    )
+    out, _, _ = _run_chat_with_input(
+        "hello\n/exit\n",
+        agent=persona_agent,
+        skill_agent=skill_agent,
+        registry=registry,
+    )
+
+    # The announcement must precede the skill's streamed output. We
+    # pin both halves: the announce line is present, and it appears
+    # before the response content.
+    assert "[skill: hey-tab]" in out
+    assert out.index("[skill: hey-tab]") < out.index("bone-dry response")
+
+
+def test_no_skill_match_does_not_print_announcement() -> None:
+    """Grimoire miss → no ``[skill: ...]`` line. The announcement is
+    a routing signal, not a turn marker; the regular agent path stays
+    quiet so chat output looks like a normal conversation."""
+    persona_agent = _StubAgent(
+        response_stream=[(["regular reply"], [object()])]
+    )
+    registry = _StubRegistry(responder=lambda q: None)
+    out, _, _ = _run_chat_with_input(
+        "no match here\n/exit\n",
+        agent=persona_agent,
+        registry=registry,
+    )
+    assert "[skill:" not in out
+
+
 def test_skill_match_threads_messages_into_session_history() -> None:
     """Skill turn's ``all_messages()`` must roll into the session history.
 
@@ -429,7 +484,14 @@ def runner() -> CliRunner:
 
 
 def test_bare_tab_invokes_chat(runner: CliRunner) -> None:
-    """``tab`` with no subcommand must default to ``tab chat``."""
+    """``tab`` with no subcommand must default to ``tab chat``.
+
+    The model passed through to ``run_chat`` is resolved by
+    ``_resolve_model_or_exit`` at command start. Without a ``--model``
+    flag, the conftest autouse stub returns ``anthropic:test-stub``;
+    in production the resolver would consult ``[model].default`` in
+    ``~/.config/tab/config.toml`` or exit with a readable error.
+    """
     captured: list[dict[str, Any]] = []
 
     def _stub(**kwargs: Any) -> None:
@@ -440,7 +502,7 @@ def test_bare_tab_invokes_chat(runner: CliRunner) -> None:
 
     assert result.exit_code == 0, result.output
     assert len(captured) == 1
-    assert captured[0]["model"] is None
+    assert captured[0]["model"] == "anthropic:test-stub"
 
 
 def test_bare_tab_passes_model_flag(runner: CliRunner) -> None:
@@ -523,9 +585,16 @@ def test_bare_tab_surfaces_runtime_errors(runner: CliRunner) -> None:
 def isolated_xdg(
     tmp_path: Any, monkeypatch: pytest.MonkeyPatch
 ) -> Any:
-    """Empty ``XDG_CONFIG_HOME`` so the resolver doesn't read real config."""
-    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
-    tab_dir = tmp_path / "tab"
+    """Sandbox ``Path.home()`` so the resolver doesn't read real config.
+
+    Name is a holdover from XDG_CONFIG_HOME days; Tab now uses
+    dotfile-style ``~/.tab/``. Returns ``<tmp>/.tab/`` for tests that
+    write a config file: ``(isolated_xdg / "config.toml").write_text(...)``.
+    """
+    from pathlib import Path
+
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+    tab_dir = tmp_path / ".tab"
     tab_dir.mkdir()
     return tab_dir
 

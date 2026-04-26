@@ -1,14 +1,25 @@
-"""Read personality settings from `~/.config/tab/config.toml`.
+"""Read personality settings and the default model from `~/.tab/config.toml`.
 
-The flag-merger lives in another ticket; this module just exposes
-`load_settings_from_config()`. It returns a dict of the keys it found
-that passed validation. Missing file is fine, malformed file warns and
-falls through, out-of-range values warn and drop just that key.
+The flag-mergers live elsewhere; this module exposes:
+
+- :func:`load_settings_from_config` — `[settings]` table for personality dials
+- :func:`load_default_model_from_config` — `[model].default` for the default
+  model identifier when no `--model` flag is passed
+
+Both honor the same conventions: missing file is fine (returns nothing),
+malformed file warns once to stderr and falls through, individual invalid
+values warn and get dropped.
+
+All Tab user state lives under ``~/.tab/``: this config plus the
+grimoire-threshold overrides written by :mod:`tab_cli.grimoire_overrides`.
+The XDG_CONFIG_HOME env var is intentionally not honored — Tab uses the
+``~/.<app>/`` dotfile-style layout (like ``~/.gitconfig``, ``~/.npmrc``)
+rather than the XDG ``$XDG_CONFIG_HOME/<app>/`` layout. One place, no
+indirection.
 """
 
 from __future__ import annotations
 
-import os
 import sys
 import tomllib
 from pathlib import Path
@@ -20,10 +31,8 @@ _VALID_KEYS = ("humor", "directness", "warmth", "autonomy", "verbosity")
 
 
 def _config_path() -> Path:
-    """Resolve the config path, honoring `XDG_CONFIG_HOME`."""
-    xdg = os.environ.get("XDG_CONFIG_HOME")
-    base = Path(xdg) if xdg else Path.home() / ".config"
-    return base / "tab" / "config.toml"
+    """Resolve the config path: ``~/.tab/config.toml``."""
+    return Path.home() / ".tab" / "config.toml"
 
 
 def _warn(message: str) -> None:
@@ -81,3 +90,55 @@ def load_settings_from_config() -> dict[str, int]:
         result[key] = value
 
     return result
+
+
+def load_default_model_from_config() -> str | None:
+    """Load `[model].default` from the user's tab config.
+
+    Returns the configured model identifier (e.g. ``"anthropic:claude-sonnet-4-5"``
+    or ``"ollama:gemma4:latest"``) if the file is present and the value parses
+    as a non-empty string. Returns ``None`` if the file is missing, the section
+    is absent, or the value is malformed (with a stderr warning in the latter
+    two cases — silent only on missing file, the same convention
+    :func:`load_settings_from_config` follows).
+
+    The CLI's model-resolution layering puts ``--model`` ahead of this; an
+    error fires only when neither source resolves a model.
+    """
+    path = _config_path()
+
+    try:
+        raw = path.read_bytes()
+    except FileNotFoundError:
+        return None
+    except OSError as exc:
+        _warn(f"could not read {path}: {exc}")
+        return None
+
+    try:
+        data = tomllib.loads(raw.decode("utf-8"))
+    except (tomllib.TOMLDecodeError, UnicodeDecodeError) as exc:
+        _warn(f"ignoring malformed config {path}: {exc}")
+        return None
+
+    model_section = data.get("model")
+    if model_section is None:
+        return None
+    if not isinstance(model_section, dict):
+        _warn(
+            f"ignoring invalid [model] section in {path} "
+            "(must be a TOML table)"
+        )
+        return None
+
+    default = model_section.get("default")
+    if default is None:
+        return None
+    if not isinstance(default, str) or not default.strip():
+        _warn(
+            f"ignoring invalid model.default={default!r} in {path} "
+            "(must be a non-empty string like 'anthropic:claude-sonnet-4-5')"
+        )
+        return None
+
+    return default.strip()

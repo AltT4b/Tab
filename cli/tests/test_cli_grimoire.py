@@ -20,9 +20,16 @@ from tab_cli.cli import app
 
 @pytest.fixture
 def fake_xdg(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """Sandbox the override store at ``$XDG_CONFIG_HOME/tab/``."""
-    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
-    return tmp_path / "tab"
+    """Sandbox the override store at ``<tmp>/.tab/``.
+
+    Name is a holdover from XDG_CONFIG_HOME days; Tab now uses
+    dotfile-style ``~/.tab/`` exclusively, so the fixture patches
+    ``Path.home()`` to ``tmp_path`` and returns ``tmp_path/.tab/``.
+    Tests that read/write the override file get the canonical path
+    via ``overrides_path()`` (which derives from ``Path.home()``).
+    """
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+    return tmp_path / ".tab"
 
 
 # --------------------------------------------------------- discoverability

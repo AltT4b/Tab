@@ -28,27 +28,43 @@ from tab_cli.registry import DEFAULT_THRESHOLD, SkillRecord
 
 @pytest.fixture
 def fake_xdg(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """Point ``XDG_CONFIG_HOME`` at a tmp dir; return the resolved tab/ subdir."""
-    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
-    return tmp_path / "tab"
+    """Sandbox the override store at ``<tmp>/.tab/``.
+
+    Name is a holdover from XDG_CONFIG_HOME days; Tab now uses
+    dotfile-style ``~/.tab/`` exclusively. Patches ``Path.home()`` to
+    ``tmp_path`` and returns ``tmp_path/.tab/``.
+    """
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+    return tmp_path / ".tab"
 
 
 # ----------------------------------------------------- path resolution
 
 
-def test_overrides_path_honors_xdg_config_home(
+def test_overrides_path_resolves_under_home_dot_tab(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
-    assert overrides_path() == tmp_path / "tab" / "grimoire-overrides.json"
-
-
-def test_overrides_path_falls_back_to_home_config(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
+    """``overrides_path()`` returns ``~/.tab/grimoire-overrides.json``,
+    derived from ``Path.home()``. The XDG_CONFIG_HOME env var is no
+    longer honored — Tab uses the dotfile-style layout exclusively."""
     monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
-    assert overrides_path() == tmp_path / ".config" / "tab" / "grimoire-overrides.json"
+    assert overrides_path() == tmp_path / ".tab" / "grimoire-overrides.json"
+
+
+def test_overrides_path_ignores_xdg_config_home(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Pin that the env var is no longer consulted — a future refactor
+    shouldn't accidentally restore XDG support without a deliberate
+    decision."""
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    fake_home = tmp_path / "home"
+    fake_home.mkdir()
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(elsewhere))
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
+    # Path resolves under home, not the XDG env var.
+    assert overrides_path() == fake_home / ".tab" / "grimoire-overrides.json"
 
 
 # ----------------------------------------------------------- load

@@ -11,20 +11,20 @@ Rather than special-case Ollama in callers (which would mean "is this an
 ollama model?" branches scattered across ``tab ask``, ``tab chat``, the four
 skill ports, and ``tab mcp``), we present a normal pydantic-ai ``Model`` that
 talks to Ollama natively. Callers stay uniform: every backend looks like
-``Agent(model, system_prompt=...)`` and ``agent.run_sync(...)``.
+``Agent(model, system_prompt=...)`` and ``agent.run_sync(...)`` /
+``agent.run_stream_sync(...)``.
 
 Tools, message-history threading, and structured output ride on pydantic-ai's
 abstractions — Ollama's ``/api/chat`` supports tool calls in the same shape,
 so the translation layer here is mechanical rather than inventive.
-
-Streaming is intentionally not implemented yet — the chat REPL uses
-``run_sync`` (not ``run_stream``), so the request path covers everything in
-the v0 surface. Streaming lands as a follow-up when a caller actually needs
-it.
 """
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterable, AsyncIterator
+from contextlib import asynccontextmanager
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import Any, cast
 
 from ollama import AsyncClient as _OllamaAsyncClient
@@ -33,13 +33,14 @@ from pydantic_ai.messages import (
     ModelMessage,
     ModelRequest,
     ModelResponse,
+    ModelResponseStreamEvent,
     SystemPromptPart,
     TextPart,
     ToolCallPart,
     ToolReturnPart,
     UserPromptPart,
 )
-from pydantic_ai.models import Model, ModelRequestParameters
+from pydantic_ai.models import Model, ModelRequestParameters, StreamedResponse
 from pydantic_ai.profiles import ModelProfileSpec
 from pydantic_ai.settings import ModelSettings
 from pydantic_ai.tools import ToolDefinition
@@ -118,6 +119,50 @@ class OllamaNativeModel(Model):
             stream=False,
         )
         return self._translate_response(response)
+
+    @asynccontextmanager
+    async def request_stream(
+        self,
+        messages: list[ModelMessage],
+        model_settings: ModelSettings | None,
+        model_request_parameters: ModelRequestParameters,
+        run_context: Any | None = None,
+    ) -> AsyncIterator[StreamedResponse]:
+        """Stream responses from Ollama via ``ollama-python``'s ``stream=True``.
+
+        ``ollama-python``'s ``AsyncClient.chat(stream=True)`` returns an
+        ``AsyncIterator[ChatResponse]`` — one chunk per partial message
+        fragment, with the final chunk carrying ``done=True`` and usage
+        metadata. We hand that iterator to :class:`_OllamaStreamedResponse`,
+        which translates each chunk into pydantic-ai's
+        ``ModelResponseStreamEvent`` shape via the parts manager.
+
+        The ``run_context`` parameter mirrors pydantic-ai's signature but
+        isn't used here — Ollama doesn't accept a run context, and the
+        per-call overrides we'd need it for (model-settings tweaks,
+        cancellation tokens) aren't wired through yet. Tracking as
+        deliberate: when a caller surfaces a real need for run-context
+        plumbing on the Ollama path, it lands here.
+        """
+        ollama_messages = self._translate_messages(messages)
+        ollama_tools = self._translate_tools(model_request_parameters.function_tools)
+
+        # ``ollama-python`` returns the iterator directly when
+        # ``stream=True``; the await is for the request setup, not for
+        # the full response body.
+        response_iter = await self._client.chat(
+            model=self._model_name,
+            messages=ollama_messages,
+            tools=ollama_tools,
+            stream=True,
+        )
+
+        yield _OllamaStreamedResponse(
+            model_request_parameters=model_request_parameters,
+            _model_name=self._model_name,
+            _provider_url=self.base_url,
+            _response=response_iter,
+        )
 
     # --- translation helpers (all stateless, exposed for tests) ---
 
@@ -252,3 +297,97 @@ class OllamaNativeModel(Model):
             model_name=self._model_name,
             provider_name="ollama",
         )
+
+
+@dataclass
+class _OllamaStreamedResponse(StreamedResponse):
+    """pydantic-ai ``StreamedResponse`` adapter for ``ollama-python`` streams.
+
+    Consumes the ``AsyncIterator[ChatResponse]`` from
+    ``AsyncClient.chat(stream=True)`` and emits the pydantic-ai
+    ``ModelResponseStreamEvent`` shape via the inherited parts manager.
+    The parts manager handles the bookkeeping (creating new parts when
+    the part-kind changes, appending deltas to the latest matching part);
+    this class just translates ollama chunks into the right
+    ``handle_*_delta`` calls.
+
+    Tool-call streaming on Ollama is coarse-grained: ``/api/chat`` typically
+    emits the full tool-call block as a single chunk after the text portion
+    finishes, rather than streaming arguments token by token. We surface
+    that as a single ``handle_tool_call_delta`` per call, with a
+    ``vendor_part_id`` keyed by an internal counter so multiple tool calls
+    in one response stay distinct.
+    """
+
+    _model_name: str = ""
+    _provider_url: str | None = None
+    _response: AsyncIterable[_OllamaChatResponse] | None = None
+    _timestamp: datetime = field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
+
+    async def _get_event_iterator(self) -> AsyncIterator[ModelResponseStreamEvent]:
+        if self._response is None:
+            return
+
+        # Counter for tool-call vendor IDs. Ollama's tool-call shape
+        # doesn't include per-call IDs, but pydantic-ai's parts manager
+        # uses ``vendor_part_id`` to decide whether a delta belongs to
+        # an existing part or starts a new one. A counter keeps multiple
+        # tool calls in a single response distinct without inventing
+        # semantics ollama doesn't have.
+        tool_call_index = 0
+
+        async for chunk in self._response:
+            msg = chunk.message
+            if msg.content:
+                # ``vendor_part_id=None`` tells the parts manager to
+                # append to the latest TextPart if there is one, or
+                # start a new TextPart otherwise. That matches Ollama's
+                # streaming shape — text comes as a continuous run of
+                # content fragments, no interleaving with tool calls
+                # mid-text.
+                for event in self._parts_manager.handle_text_delta(
+                    vendor_part_id=None,
+                    content=msg.content,
+                ):
+                    yield event
+
+            if msg.tool_calls:
+                for call in msg.tool_calls:
+                    # ``ollama-python`` types ``arguments`` as a
+                    # ``Mapping[str, Any]``; cast to ``dict`` for
+                    # pydantic-ai's stricter typing. Empty/missing
+                    # arguments collapse to ``{}``.
+                    args: dict[str, Any] = (
+                        dict(call.function.arguments)
+                        if call.function.arguments
+                        else {}
+                    )
+                    vendor_id = f"tc_{tool_call_index}"
+                    tool_call_index += 1
+
+                    event = self._parts_manager.handle_tool_call_delta(
+                        vendor_part_id=vendor_id,
+                        tool_name=call.function.name,
+                        args=cast(dict[str, Any], args),
+                        tool_call_id=vendor_id,
+                    )
+                    if event is not None:
+                        yield event
+
+    @property
+    def model_name(self) -> str:
+        return self._model_name
+
+    @property
+    def provider_name(self) -> str:
+        return "ollama"
+
+    @property
+    def provider_url(self) -> str | None:
+        return self._provider_url
+
+    @property
+    def timestamp(self) -> datetime:
+        return self._timestamp
