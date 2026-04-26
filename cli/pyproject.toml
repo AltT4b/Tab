@@ -12,6 +12,11 @@ dependencies = [
     "grimoire",
     "pyyaml>=6.0",
     "fastmcp>=2.0",
+    # Used by `tab ask --model ollama:<name>` to bypass pydantic-ai's
+    # OpenAI-compat routing for local Ollama. Currently transitive via
+    # grimoire; pinned here explicitly so the dependency stays visible
+    # if grimoire's transitive set changes.
+    "ollama>=0.4",
 ]
 
 [project.scripts]

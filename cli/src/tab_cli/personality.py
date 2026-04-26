@@ -109,7 +109,12 @@ def compile_tab_agent(
     Args:
         settings: Personality dial values. ``None`` uses defaults from
             the Settings table in `tab.md`.
-        model: pydantic-ai model name (e.g. ``"anthropic:claude-sonnet-4"``).
+        model: Model identifier in ``<provider>:<name>`` form. The CLI
+            drives only two providers: ``anthropic:<model>`` (handled by
+            pydantic-ai's stock ``AnthropicModel``) and ``ollama:<model>``
+            (handled by Tab's in-house :class:`OllamaNativeModel`, which
+            talks to Ollama's ``/api/chat`` directly via ``ollama-python``
+            rather than routing through the ``/v1`` OpenAI-compat layer).
             ``None`` defers model resolution; downstream callers wire it
             up before running the agent.
 
@@ -117,8 +122,37 @@ def compile_tab_agent(
         A ready-to-run pydantic-ai `Agent`. Recompile to change settings.
     """
     prompt = build_system_prompt(settings)
+    resolved_model = _resolve_model(model)
     return Agent(
-        model=model,
+        model=resolved_model,
         system_prompt=prompt,
         defer_model_check=True,
     )
+
+
+def _resolve_model(model: str | None):
+    """Dispatch a model string to the appropriate backend.
+
+    The two prefixes Tab supports are:
+
+    - ``ollama:<name>`` — peeled and passed to :class:`OllamaNativeModel`,
+      which uses ``ollama-python``'s native ``/api/chat`` endpoint.
+    - ``anthropic:<name>`` — passed through verbatim. pydantic-ai's
+      ``Agent`` constructor parses the prefix and instantiates
+      ``AnthropicModel`` itself, so we don't intercept.
+
+    Anything else (``None``, ``openai:...``, etc.) is also passed through
+    verbatim. pydantic-ai will reject unknown providers at run time, which
+    is the right error surface — the CLI's documented contract is
+    Anthropic + Ollama, but we don't pre-validate here so tests and
+    advanced users keep a clean escape hatch.
+    """
+    if model is None:
+        return None
+    if model.startswith("ollama:"):
+        # Lazy import: keeps callers that never use Ollama from paying
+        # the ``ollama`` package's import cost.
+        from tab_cli.models import OllamaNativeModel
+
+        return OllamaNativeModel(model.removeprefix("ollama:"))
+    return model
