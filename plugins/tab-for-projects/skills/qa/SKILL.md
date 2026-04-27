@@ -1,7 +1,7 @@
 ---
 name: qa
 description: "Version audit orchestrator. Requires a `group_key` argument and refuses `\"new\"` (that's `/curate`'s territory). Reads the version's tasks, dispatches `bug-hunter` for runtime concerns and `archaeologist` for KB/code alignment in parallel, files concrete gap tasks into the same group, and surfaces complexity/risk for the user without auto-filing design tasks."
-argument-hint: "<group_key>"
+argument-hint: "[<group_key>]"
 ---
 
 `/qa` is the skill you reach for when a version's work is mostly landed and you want to know whether it's actually done. I audit one version — the group you name — by reading its tasks, dispatching `bug-hunter` for the runtime side and `archaeologist` for the alignment side in parallel, filing concrete gap tasks back into the same group, and handing you a structured report of what's missing, what's drifting, and what's risky. The concrete gaps file themselves; the taste calls come back to you.
@@ -18,9 +18,11 @@ Honest about scope. I read the group, I dispatch two subagents (sometimes a thir
 
 ## Approach
 
-**Validate the argument first.** No `group_key` argument means I refuse early and loud — `/qa` without a target version isn't a meaningful operation. `group_key="new"` also refuses early and loud, with a pointer at `/curate` — that group is the inbox, not a version, and auditing it is a category error.
+**Validate the argument first.** `group_key="new"` refuses early and loud, with a pointer at `/curate` — that group is the inbox, not a version, and auditing it is a category error. That guard stays whether the user typed the arg or not.
 
-With a real `group_key` in hand, I resolve the project and pull the slice. `list_tasks` filtered to the group across `todo`, `in_progress`, and `done` gives me the audit set; `get_dependency_graph` filtered to the group surfaces edges I'll want when ordering gaps. If a version brief lives in the KB — `search_documents` against the group_key, falling back to a folder convention if the project has one — I read it before dispatching so the subagent prompts can name what the version was supposed to deliver.
+If the `group_key` argument is missing, I infer the most-recently-active in-progress group via `get_project_context` (the group whose tasks have the most recent update timestamp among groups with at least one `in_progress` task) and use it. **The resolved `group_key` shows in the run header** so the user can interrupt and re-run with an explicit arg if I picked the wrong one. Zero in-progress groups → refuse with a pointer at `/design` (nothing to audit). Ambiguous most-recent (a tie at the top) → refuse with the candidate list and ask the user to name one.
+
+With a `group_key` in hand — typed or inferred — I resolve the project and pull the slice. `list_tasks` filtered to the group across `todo`, `in_progress`, and `done` gives me the audit set; `get_dependency_graph` filtered to the group surfaces edges I'll want when ordering gaps. If a version brief lives in the KB — `search_documents` against the group_key, falling back to a folder convention if the project has one — I read it before dispatching so the subagent prompts can name what the version was supposed to deliver.
 
 Then I dispatch in parallel:
 
@@ -59,7 +61,7 @@ Pass prose to subagents or write task state on their behalf. `bug-hunter` and `a
 ## Output
 
 ```
-group_key:        the audited version's group
+group_key:        the audited version's group (resolved — typed or inferred)
 project_id:       resolved project
 tasks_audited:    list — { task_id, title, status }
 brief:            doc_id of the version brief, or "none"
@@ -71,7 +73,8 @@ recommend:        (optional) "/design" when a flagged risk wants a hosted decisi
 
 Failure modes:
 
-- `group_key` argument missing → refuse with a pointer at the argument hint.
+- `group_key` argument missing and no in-progress groups exist → refuse with a pointer at `/design` (nothing to audit).
+- `group_key` argument missing and the most-recently-active in-progress group is ambiguous (tie at the top) → refuse with the candidate list; ask the user to name one explicitly.
 - `group_key="new"` → refuse with a pointer at `/curate`.
 - Audit set is empty (no tasks in the group) → return early with that note; nothing to audit.
 - `bug-hunter` or `archaeologist` returns `failed` / `inconclusive` → record the dispatch outcome in `dispatches_run`, file whatever gaps the other subagent did surface, note the partial coverage in the report.
