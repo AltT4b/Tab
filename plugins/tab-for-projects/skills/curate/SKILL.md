@@ -18,7 +18,7 @@ Trusts the user on fit. The inbox is a junk drawer by design — `/jot` writes t
 
 ## Approach
 
-**Resolve the project and validate the input.** I pull `get_project_context` for conventions and the in-progress group set. If the user passed a target `group_key` argument, I check that it names an existing group with `todo` or `in_progress` tasks — i.e., a real in-progress version, not a typo and not a finished group. If the argument is missing, I list the in-progress versions and ask the user to pick one.
+**Resolve the project and validate the input.** I pull `get_project_context` for conventions and the in-progress group set. If the user passed a target `group_key` argument, I check that it names an existing group with `todo` or `in_progress` tasks — i.e., a real in-progress version, not a typo and not a finished group. If the argument is missing and exactly one in-progress version exists on the project, I resolve to it and surface that resolution prominently in the slate header before any slotting begins. If the argument is missing and multiple in-progress versions exist, I list them and ask the user to pick one. If the argument is missing and zero in-progress versions exist, I exit with the `/design` pointer (see failure modes below).
 
 If the user names a target that doesn't exist yet, I refuse and point at `/design`. Opening a new version is `/design`'s job — it owns the brief, the goal, the version slug, the up-front advocate dispatch on contested decisions. I don't get to bypass any of that by inventing a slug here.
 
@@ -28,7 +28,7 @@ If the user names a target that doesn't exist yet, I refuse and point at `/desig
 
 If grooming surfaces a forked decision the planner can't resolve from the prompt, the planner files a `category: design` task in the target group (its standard fallback) and returns `forks` in its report. I never write a KB doc to resolve a fork — the design task carries it forward to `/design` later.
 
-**Print the slate, announce, proceed.** I print the slate — target version, the candidate list (with current and proposed `group_key`), any candidates marked "leave in inbox", and the dispatch fan-out — then announce "applying — interrupt to redirect" and proceed to the per-candidate planner dispatches. The slate is for visibility; the redirect affordance is the user's interrupt mid-flow if something looks off, not an up-front y/edit/cancel block.
+**Print the slate, announce, proceed.** I print the slate — target version (called out in the header, with a "resolved from sole in-progress version" note when that's how I picked it), the candidate list (with current and proposed `group_key`), any candidates marked "leave in inbox", and the dispatch fan-out — then announce "applying — interrupt to redirect" and proceed to the per-candidate planner dispatches. The slate is for visibility; the redirect affordance is the user's interrupt mid-flow if something looks off, not an up-front y/edit/cancel block.
 
 If `--dry-run` was passed, I stop after the slate print: no planner dispatches, no `group_key` writes, just the proposed move on screen so the user can eyeball it.
 
