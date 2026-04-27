@@ -1,7 +1,7 @@
 ---
 name: develop
-description: "Version-anchored autopilot. Requires a `group_key` argument and refuses `\"new\"` (that's `/curate`'s territory). Reads the version's dependency graph, dispatches `developer` in isolated worktrees in parallel for unblocked tasks, integrates branches as developers return (FF-merge for the first in a parallel batch, `git merge --no-ff` for second-and-later), halts on dirty tree / three consecutive failures / merge content conflict / user interrupt, and ends the run by suggesting `/qa <group_key>`."
-argument-hint: "<group_key> [--dry-run]"
+description: "Version-anchored autopilot. Takes an optional `group_key` argument — when omitted, infers the most-recently-active in-progress group; refuses `\"new\"` (that's `/curate`'s territory). Reads the version's dependency graph, dispatches `developer` in isolated worktrees in parallel for unblocked tasks, integrates branches as developers return (FF-merge for the first in a parallel batch, `git merge --no-ff` for second-and-later), halts on dirty tree / three consecutive failures / merge content conflict / user interrupt, and ends the run by suggesting `/qa <group_key>`."
+argument-hint: "[<group_key>] [--dry-run]"
 ---
 
 `/develop` is the skill you reach for when a version's tasks are ready and you want to hand off execution. I read the dependency graph for the named group, dispatch `developer` in isolated git worktrees in parallel for every currently unblocked task, integrate each worktree's branch into the working branch as the dev returns (FF-merge the first in a parallel batch, `git merge --no-ff` for second-and-later), and end the run with a single report whose headline next-move is `/qa <group_key>`. I don't groom, I don't decide, I don't pair-program — I execute what the planner already shaped, and I surface what isn't shaped yet.
@@ -20,7 +20,7 @@ Trusts the developer subagent. `developer` owns its own task-state transitions (
 
 **Re-run primitive: integrate before dispatching.** Every `/develop` run starts by scanning for un-merged completed worktrees from prior halted runs — branches whose `developer` dispatch returned `done` but whose merge never landed because an earlier run halted. I integrate them first, in topological order against the dependency graph: FF-merge the first one, `git merge --no-ff <branch>` for the rest. Only after the prior wave's completions are folded in do I dispatch new work. This makes a halted run cheap to resume — the user fixes the halt cause and re-runs, and the previously-completed worktrees fold in automatically instead of being orphaned on disk.
 
-**Validate the argument first.** No `group_key` argument means I refuse early and loud — `/develop` without a target version isn't a meaningful operation, and prompting conversationally for it would reintroduce the pair-programming shape this rewrite removes. `group_key="new"` also refuses early and loud, with a pointer at `/curate` — that group is `/jot`'s reserved inbox, not a version, and executing on triage is a category error. `--dry-run` is the one optional flag — it tells me to print the plan and stop before any dispatch, for inspect-before-commit; refusal guards on missing `group_key` and `group_key="new"` still fire ahead of it.
+**Validate the argument first.** `group_key="new"` refuses early and loud, with a pointer at `/curate` — that group is `/jot`'s reserved inbox, not a version, and executing on triage is a category error. The `"new"` guard is a category error and stays loud regardless of how the arg arrived. When the `group_key` argument is **missing**, I infer the most-recently-active in-progress group on the project: `get_project_context` surfaces the in-progress groups, and I pick the one with the most recently updated task (falling back to most recently created brief on a tie of update timestamps). The resolved group goes into the run header explicitly so you see what was chosen and can interrupt to redirect or re-run with the explicit arg. Zero in-progress groups on the project → refuse with a pointer at `/design` (nothing to develop yet). Multiple in-progress groups with no unambiguous most-recent (true tie on the update timestamp) → refuse with the candidate list so you can pick. `--dry-run` is the one optional flag — it tells me to print the plan and stop before any dispatch, for inspect-before-commit; the `group_key="new"` guard and the no-in-progress-groups / ambiguous-tie refusals still fire ahead of it.
 
 With a real `group_key` in hand, I resolve the project and check the working tree. **A dirty working branch halts before any dispatch.** Merging into a dirty tree is the kind of silent corruption I refuse to risk; the user commits or stashes, then re-runs.
 
@@ -70,7 +70,8 @@ Interrupt mid-run for anything short of the four halt conditions. Surprises, dri
 ## Output
 
 ```
-group_key:         the version's group
+group_key:         the version's group (resolved — explicit arg or inferred most-recently-active in-progress)
+group_key_source:  "explicit" | "inferred"
 project_id:        resolved project
 tasks_eligible:    list — { task_id, title, ready | blocked | below-bar }
 dispatches_run:    list — { task_id, status: done | flagged | failed | halted, worktree, merged_sha }
@@ -82,8 +83,9 @@ recommend:         "/qa <group_key>" on a clean run; the specific halt reason ot
 
 Failure modes:
 
-- `group_key` argument missing → refuse early and loud with a pointer at the argument hint.
 - `group_key="new"` → refuse early and loud with a pointer at `/curate`.
+- `group_key` argument missing **and** zero in-progress groups on the project → refuse with a pointer at `/design` (nothing to develop yet).
+- `group_key` argument missing **and** multiple in-progress groups tied on the most-recent-update timestamp → refuse with the candidate list so the user can pick.
 - Dirty working tree at start → halt before any dispatch; report the dirty paths.
 - Local working branch behind or diverged from `origin/main` → halt before dispatch; user fetches and reconciles.
 - Three consecutive `developer` failures → abort the run; report the three task IDs and their specific reasons.
