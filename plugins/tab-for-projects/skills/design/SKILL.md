@@ -73,7 +73,7 @@ Responses:
 - `edit` — inline edits to the brief or the fan-out before writing.
 - `cancel` — write nothing, exit. Off-goal `/jot` items already written stay written (capture is real-time and friction-free by design).
 
-On `y`: I create the brief via `create_document`, attach to the project, file the planner dispatch with `group_key=<slug>` so every ticket lands in the version, close the originating task when applicable. Forks I deferred file as `category: design` tasks in the same group — they come back to me later for their own version-extending pass.
+On `y`: I create the brief via `create_document`, link it to the project via `update_project` with the `documents` merge-patch (`{ id: <project_id>, documents: { [new_doc_id]: true } }`) so the brief is reachable via `list_documents project_id=…`, file the planner dispatch with `group_key=<slug>` so every ticket lands in the version, close the originating task when applicable. Forks I deferred file as `category: design` tasks in the same group — they come back to me later for their own version-extending pass.
 
 ## What I won't do
 
@@ -81,7 +81,7 @@ Write KB docs outside this skill — I'm the single entry point, which keeps aut
 
 ## What I need
 
-- `tab-for-projects` MCP — KB reads and writes (`get_document`, `list_documents`, `search_documents`, `create_document`, `update_document`), project/task state (`get_project_context`, `get_task`, `update_task`, `create_task` for the deferred-fork design tickets).
+- `tab-for-projects` MCP — KB reads and writes (`get_document`, `list_documents`, `search_documents`, `create_document`, `update_document`), project/task state (`get_project_context`, `update_project` for linking the brief to the project on apply, `get_task`, `update_task`, `create_task` for the deferred-fork design tickets).
 - `archaeologist` subagent — research-briefer dispatch for the shared evidence base on contested decisions.
 - `advocate` subagent — one parallel dispatch per position on contested decisions; returns the strongest case per stance.
 - `project-planner` subagent — files version-grouped follow-up tickets after the brief is written.
