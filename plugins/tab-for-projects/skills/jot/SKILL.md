@@ -12,7 +12,7 @@ Capture, not curation. The cost of capture is what kills inboxes — every follo
 
 Trusts the user's wording. The title goes in as written; I don't paraphrase, normalize, or "improve" it. If the title is terse or rough, that's the user's signal to themselves — the inbox is a junk drawer by design and rough is fine. Polishing happens at drain time, not capture time.
 
-Refuses follow-ups, on purpose. If I notice the title is vague, the summary is missing, or a category would obviously help — I still don't ask. The user invoked `/jot` instead of `/plan` or `/develop` for a reason; turning capture into a conversation defeats the reason. The only thing I refuse to do silently is write a task with no title — and even then I refuse with a one-line instruction, not a conversational prompt.
+Refuses follow-ups, on purpose. If I notice the title is vague, the summary is missing, or a category would obviously help — I still don't ask. The user invoked `/jot` instead of `/plan` or `/develop` for a reason; turning capture into a conversation defeats the reason. When the title arg is missing but the user's preceding utterance is right there, I synthesize from it and report what landed — silent fallback, not a conversational prompt. The only refusal path is title missing *and* no prior utterance to draw from, and even then it's a one-line instruction, not a question.
 
 Inbox-bound. Every task `/jot` creates lands in `group_key="new"` regardless of any active version context, regardless of what the user is currently working on, regardless of what the conversation was about a moment ago. The reserved group is the contract with `/curate` and `/qa` and `/develop` — they all know `"new"` is the unsorted bucket and treat it accordingly. Writing anywhere else from this skill would break the contract.
 
@@ -20,20 +20,22 @@ Inbox-bound. Every task `/jot` creates lands in `group_key="new"` regardless of 
 
 **Parse the args.** The first positional arg is the title. An optional `--` separator introduces a summary. An optional `--category=<category>` sets the category. Everything else is ignored — no `--effort`, no `--group`, no `--impact`. If the user passes one of those, I note in the report that I dropped it; I don't error.
 
-If the title is missing or empty after parsing, I refuse with a single line — "`/jot` needs a title; pass it as the first arg" — and exit. No conversational prompt, no "what would you like to capture?", no fallback to the last user message as a title.
+If the title is missing or empty after parsing, I synthesize one from the user's immediately preceding utterance — verbatim or near-verbatim, since the "trusts the user's wording" stance still applies and minimal paraphrase is the rule. The synthesized title is reported in the output (alongside a `synthesized: true` flag) so the user sees what landed and can re-run with an explicit title to override. No confirmation prompt, no "what would you like to capture?", no clarifying question — auto-title is a silent fallback, not a conversation.
+
+If the title is missing *and* there's no prior user utterance to synthesize from (e.g. `/jot` is the first thing in a fresh session), I refuse with a single line — "`/jot` needs a title; pass it as the first arg" — and exit. Context is genuinely unrecoverable; that's the only refusal path.
 
 **Resolve the project.** Project resolution follows the standard inference path (explicit arg → `.tab-project` file → git remote → cwd → recent activity). If resolution fails, I refuse with a one-line instruction pointing at the project-arg flag and exit. I do not call `get_project_context`; I only need the project ID, and `get_project` is the cheaper read when an inference step needs validation.
 
 **Write once.** One `create_task` call:
 
 - `project_id` — the resolved project.
-- `title` — the user's title, verbatim.
+- `title` — the user's title, verbatim; or, when synthesized from the prior turn, the user's preceding utterance with minimal paraphrase.
 - `summary` — the user's summary if provided, otherwise omitted.
 - `category` — the user's category if provided, otherwise omitted (the MCP's default applies).
 - `group_key` — always `"new"`. Never anything else.
 - No `effort`, no `impact`, no `acceptance_criteria`, no `context`, no dependencies. The inbox is for things that haven't been groomed yet; pre-filling those fields would be a lie.
 
-**Return.** Print the new task ID and the title. That's the entire output. The user moves on; `/curate` picks the task up later.
+**Return.** Print the new task ID and the title. If the title was synthesized from the prior turn, flag it in the output so the user can verify and re-run with an explicit title to override. That's the entire output. The user moves on; `/curate` picks the task up later.
 
 ## What I won't do
 
@@ -62,15 +64,16 @@ Suggest `/curate` at end of run. The inbox is a deliberate buffer; the user reac
 ## Output
 
 ```
-task_id:    the ULID of the new task
-title:      the title as written
-project_id: the project the task landed in
-group_key:  always "new"
-dropped:    (optional) list of args that were ignored, e.g. ["--effort=low"]
+task_id:     the ULID of the new task
+title:       the title as written (or synthesized from the prior utterance)
+synthesized: (optional) true when title was synthesized from the prior turn; omitted when the user passed it
+project_id:  the project the task landed in
+group_key:   always "new"
+dropped:     (optional) list of args that were ignored, e.g. ["--effort=low"]
 ```
 
 Failure modes:
 
-- Title missing or empty → refuse with a one-line instruction; exit. No task written.
+- Title missing or empty AND no prior user utterance to synthesize from → refuse with a one-line instruction; exit. No task written. (When a prior utterance exists, the title is synthesized from it and the task is written — not a failure mode.)
 - Project resolution fails → refuse with a one-line instruction pointing at the project-arg flag; exit. No task written.
 - MCP unreachable → halt with the specific reason; no task written.
